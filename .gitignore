@@ -4,3 +4,4 @@
 moc_*
 Makefile
 ui_MainWindow.h
+*-build-desktop/
