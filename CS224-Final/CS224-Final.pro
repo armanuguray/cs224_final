@@ -6,9 +6,10 @@
 
 QT       += core gui
 
+CONFIG += warn_on
+
 TARGET = CS224-Final
 TEMPLATE = app
-
 
 SOURCES += main.cpp\
         MainWindow.cpp
