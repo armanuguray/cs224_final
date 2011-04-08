@@ -2,3 +2,5 @@
 *~
 *.o
 moc_*
+Makefile
+ui_MainWindow.h
