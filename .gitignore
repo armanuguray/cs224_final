@@ -3,3 +3,5 @@
 *.o
 moc_*
 CS224-Final-build-desktop/
+Makefile
+ui_MainWindow.h
