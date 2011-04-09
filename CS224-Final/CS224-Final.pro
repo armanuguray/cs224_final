@@ -4,16 +4,19 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 
-CONFIG += warn_on
+CONFIG += warn_on precompile_header
 
 TARGET = CS224-Final
 TEMPLATE = app
 
-SOURCES += main.cpp\
+PRECOMPILED_HEADER = CS224-Final_Prefix.pch
+
+SOURCES += main.cpp \
         MainWindow.cpp
 
-HEADERS  += MainWindow.h
+HEADERS  += MainWindow.h \
+    CS224-Final_Prefix.pch
 
 FORMS    += MainWindow.ui

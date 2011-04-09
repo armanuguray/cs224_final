@@ -1,0 +1,33 @@
+#ifndef CS224FINAL_PREFIX_PCH
+#define CS224FINAL_PREFIX_PCH
+
+/**
+ * @author auguray
+ * @brief Global/static defines for the entire project
+ */
+
+// === DEBUG mode and logging macros ===
+//
+// use log() and logln() to write to the console
+
+// uncomment this to disable logging
+#define __DEBUG
+
+#ifndef __DEBUG
+
+// disable logging
+    #define printf(...)
+    #define log(...)
+    #define logln(...)
+
+#else
+    #ifdef __cplusplus
+
+        #include <iostream>
+        #define log(s) std::cout << __FILE__ << ", line " << __LINE__ << ": " << s
+        #define logln(s) log(s) << std::endl
+
+    #endif
+#endif
+
+#endif // CS224FINAL_PREFIX_PCH
