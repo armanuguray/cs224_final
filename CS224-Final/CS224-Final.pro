@@ -14,9 +14,11 @@ TEMPLATE = app
 PRECOMPILED_HEADER = CS224-Final_Prefix.pch
 
 SOURCES += main.cpp \
-        MainWindow.cpp
+        MainWindow.cpp \
+    GLWidget.cpp
 
 HEADERS  += MainWindow.h \
-    CS224-Final_Prefix.pch
+    CS224-Final_Prefix.pch \
+    GLWidget.h
 
 FORMS    += MainWindow.ui
