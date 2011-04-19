@@ -147,7 +147,7 @@ void ProjectorCamera::loadMatrices()
     // if no intersections are found, return false so that the surface isn't rendered
     if (intersections.size() == 0) {
         logln("NO");
-        delete corners;
+        delete[] corners;
         grid_visible = false;
         return;
     }
@@ -187,7 +187,7 @@ void ProjectorCamera::loadMatrices()
     logln(lri);
     logln(uli);
     logln(uri);
-    delete corners;
+    delete[] corners;
 
     // store the left and right sides
     delete[] left_points;
@@ -209,7 +209,7 @@ void ProjectorCamera::loadMatrices()
     right_dir = right_dir.getNormalized() * (right_dir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
 
     Vector4 near, far;
-    for (int i = 0; i <= settings.grid_resolution; i++) {
+    for (unsigned  i = 0; i <= settings.grid_resolution; i++) {
         far = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 1, 1)).homogenize();
         near = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 0, 1)).homogenize();
         intersectSegmentPlane(near, far, 0, v);
