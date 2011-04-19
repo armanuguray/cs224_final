@@ -35,7 +35,14 @@ bool ProjectorCamera::intersectSegmentPlane(Vector4 v1, Vector4 v2, REAL y, Vect
 
 ProjectorCamera::ProjectorCamera(int width, int height) : Camera(width, height)
 {
+    left_points = right_points = NULL;
     ProjectorCamera::loadMatrices();
+}
+
+ProjectorCamera::~ProjectorCamera()
+{
+    delete[] left_points;
+    delete[] right_points;
 }
 
 void ProjectorCamera::loadMatrices()
@@ -181,6 +188,40 @@ void ProjectorCamera::loadMatrices()
     logln(uli);
     logln(uri);
     delete corners;
+
+    // store the left and right sides
+    delete[] left_points;
+    left_points = new Vector4[settings.grid_resolution + 1];
+    delete[] right_points;
+    right_points = new Vector4[settings.grid_resolution + 1];
+
+    Vector4 screen_left = viewproj * ul;
+    screen_left.homogenize();
+    Vector4 screen_right = viewproj * ur;
+    screen_right.homogenize();
+
+    Vector4 left_dir = (viewproj * ll).homogenize() - screen_left;
+    left_dir.unhomgenize();
+    left_dir = left_dir.getNormalized() * (left_dir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
+
+    Vector4 right_dir = (viewproj * lr).homogenize() - screen_right;
+    right_dir.unhomgenize();
+    right_dir = right_dir.getNormalized() * (right_dir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
+
+    Vector4 near, far;
+    for (int i = 0; i <= settings.grid_resolution; i++) {
+        far = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 1, 1)).homogenize();
+        near = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 0, 1)).homogenize();
+        intersectSegmentPlane(near, far, 0, v);
+        left_points[i] = v;
+        screen_left += left_dir;
+
+        far = (inv_viewproj * Vector4(screen_right.x, screen_right.y, 1, 1)).homogenize();
+        near = (inv_viewproj * Vector4(screen_right.x, screen_right.y, 0, 1)).homogenize();
+        intersectSegmentPlane(near, far, 0, v);
+        right_points[i] = v;
+        screen_right += right_dir;
+    }
 }
 
 void ProjectorCamera::renderProjectedGrid()
@@ -204,21 +245,20 @@ void ProjectorCamera::renderProjectedGrid()
         glVertex3d(ul.x, ul.y, ul.z);
         glEnd();
 #endif
+
+        glColor3f(0, 1, 1);
+
         if (settings.line_mode)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         Vector2 v0curr, v1curr, v0next, v1next;
-        Vector2 leftdir, rightdir, xdircurr, xdirnext;
-        leftdir = Vector2(ll.x, ll.z) - Vector2(ul.x, ul.z);
-        leftdir = leftdir.getNormalized() * (leftdir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
-        rightdir = Vector2(lr.x, lr.z) - Vector2(ur.x, ur.z);
-        rightdir = rightdir.getNormalized() * (rightdir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
-        v0curr = Vector2(ul.x, ul.z);
-        v1curr = Vector2(ur.x, ur.z);
+        Vector2 xdircurr, xdirnext;
         Vector2 vcurr, vnext;
         for (unsigned i = 0; i < settings.grid_resolution; i++) {
-            v0next = v0curr + leftdir;
-            v1next = v1curr + rightdir;
+            v0curr = Vector2(left_points[i].x, left_points[i].z);
+            v1curr = Vector2(right_points[i].x, right_points[i].z);
+            v0next = Vector2(left_points[i+1].x, left_points[i+1].z);
+            v1next = Vector2(right_points[i+1].x, right_points[i+1].z);
             vcurr = v0curr;
             vnext = v0next;
             xdircurr = v1curr - v0curr;
@@ -233,8 +273,6 @@ void ProjectorCamera::renderProjectedGrid()
                 vnext += xdirnext;
             }
             glEnd();
-            v0curr = v0next;
-            v1curr = v1next;
         }
     }
 }

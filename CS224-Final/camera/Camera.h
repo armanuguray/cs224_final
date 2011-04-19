@@ -24,7 +24,7 @@ public:
     inline Vector4 getW() const { return -m_look.getNormalized(); }
 
     // getters to primary camera matrices
-    inline Matrix4x4 getModelViewMatrix() const { return Matrix4x4((REAL*)m_modelview_matrix).getTranspose(); }
+    inline Matrix4x4 getModelViewMatrix() const { return m_modelview; }
     inline Matrix4x4 getProjectionMatrix() const { return Matrix4x4((REAL*)m_projection_matrix).getTranspose(); }
 
     // should be called when screen size changes to retain aspect ratio
@@ -42,6 +42,8 @@ protected:
     Vector4 m_eye, m_look, m_up;
     GLfloat m_fovy, m_near, m_far;
     int m_width, m_height;
+
+    Matrix4x4 m_modelview, m_projection, m_modelview_inv, m_projection_inv;
 
     GLdouble m_modelview_matrix[16],
             m_projection_matrix[16];

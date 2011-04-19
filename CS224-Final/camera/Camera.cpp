@@ -37,6 +37,12 @@ void Camera::loadMatrices()
 
     glGetDoublev(GL_MODELVIEW_MATRIX, m_modelview_matrix);
     glGetDoublev(GL_PROJECTION_MATRIX, m_projection_matrix);
+
+    m_modelview = Matrix4x4((REAL*)m_modelview_matrix).getTranspose();
+    m_modelview_inv = m_modelview.getInverse();
+
+    m_projection = Matrix4x4((REAL*)m_projection_matrix).getTranspose();
+    m_projection_inv = m_projection.getInverse();
 }
 
 void Camera::lookVectorRotate(const Vector2 &delta)

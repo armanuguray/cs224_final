@@ -7,6 +7,7 @@ class ProjectorCamera : public Camera
 {
 public:
     ProjectorCamera(int width, int height);
+    ~ProjectorCamera();
 
     // TODO: make this render the water grid using interpolation if grid_visible == true
     void renderProjectedGrid();
@@ -19,6 +20,10 @@ private:
     virtual void loadMatrices();
 
     Vector4 ll,lr,ul,ur; // corner points of the grid
+
+    Vector4 *left_points;
+    Vector4 *right_points;
+
     bool grid_visible;
 };
 

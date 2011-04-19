@@ -4,6 +4,6 @@ Settings settings;
 
 Settings::Settings()
 {
-    grid_resolution = 10;
+    grid_resolution = 40;
     line_mode = true;
 }
