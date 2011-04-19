@@ -6,35 +6,43 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>829</width>
-    <height>580</height>
+    <width>577</width>
+    <height>548</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>CS224 Final Project</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="GLWidget" name="glwidget" native="true">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>9</y>
-      <width>621</width>
-      <height>521</height>
-     </rect>
-    </property>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="GLWidget" name="glwidget" native="true">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>1</width>
+        <height>1</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>829</width>
-     <height>22</height>
+     <width>577</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>

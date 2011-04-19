@@ -22,6 +22,13 @@ GLWidget::~GLWidget()
 
 void GLWidget::initializeGL()
 {
+    // AA
+    QGLFormat format;
+    QGLFormat::setDefaultFormat(format);
+    format.setSamples(4);
+    format.setSampleBuffers(true);
+    this->setFormat(format);
+
     glViewport(0, 0, this->width(), this->height());
     logln("Initializing GLWidget");
 
@@ -29,6 +36,7 @@ void GLWidget::initializeGL()
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(repaint()));
     m_timer->start(30.0);
+
 }
 
 void GLWidget::paintGL()

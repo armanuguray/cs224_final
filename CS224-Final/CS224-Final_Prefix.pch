@@ -13,21 +13,21 @@
 // uncomment this to disable logging
 #define __DEBUG
 
-#ifndef __DEBUG
+#ifdef __DEBUG
 
-// disable logging
-    #define printf(...)
+    #ifdef __cplusplus
+        #include <iostream>
+
+        #define log_(s) std::cout << __FILE__ << ", line " << __LINE__ << ": " << s
+        #define logln(s) log_(s) << std::endl
+    #endif
+
+#else
+
+    // #define printf(...)
     #define log(...)
     #define logln(...)
 
-#else
-    #ifdef __cplusplus
-
-        #include <iostream>
-        #define log_(s) std::cout << __FILE__ << ", line " << __LINE__ << ": " << s
-        #define logln(s) log_(s) << std::endl
-
-    #endif
 #endif
 
 #endif // CS224FINAL_PREFIX_PCH
