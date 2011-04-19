@@ -7,6 +7,15 @@
 #endif
 
 #include <float.h>
+#include "Settings.h"
+
+#define CORNER_LINES
+
+// given points v0 and v1 and an x value between v0.x and v1.x, returns the linearly interpolated y value
+void lerp(Vector2 v0, Vector2 v1, REAL x, REAL &y)
+{
+    y = v0.y + ((x - v0.x) * v1.y - (x - v0.x) * v0.y)/(v1.x - v0.x);
+}
 
 bool ProjectorCamera::intersectSegmentPlane(Vector4 v1, Vector4 v2, REAL y, Vector4 &intersect)
 {
@@ -178,6 +187,8 @@ void ProjectorCamera::renderProjectedGrid()
 {
     if (grid_visible)
     {
+#undef CORNER_LINES
+#ifdef CORNER_LINES
         glBegin(GL_LINES);
         glColor3d(1, 0, 0);
         glVertex3d(ll.x, ll.y, ll.z);
@@ -192,6 +203,39 @@ void ProjectorCamera::renderProjectedGrid()
         glVertex3d(ur.x, ur.y, ur.z);
         glVertex3d(ul.x, ul.y, ul.z);
         glEnd();
+#endif
+        if (settings.line_mode)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        Vector2 v0curr, v1curr, v0next, v1next;
+        Vector2 leftdir, rightdir, xdircurr, xdirnext;
+        leftdir = Vector2(ll.x, ll.z) - Vector2(ul.x, ul.z);
+        leftdir = leftdir.getNormalized() * (leftdir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
+        rightdir = Vector2(lr.x, lr.z) - Vector2(ur.x, ur.z);
+        rightdir = rightdir.getNormalized() * (rightdir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
+        v0curr = Vector2(ul.x, ul.z);
+        v1curr = Vector2(ur.x, ur.z);
+        Vector2 vcurr, vnext;
+        for (unsigned i = 0; i < settings.grid_resolution; i++) {
+            v0next = v0curr + leftdir;
+            v1next = v1curr + rightdir;
+            vcurr = v0curr;
+            vnext = v0next;
+            xdircurr = v1curr - v0curr;
+            xdircurr = xdircurr.getNormalized() * (xdircurr.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
+            xdirnext = v1next - v0next;
+            xdirnext = xdirnext.getNormalized() * (xdirnext.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
+            glBegin(GL_QUAD_STRIP);
+            for (unsigned i = 0; i <= settings.grid_resolution; i++) {
+                glVertex3f(vcurr.x, 0, vcurr.y);
+                glVertex3f(vnext.x, 0, vnext.y);
+                vcurr += xdircurr;
+                vnext += xdirnext;
+            }
+            glEnd();
+            v0curr = v0next;
+            v1curr = v1next;
+        }
     }
 }
 

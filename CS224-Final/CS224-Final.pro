@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     math/CS123Matrix.cpp \
     DrawEngine.cpp \
     camera/Camera.cpp \
-    camera/ProjectorCamera.cpp
+    camera/ProjectorCamera.cpp \
+    Settings.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -32,7 +33,8 @@ HEADERS  += MainWindow.h \
     DrawEngine.h \
     camera/Camera.h \
     OpenGLInclude.h \
-    camera/ProjectorCamera.h
+    camera/ProjectorCamera.h \
+    Settings.h
 
 FORMS    += MainWindow.ui
 

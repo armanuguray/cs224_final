@@ -83,6 +83,7 @@ separately.
     inline bool operator!=(const X &rhs) { return (x != rhs.x || y != rhs.y); }
 
 
+
 #undef X
 #undef VECOP_PCW
 #undef VECOP_SCA
@@ -90,6 +91,16 @@ separately.
 //@}-----------------------------------------------------------------
 ///@name Additional Operations
 //@{-----------------------------------------------------------------
+
+    inline vec2 getNormalized() const { T m = getMagnitude(); return vec2(x/m, y/m); }
+
+    inline T getMagnitude() const {
+            return sqrt(getMagnitude2());
+    }
+
+    inline T getMagnitude2() const {
+            return x * x + y * y;
+    }
 
 //@}-----------------------------------------------------------------
 
