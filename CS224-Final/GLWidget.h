@@ -7,13 +7,11 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#ifdef __APPLE__
-    #include <QtOpenGL/QGLWidget>
-#else
-    #include <QGLWidget>
-#endif
+#include "OpenGLInclude.h"
+#include "CS123Algebra.h"
 
 class QTimer;
+class DrawEngine;
 
 class GLWidget : public QGLWidget
 {
@@ -28,8 +26,16 @@ protected:
     void paintGL();
     void resizeGL(int width, int height);
 
+    // mouse events
+    void wheelEvent(QWheelEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+
 private:
     QTimer *m_timer;
+    DrawEngine *m_drawengine;
+
+    Vector2 m_old; // previous mouse location for mouse interaction
 };
 
 #endif // GLWIDGET_H

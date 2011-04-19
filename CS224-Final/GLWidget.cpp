@@ -1,12 +1,10 @@
 #include "GLWidget.h"
 
-#ifdef __APPLE__
-    #include <QtOpenGL/qgl.h>
-#else
-    #include <qgl.h>
-#endif
-
 #include <QTimer>
+#include "CS123Algebra.h"
+#include "DrawEngine.h"
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
 {
@@ -18,12 +16,12 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::DoubleBuffer), pa
 GLWidget::~GLWidget()
 {
     delete m_timer;
+    delete m_drawengine;
 }
 
 void GLWidget::initializeGL()
 {
-    glViewport(0, 0, this->width(), this->height());
-    logln("Initializing GLWidget");
+    m_drawengine = new DrawEngine(this->width(), this->height());
 
     // start the rendering loop
     m_timer = new QTimer(this);
@@ -33,21 +31,32 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glRotatef(0.5, 0.0, 0.0, 1.0);
-    glBegin(GL_TRIANGLES);
-    {
-        glColor3f(1.0, 0.0, 0.0);
-        glVertex3f(-0.5, -0.5, 0.0);
-        glColor3f(0.0, 1.0, 0.0);
-        glVertex3f(0.5, -0.5, 0.0);
-        glColor3f(0.0, 0.0, 1.0);
-        glVertex3f(0.0, 0.5, 0.0);
-    }
-    glEnd();
+    m_drawengine->drawFrame();
 }
 
 void GLWidget::resizeGL(int width, int height)
 {
+    m_drawengine->resize(width, height);
+}
 
+void GLWidget::wheelEvent(QWheelEvent *event)
+{
+    m_drawengine->mouse_scroll(event->delta());
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    Vector2 pos = Vector2(event->x(), event->y());
+    Vector2 delta = pos - m_old;
+    m_old = pos;
+    if(event->buttons() & Qt::RightButton)
+        m_drawengine->mouse_dragged(delta, MouseButtonRight);
+    else if (event->buttons() & Qt::LeftButton)
+        m_drawengine->mouse_dragged(delta, MouseButtonLeft);
+
+}
+
+void GLWidget::mousePressEvent(QMouseEvent *event)
+{
+    m_old = Vector2(event->x(), event->y());
 }
