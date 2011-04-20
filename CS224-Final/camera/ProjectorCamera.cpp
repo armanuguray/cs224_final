@@ -9,7 +9,8 @@
 #include <float.h>
 #include "Settings.h"
 
-#define CORNER_LINES
+//#define CORNER_LINES
+#define ALT_CAMERA // render the projected grid from the perspective of an alternative camera
 
 // given points v0 and v1 and an x value between v0.x and v1.x, returns the linearly interpolated y value
 void lerp(Vector2 v0, Vector2 v1, REAL x, REAL &y)
@@ -81,7 +82,7 @@ void ProjectorCamera::loadMatrices()
             intersections.push_front(v);
         }
         // don't intersect twice if delta is 0
-        if (delta != 0 && intersectSegmentPlane(corners[i], corners[i+4], -delta, v)) {
+        if (fabs(delta - 0) < DBL_EPSILON && intersectSegmentPlane(corners[i], corners[i+4], -delta, v)) {
             v.y = 0; // project the point onto S_base
             intersections.push_front(v);
         }
@@ -189,7 +190,7 @@ void ProjectorCamera::loadMatrices()
     logln(uri);
     delete[] corners;
 
-    // store the left and right sides
+    // store the left and right sides of the projected grid
     delete[] left_points;
     left_points = new Vector4[settings.grid_resolution + 1];
     delete[] right_points;
@@ -228,7 +229,6 @@ void ProjectorCamera::renderProjectedGrid()
 {
     if (grid_visible)
     {
-#undef CORNER_LINES
 #ifdef CORNER_LINES
         glBegin(GL_LINES);
         glColor3d(1, 0, 0);
@@ -245,7 +245,11 @@ void ProjectorCamera::renderProjectedGrid()
         glVertex3d(ul.x, ul.y, ul.z);
         glEnd();
 #endif
-
+#ifdef ALT_CAMERA
+        glPushMatrix();
+        glLoadIdentity();
+        gluLookAt(50,50,50,0,0,0,0,1,0);
+#endif
         glColor3f(0, 1, 1);
 
         if (settings.line_mode)
@@ -274,6 +278,9 @@ void ProjectorCamera::renderProjectedGrid()
             }
             glEnd();
         }
+#ifdef ALT_CAMERA
+        glPopMatrix();
+#endif
     }
 }
 
