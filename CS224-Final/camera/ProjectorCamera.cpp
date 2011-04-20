@@ -82,7 +82,7 @@ void ProjectorCamera::loadMatrices()
             intersections.push_front(v);
         }
         // don't intersect twice if delta is 0
-        if (fabs(delta) > DBL_EPSILON && intersectSegmentPlane(corners[i], corners[i+4], -delta, v)) {
+        if (delta > DBL_EPSILON && intersectSegmentPlane(corners[i], corners[i+4], -delta, v)) {
             v.y = 0; // project the point onto S_base
             intersections.push_front(v);
         }
@@ -104,7 +104,7 @@ void ProjectorCamera::loadMatrices()
                 v.y = 0; // project the point onto S_base
                 intersections.push_front(v);
             }
-            if (fabs(delta) > DBL_EPSILON && intersectSegmentPlane(corners[i], corners[j], -delta, v)) {
+            if (delta > DBL_EPSILON && intersectSegmentPlane(corners[i], corners[j], -delta, v)) {
                 v.y = 0; // project the point onto S_base
                 intersections.push_front(v);
             }
@@ -127,7 +127,7 @@ void ProjectorCamera::loadMatrices()
                 v.y = 0; // project the point onto S_base
                 intersections.push_front(v);
             }
-            if (fabs(delta) > DBL_EPSILON && intersectSegmentPlane(corners[i], corners[j], -delta, v)) {
+            if (delta > DBL_EPSILON && intersectSegmentPlane(corners[i], corners[j], -delta, v)) {
                 v.y = 0; // project the point onto S_base
                 intersections.push_front(v);
             }
@@ -135,7 +135,7 @@ void ProjectorCamera::loadMatrices()
     }
 
     // check if any of the corner points lie inside the volume and add them as well
-    if (delta != 0) {
+    if (delta > DBL_EPSILON) {
         for (int i = 0; i < 8; i++) {
             v = corners[i];
             if (v.y > -delta && v.y < delta) {
@@ -209,8 +209,16 @@ void ProjectorCamera::loadMatrices()
     right_dir.unhomgenize();
     right_dir = right_dir.getNormalized() * (right_dir.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
 
+    // handle boundary cases seperately, as the transformations cause epsilon errors
+    left_points[0] = ul;
+    right_points[0] = ur;
+    left_points[settings.grid_resolution] = ll;
+    right_points[settings.grid_resolution] = lr;
+    screen_left += left_dir;
+    screen_right += right_dir;
+
     Vector4 near, far;
-    for (unsigned  i = 0; i <= settings.grid_resolution; i++) {
+    for (unsigned  i = 1; i < settings.grid_resolution; i++) {
         far = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 1, 1)).homogenize();
         near = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 0, 1)).homogenize();
         intersectSegmentPlane(near, far, 0, v);
@@ -241,8 +249,8 @@ void ProjectorCamera::renderProjectedGrid()
         glVertex3d(lr.x, lr.y, lr.z);
         glVertex3d(ll.x, ll.y, ll.z);
         glColor3d(1, 1, 0);
-        glVertex3d(ur.x, ur.y, ur.z);
         glVertex3d(ul.x, ul.y, ul.z);
+        glVertex3d(ur.x, ur.y, ur.z);
         glEnd();
 #endif
 #ifdef ALT_CAMERA
