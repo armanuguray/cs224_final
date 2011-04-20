@@ -3,8 +3,9 @@
 #ifdef __APPLE__
     #include <OpenGL/glu.h>
 #else
-    #include <glu.h>
+    #include <GL/glu.h>
 #endif
+
 
 Camera::Camera(int width, int height)
 {
