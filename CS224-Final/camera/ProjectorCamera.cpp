@@ -49,7 +49,7 @@ ProjectorCamera::~ProjectorCamera()
 void ProjectorCamera::loadMatrices()
 {
     Camera::loadMatrices();
-    Matrix4x4 viewproj = (Matrix4x4(m_modelview_matrix) * Matrix4x4(m_projection_matrix)).getTranspose();
+    Matrix4x4 viewproj = m_projection * m_modelview;
     Matrix4x4 inv_viewproj = viewproj.getInverse();
 
     Vector4 *corners = new Vector4[8];
@@ -75,7 +75,7 @@ void ProjectorCamera::loadMatrices()
     // get intersection points between the edges of
     // the camera frustum and the displacable volume
     std::list<Vector4> intersections;
-    const REAL delta = 0.0;//settings.getAmplitudeDelta();
+    const REAL delta = settings.dv_delta;
     for (int i = 0; i < 4; i++) {
         if (intersectSegmentPlane(corners[i], corners[i+4], delta, v)) {
             v.y = 0; // project the point onto S_base
