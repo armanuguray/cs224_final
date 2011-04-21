@@ -49,7 +49,20 @@ ProjectorCamera::~ProjectorCamera()
 void ProjectorCamera::loadMatrices()
 {
     Camera::loadMatrices();
-    Matrix4x4 viewproj = m_projection * m_modelview;
+
+    // adjust the camera frustum
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    const REAL ratio = m_width / static_cast<REAL>(m_height);
+    const REAL scale = settings.dv_scale;
+    gluPerspective(m_fovy * scale, ratio, m_near, m_far);
+    GLdouble p[16];
+    glGetDoublev(GL_PROJECTION_MATRIX, p);
+    Matrix4x4 perspective = Matrix4x4((REAL *)p).getTranspose();
+    glPopMatrix();
+
+    Matrix4x4 viewproj = perspective * m_modelview;
     Matrix4x4 inv_viewproj = viewproj.getInverse();
 
     Vector4 *corners = new Vector4[8];
@@ -75,7 +88,9 @@ void ProjectorCamera::loadMatrices()
     // get intersection points between the edges of
     // the camera frustum and the displacable volume
     std::list<Vector4> intersections;
-    const REAL delta = settings.dv_delta;
+    // delta denotes absolute distance of the bounding planes of the displaceable volume from the y=0 plane.
+    // the value is set to 0 as I'm never going to use the displaceable volume idea.
+    const REAL delta = 0.0;
     for (int i = 0; i < 4; i++) {
         if (intersectSegmentPlane(corners[i], corners[i+4], delta, v)) {
             v.y = 0; // project the point onto S_base
