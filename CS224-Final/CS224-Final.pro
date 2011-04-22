@@ -22,7 +22,10 @@ SOURCES += main.cpp \
     DrawEngine.cpp \
     camera/Camera.cpp \
     camera/ProjectorCamera.cpp \
-    Settings.cpp
+    Settings.cpp \
+    Poolable.cpp \
+    Pool.cpp \
+    PoolIterator.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -34,7 +37,10 @@ HEADERS  += MainWindow.h \
     camera/Camera.h \
     OpenGLInclude.h \
     camera/ProjectorCamera.h \
-    Settings.h
+    Settings.h \
+    Poolable.h \
+    Pool.h \
+    PoolIterator.h
 
 FORMS    += MainWindow.ui
 
