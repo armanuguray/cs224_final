@@ -23,11 +23,11 @@ SOURCES += main.cpp \
     camera/Camera.cpp \
     camera/ProjectorCamera.cpp \
     Settings.cpp \
-    Poolable.cpp \
-    Pool.cpp \
-    PoolIterator.cpp \
-    Wave.cpp \
-    WaveParticle.cpp
+    pool/Poolable.cpp \
+    pool/Pool.cpp \
+    pool/PoolIterator.cpp \
+    waveparticles/Wave.cpp \
+    waveparticles/WaveParticle.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -40,15 +40,15 @@ HEADERS  += MainWindow.h \
     OpenGLInclude.h \
     camera/ProjectorCamera.h \
     Settings.h \
-    Poolable.h \
-    Pool.h \
-    PoolIterator.h \
-    WaveParticle.h \
-    Wave.h
+    pool/Poolable.h \
+    pool/Pool.h \
+    pool/PoolIterator.h \
+    waveparticles/WaveParticle.h \
+    waveparticles/Wave.h
 
 FORMS    += MainWindow.ui
 
-INCLUDEPATH += math camera
+INCLUDEPATH += math camera waveparticles pool
 DEPENDPATH += math camera
 
 unix:LIBS += -L/usr/local/lib -lm
