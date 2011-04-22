@@ -1,6 +1,7 @@
 #include "DrawEngine.h"
 #include "ProjectorCamera.h"
 #include <QGLShaderProgram>
+#include "OpenGLInclude.h"
 
 DrawEngine::DrawEngine(int width, int height)
 {
@@ -43,6 +44,22 @@ void DrawEngine::setupGL()
 void DrawEngine::drawFrame()
 {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+#ifdef __DEBUG
+    // mark the origin
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_CULL_FACE);
+    glColor3f(1.0,0.0,0.0);
+    glBegin(GL_QUAD_STRIP);
+    {
+        glVertex3f(-0.5, 0.0, -0.5);
+        glVertex3f(-0.5, 0.0, 0.5);
+        glVertex3f(0.5, 0.0, -0.5);
+        glVertex3f(0.5, 0.0, 0.5);
+    }
+    glEnd();
+    glEnable(GL_CULL_FACE);
+
+#endif
     m_projectorcamera->renderProjectedGrid();
 }
 

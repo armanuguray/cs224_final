@@ -8,6 +8,7 @@
 
 #include <float.h>
 #include "Settings.h"
+#include <list>
 
 //#define CORNER_LINES
 //#define ALT_CAMERA // render the projected grid from the perspective of an alternative camera
@@ -56,7 +57,7 @@ void ProjectorCamera::loadMatrices()
     glLoadIdentity();
     const REAL ratio = m_width / static_cast<REAL>(m_height);
     const REAL scale = settings.dv_scale;
-    gluPerspective(m_fovy * scale, ratio, m_near, m_far);
+    gluPerspective(m_fovy * scale, ratio, m_near, m_far-1.0);
     GLdouble p[16];
     glGetDoublev(GL_PROJECTION_MATRIX, p);
     Matrix4x4 perspective = Matrix4x4((REAL *)p).getTranspose();

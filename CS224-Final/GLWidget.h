@@ -7,8 +7,13 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include "OpenGLInclude.h"
 #include "CS123Algebra.h"
+
+#ifdef __APPLE__
+#include <QtOpenGL/QGLWidget>
+#else
+#include <QGLWidget>
+#endif
 
 class QTimer;
 class DrawEngine;

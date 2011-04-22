@@ -6,6 +6,12 @@
 #include <map>
 #include <string>
 
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
+#include <GL/glu.h>
+#endif
+
 class QGLShaderProgram;
 class ProjectorCamera;
 class SkyRenderer;
