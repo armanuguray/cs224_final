@@ -26,7 +26,6 @@ SOURCES += main.cpp \
     pool/Poolable.cpp \
     pool/Pool.cpp \
     pool/PoolIterator.cpp \
-    waveparticles/Wave.cpp \
     waveparticles/WaveParticle.cpp
 
 HEADERS  += MainWindow.h \
@@ -43,8 +42,7 @@ HEADERS  += MainWindow.h \
     pool/Poolable.h \
     pool/Pool.h \
     pool/PoolIterator.h \
-    waveparticles/WaveParticle.h \
-    waveparticles/Wave.h
+    waveparticles/WaveParticle.h
 
 FORMS    += MainWindow.ui
 
