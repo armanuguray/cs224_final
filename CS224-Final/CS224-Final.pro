@@ -25,7 +25,9 @@ SOURCES += main.cpp \
     Settings.cpp \
     Poolable.cpp \
     Pool.cpp \
-    PoolIterator.cpp
+    PoolIterator.cpp \
+    Wave.cpp \
+    WaveParticle.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -40,7 +42,9 @@ HEADERS  += MainWindow.h \
     Settings.h \
     Poolable.h \
     Pool.h \
-    PoolIterator.h
+    PoolIterator.h \
+    WaveParticle.h \
+    Wave.h
 
 FORMS    += MainWindow.ui
 

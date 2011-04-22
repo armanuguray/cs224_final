@@ -41,16 +41,16 @@ public:
     ~Pool();
 
     /** Gets a value indicating whether this pool has any allocated objects */
-    bool hasLive();
+    bool hasLive() const;
     /** Gets a value indicating whether this pool has any free objects */
-    bool hasDead();
+    bool hasDead() const;
 
     /** Gets the total number of objects that can be allocated at once in this pool */
-    int capacity();
+    int capacity() const;
     /** Gets the number of allocated objects in this pool */
-    int liveCount();
+    int liveCount() const;
     /** Gets the number of free objects in this pool */
-    int deadCount();
+    int deadCount() const;
 
     /** Adds the given poolable to the pool. This operation increases the capacity of this pool by one */
     void add(Poolable *p);

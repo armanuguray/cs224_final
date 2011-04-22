@@ -8,7 +8,7 @@ Pool::~Pool()
     clear();
 }
 
-bool Pool::hasLive()
+bool Pool::hasLive() const
 {
     Poolable *p = 0;
     for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
@@ -17,7 +17,7 @@ bool Pool::hasLive()
     return false;
 }
 
-bool Pool::hasDead()
+bool Pool::hasDead() const
 {
     Poolable *p = 0;
     for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
@@ -26,7 +26,7 @@ bool Pool::hasDead()
     return false;
 }
 
-int Pool::capacity()
+int Pool::capacity() const
 {
     int c = 0;
     Poolable *p = 0;
@@ -35,7 +35,7 @@ int Pool::capacity()
     return c;
 }
 
-int Pool::liveCount()
+int Pool::liveCount() const
 {
     int c = 0;
     Poolable *p = 0;
@@ -45,7 +45,7 @@ int Pool::liveCount()
     return c;
 }
 
-int Pool::deadCount()
+int Pool::deadCount() const
 {
     int c = 0;
     Poolable *p = 0;
