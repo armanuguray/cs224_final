@@ -44,29 +44,34 @@ void DrawEngine::setupGL()
 
 }
 
-void DrawEngine::drawFrame()
+void DrawEngine::drawFrame(float time_elapsed)
 {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-#ifdef SHOW_ORIGIN
-    // mark the origin as a point of reference
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDisable(GL_CULL_FACE);
-    glColor3f(1.0,0.0,0.0);
-    glBegin(GL_QUAD_STRIP);
-    {
-        glVertex3f(-0.5, 0.0, -0.5);
-        glVertex3f(-0.5, 0.0, 0.5);
-        glVertex3f(0.5, 0.0, -0.5);
-        glVertex3f(0.5, 0.0, 0.5);
-    }
-    glEnd();
-    glEnable(GL_CULL_FACE);
-#endif
+
     // render sky
     m_skyrenderer->renderSkyBox(m_projectorcamera);
 
     // render water
     m_projectorcamera->renderProjectedGrid();
+
+    // mark the origin as a point of reference
+#ifdef SHOW_ORIGIN
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_CULL_FACE);
+    glBegin(GL_QUAD_STRIP);
+    {
+        glColor3f(1.0,0.0,0.0);
+        glVertex3f(-0.5, -0.5, 0.0);
+        glColor3f(0.0,1.0,0.0);
+        glVertex3f(-0.5, 0.5, 0.0);
+        glColor3f(0.0,0.0,1.0);
+        glVertex3f(0.5, -0.5, 0.0);
+        glColor3f(1.0,1.0,0.0);
+        glVertex3f(0.5, 0.5, 0.0);
+    }
+    glEnd();
+    glEnable(GL_CULL_FACE);
+#endif
 }
 
 void DrawEngine::mouse_down(Vector2 &mouse_pos)

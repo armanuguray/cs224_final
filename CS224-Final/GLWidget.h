@@ -15,6 +15,7 @@
 #include <QGLWidget>
 #endif
 
+class QTime;
 class QTimer;
 class DrawEngine;
 
@@ -37,6 +38,7 @@ protected:
     void mousePressEvent(QMouseEvent *event);
 
 private:
+    QTime *m_time;
     QTimer *m_timer;
     DrawEngine *m_drawengine;
 

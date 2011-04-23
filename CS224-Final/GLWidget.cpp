@@ -1,5 +1,6 @@
 #include "GLWidget.h"
 
+#include <QTime>
 #include <QTimer>
 #include "CS123Algebra.h"
 #include "DrawEngine.h"
@@ -16,6 +17,7 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::DoubleBuffer), pa
 GLWidget::~GLWidget()
 {
     delete m_timer;
+    delete m_time;
     delete m_drawengine;
 }
 
@@ -24,6 +26,7 @@ void GLWidget::initializeGL()
     m_drawengine = new DrawEngine(this->width(), this->height());
 
     // start the rendering loop
+    m_time = new QTime();
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(repaint()));
     m_timer->start(30.0);
@@ -31,7 +34,8 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-    m_drawengine->drawFrame();
+    m_drawengine->drawFrame((float)m_time->elapsed());
+    glFlush();
 }
 
 void GLWidget::resizeGL(int width, int height)

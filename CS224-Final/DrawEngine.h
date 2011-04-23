@@ -30,7 +30,7 @@ public:
     // does initial OpenGL setup
     void setupGL();
     // draws to the rendering context. Should be called each frame
-    void drawFrame();
+    void drawFrame(float time_elapsed);
     // should be called when the window gets resized
     void resize(REAL width, REAL height);
 
