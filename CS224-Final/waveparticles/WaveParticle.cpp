@@ -157,9 +157,9 @@ void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *parti
         m_amplitude *= .25;
 
         // Create the particles
-        WaveParticle *left = particles->alloc();
-        WaveParticle *right = particles->alloc();
-        WaveParticle *here = particles->alloc();
+        WaveParticle *left = (WaveParticle *)particles->alloc();
+        WaveParticle *right = (WaveParticle *)particles->alloc();
+        WaveParticle *here = (WaveParticle *)particles->alloc();
         // TODO
     }
 }
