@@ -42,7 +42,8 @@ HEADERS  += MainWindow.h \
     pool/Poolable.h \
     pool/Pool.h \
     pool/PoolIterator.h \
-    waveparticles/WaveParticle.h
+    waveparticles/WaveParticle.h \
+    waveparticles/WaveConstants.h
 
 FORMS    += MainWindow.ui
 
