@@ -26,7 +26,6 @@ SOURCES += main.cpp \
     pool/Poolable.cpp \
     pool/Pool.cpp \
     pool/PoolIterator.cpp \
-    waveparticles/Wave.cpp \
     waveparticles/WaveParticle.cpp \
     SkyRenderer.cpp
 
@@ -45,8 +44,8 @@ HEADERS  += MainWindow.h \
     pool/Pool.h \
     pool/PoolIterator.h \
     waveparticles/WaveParticle.h \
-    waveparticles/Wave.h \
     SkyRenderer.h
+    waveparticles/WaveConstants.h
 
 FORMS    += MainWindow.ui
 
