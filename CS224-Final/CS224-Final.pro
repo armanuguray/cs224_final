@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     pool/Pool.cpp \
     pool/PoolIterator.cpp \
     waveparticles/Wave.cpp \
-    waveparticles/WaveParticle.cpp
+    waveparticles/WaveParticle.cpp \
+    SkyRenderer.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -44,7 +45,8 @@ HEADERS  += MainWindow.h \
     pool/Pool.h \
     pool/PoolIterator.h \
     waveparticles/WaveParticle.h \
-    waveparticles/Wave.h
+    waveparticles/Wave.h \
+    SkyRenderer.h
 
 FORMS    += MainWindow.ui
 

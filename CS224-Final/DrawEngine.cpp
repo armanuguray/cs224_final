@@ -2,11 +2,14 @@
 #include "ProjectorCamera.h"
 #include <QGLShaderProgram>
 #include "OpenGLInclude.h"
+#include "SkyRenderer.h"
+
+#define SHOW_ORIGIN
 
 DrawEngine::DrawEngine(int width, int height)
 {
     setupGL();
-    m_skyrenderer = NULL;
+    m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
 }
 
@@ -44,8 +47,8 @@ void DrawEngine::setupGL()
 void DrawEngine::drawFrame()
 {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-#ifdef __DEBUG
-    // mark the origin
+#ifdef SHOW_ORIGIN
+    // mark the origin as a point of reference
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
     glColor3f(1.0,0.0,0.0);
@@ -58,8 +61,11 @@ void DrawEngine::drawFrame()
     }
     glEnd();
     glEnable(GL_CULL_FACE);
-
 #endif
+    // render sky
+    m_skyrenderer->renderSkyBox(m_projectorcamera);
+
+    // render water
     m_projectorcamera->renderProjectedGrid();
 }
 
