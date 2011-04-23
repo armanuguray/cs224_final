@@ -44,7 +44,7 @@ HEADERS  += MainWindow.h \
     pool/Pool.h \
     pool/PoolIterator.h \
     waveparticles/WaveParticle.h \
-    SkyRenderer.h
+    SkyRenderer.h \
     waveparticles/WaveConstants.h
 
 FORMS    += MainWindow.ui
