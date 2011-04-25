@@ -57,13 +57,23 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     Vector2 delta = pos - m_old;
     m_old = pos;
     if(event->buttons() & Qt::RightButton)
-        m_drawengine->mouse_dragged(delta, MouseButtonRight);
-    else if (event->buttons() & Qt::LeftButton)
-        m_drawengine->mouse_dragged(delta, MouseButtonLeft);
+        m_drawengine->mouse_dragged(m_old, delta, MouseButtonRight);
+    else {
+        MouseButton button;
+        if (event->buttons() & Qt::LeftButton)
+        {
+            if (event->modifiers() & Qt::ControlModifier)
+                button = MouseButtonCTRLLeft;
+            else button = MouseButtonLeft;
 
+            m_drawengine->mouse_dragged(m_old, delta, button);
+        }
+    }
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     m_old = Vector2(event->x(), event->y());
+    if (event->buttons() & Qt::LeftButton && event->modifiers() & Qt::ControlModifier)
+        m_drawengine->mouse_down(m_old, MouseButtonCTRLLeft);
 }

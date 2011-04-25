@@ -21,7 +21,8 @@ class SkyRenderer;
 
 typedef enum {
     MouseButtonLeft,
-    MouseButtonRight
+    MouseButtonRight,
+    MouseButtonCTRLLeft
 } MouseButton;
 
 class DrawEngine
@@ -37,12 +38,17 @@ public:
     // should be called when the window gets resized
     void resize(REAL width, REAL height);
 
-    // mouse interaction
-    void mouse_down(Vector2 &mouse_pos);
+    // === mouse interaction ===
+    // controls that interact with the water/objects
+    void mouse_down(Vector2 &mouse_pos, MouseButton button);
+
+    // controls that move the camera
     void mouse_scroll(REAL delta);
-    void mouse_dragged(Vector2 &delta, MouseButton button);
+    void mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button);
 
 protected:
+    void interact(Vector2 &mouse_pos);
+
     SkyRenderer *m_skyrenderer; // handles the rendering of the sky, including the sun.
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
 
