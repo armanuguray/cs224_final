@@ -10,37 +10,33 @@ Pool::~Pool()
 
 bool Pool::hasLive() const
 {
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
-        if (p->isAlive())
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
+        if (it.next()->isAlive())
             return true;
     return false;
 }
 
 bool Pool::hasDead() const
 {
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
-        if (!p->isAlive())
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
+        if (!it.next()->isAlive())
             return true;
     return false;
 }
 
 int Pool::capacity() const
 {
-    int c = 0;
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
-        ++c;
-    return c;
+    return m_data.count();
 }
 
 int Pool::liveCount() const
 {
     int c = 0;
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
-        if (p->isAlive())
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
+        if (it.next()->isAlive())
             ++c;
     return c;
 }
@@ -48,9 +44,9 @@ int Pool::liveCount() const
 int Pool::deadCount() const
 {
     int c = 0;
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
-        if (p->isAlive())
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
+        if (!it.next()->isAlive())
             ++c;
     return c;
 }
@@ -62,9 +58,11 @@ void Pool::add(Poolable *p)
 
 void Pool::remove(bool removeLive)
 {
-    Poolable *live = 0, *dead = 0, *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
+    Poolable *live = 0, *dead = 0;
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
     {
+        Poolable *p = it.next();
         if (p->isAlive())
         {
             live = p;
@@ -90,19 +88,20 @@ void Pool::remove(bool removeLive)
 
 void Pool::clear()
 {
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
-        delete p;
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
+        delete it.next();
     m_data.clear();
 }
 
 Poolable *Pool::alloc()
 {
     Poolable *free = 0;
-    Poolable *p = 0;
-    for (QLinkedListIterator<Poolable*> it(m_data); it.hasNext(); p = it.next())
+    QLinkedListIterator<Poolable*> it(m_data);
+    while (it.hasNext())
     {
-        if (p->isAlive())
+        Poolable *p = it.next();
+        if (!p->isAlive())
         {
             free = p;
             break;
