@@ -17,4 +17,7 @@
 // TODO: read the paper for the suggested value
 #define WAVE_SUBDIVISION_COEFFICIENT .1
 
+// The maximum number of wave particles to pre-allocate for the entire simulation
+#define WAVE_PARTICLE_COUNT
+
 #endif // WAVECONSTANTS_H

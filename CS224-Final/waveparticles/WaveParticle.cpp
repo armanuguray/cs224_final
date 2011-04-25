@@ -177,10 +177,10 @@ void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *parti
         float dist = off.getMagnitude();
         float theta0 = atan2(off.y, off.x);
 
-        float theta = theta0 + thetaLeft;
+        theta = theta0 + thetaLeft;
         Vector2 dir(cos(theta), sin(theta));
-        left->setPosition(dist * dir);
-        left->setVelocity(m_velocity * dir);
+        left->setPosition(dir * dist);
+        left->setVelocity(dir * m_velocity.getMagnitude());
 
         right->setAmplitude(m_amplitude);
         right->setDispersionAngle(m_dispersionAngle);
@@ -190,7 +190,7 @@ void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *parti
         theta = theta0 + thetaRight;
         dir.x = cos(theta);
         dir.y = sin(theta);
-        right->setPosition(dist * dir);
-        right->setVelocity(m_velocity * dir);
+        right->setPosition(dir * dist);
+        right->setVelocity(dir * m_velocity.getMagnitude());
     }
 }
