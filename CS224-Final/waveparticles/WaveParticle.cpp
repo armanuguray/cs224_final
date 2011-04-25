@@ -157,9 +157,40 @@ void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *parti
         m_amplitude *= .25;
 
         // Create the particles
+        WaveParticle *here = (WaveParticle *)particles->alloc();
         WaveParticle *left = (WaveParticle *)particles->alloc();
         WaveParticle *right = (WaveParticle *)particles->alloc();
-        WaveParticle *here = (WaveParticle *)particles->alloc();
-        // TODO
+
+        here->setAmplitude(m_amplitude);
+        here->setDispersionAngle(m_dispersionAngle);
+        here->setDispersionOrigin(m_dispersionOrigin);
+        here->setRadius(m_radius);
+        here->setPosition(m_position);
+        here->setVelocity(m_velocity);
+
+        left->setAmplitude(m_amplitude);
+        left->setDispersionAngle(m_dispersionAngle);
+        left->setDispersionOrigin(m_dispersionOrigin);
+        left->setRadius(m_radius);
+
+        Vector2 off = m_position - m_dispersionOrigin;
+        float dist = off.getMagnitude();
+        float theta0 = atan2(off.y, off.x);
+
+        float theta = theta0 + thetaLeft;
+        Vector2 dir(cos(theta), sin(theta));
+        left->setPosition(dist * dir);
+        left->setVelocity(m_velocity * dir);
+
+        right->setAmplitude(m_amplitude);
+        right->setDispersionAngle(m_dispersionAngle);
+        right->setDispersionOrigin(m_dispersionOrigin);
+        right->setRadius(m_radius);
+
+        theta = theta0 + thetaRight;
+        dir.x = cos(theta);
+        dir.y = sin(theta);
+        right->setPosition(dist * dir);
+        right->setVelocity(m_velocity * dir);
     }
 }
