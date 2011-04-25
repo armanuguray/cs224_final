@@ -19,6 +19,8 @@ private:
     Vector2 m_dispersionOrigin;     // The point at which the particle was created. Used to calculate when to subdivide
     REAL m_dispersionAngle;         // The angle between this particle and each of its neighbors. Used to calculate when to subdivide
 
+    REAL sign(REAL);
+
 protected:
     void onAlloc();
     void onFree();
@@ -54,7 +56,7 @@ public:
      * Updates this particle
      * @param dt The amount of time that has elapsed since the last update() call, in seconds
      */
-    void update(QLinkedList<WaveParticle*> liveParticles, Pool *particles, REAL dt);
+    void update(QLinkedList<WaveParticle*> *liveParticles, Pool *particles, REAL dt);
 };
 
 #endif // WAVEPARTICLE_H

@@ -6,6 +6,9 @@
 #include <map>
 #include <string>
 
+#include "Pool.h"
+#include "WaveParticle.h"
+
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #else
@@ -44,6 +47,10 @@ protected:
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
 
     std::map<string, QGLShaderProgram *> m_shaderprograms; // maps a shader program object to a given name.
+
+    Pool m_particles;    // The particles in this simulation
+    GLUquadric *m_quadric;
+    QLinkedList<WaveParticle*> m_liveParticles;
 };
 
 #endif // DRAWENGINE_H

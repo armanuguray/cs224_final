@@ -4,13 +4,22 @@
 #include "OpenGLInclude.h"
 #include "SkyRenderer.h"
 
+#include "PoolIterator.h"
+#include "WaveConstants.h"
+
 #define SHOW_ORIGIN
+#define PARTICLE_TEST
 
 DrawEngine::DrawEngine(int width, int height)
 {
     setupGL();
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
+
+    for (int i = 0; i < WAVE_PARTICLE_COUNT; ++i)
+        m_particles.add(new WaveParticle());
+
+    m_quadric = gluNewQuadric();
 }
 
 DrawEngine::~DrawEngine()
@@ -20,6 +29,11 @@ DrawEngine::~DrawEngine()
     for (std::map<string, QGLShaderProgram *>::iterator it = m_shaderprograms.begin(); it != m_shaderprograms.end(); ++it) {
         delete it->second;
     }
+
+    m_particles.clear();
+
+    gluDeleteQuadric(m_quadric);
+    m_quadric = 0;
 }
 
 void DrawEngine::resize(REAL width, REAL height)
@@ -45,7 +59,7 @@ void DrawEngine::setupGL()
 }
 
 void DrawEngine::drawFrame(float time_elapsed)
-{
+{    
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     // render sky
@@ -71,6 +85,47 @@ void DrawEngine::drawFrame(float time_elapsed)
     }
     glEnd();
     glEnable(GL_CULL_FACE);
+#endif
+
+#ifdef PARTICLE_TEST
+    float dt = time_elapsed / 1000.f;   // ms -> s
+    float TEST_AMPLITUDE = 7.5f;
+    QLinkedListIterator<WaveParticle*> it(m_liveParticles);
+    while (it.hasNext())
+    {
+        WaveParticle *p = (WaveParticle*)it.next();
+        assert(p->isAlive());
+
+        p->update(&m_liveParticles, &m_particles, dt);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslatef(p->position().x, 0.f, p->position().y);
+
+        float lerp = .5f + .5f * (p->amplitude() / TEST_AMPLITUDE);
+        glColor3f(lerp, 0.f, 1.f - lerp);
+
+        gluSphere(m_quadric, p->radius(), 3, 3);
+
+        glPopMatrix();
+    }
+
+    static int frame = 0;
+    static float t = 0;
+    if (frame % 5 == 0)
+    {
+        int PARTICLES_PER_RING = 10;
+        float dispersionAngle = 2 * M_PI / PARTICLES_PER_RING;
+        for (int i = 0; i < PARTICLES_PER_RING; ++i)
+        {
+            float theta = 2 * M_PI * i / PARTICLES_PER_RING;
+            WaveParticle *p = (WaveParticle*)m_particles.alloc();
+            p->spawn(TEST_AMPLITUDE * sin(t * 4.f), 1.f, Vector2(0.f, 0.f), dispersionAngle, theta);
+            m_liveParticles.append(p);
+        }
+    }
+    ++frame;
+    t += dt;
 #endif
 }
 

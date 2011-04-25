@@ -34,7 +34,10 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-    m_drawengine->drawFrame((float)m_time->elapsed());
+    float time = m_time->elapsed();
+    m_time->restart();
+    m_drawengine->drawFrame(time);
+//    m_drawengine->drawFrame((float)m_time->elapsed());
     glFlush();
 }
 

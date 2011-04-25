@@ -35,6 +35,11 @@ WaveParticle::~WaveParticle()
 {
 }
 
+REAL WaveParticle::sign(REAL a)
+{
+    return a < 0 ? -1.0 : 1.0;
+}
+
 void WaveParticle::onAlloc()
 {
 }
@@ -123,18 +128,18 @@ void WaveParticle::setDispersionAngle(REAL r)
     m_dispersionAngle = r;
 }
 
-void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *particles, REAL dt)
+void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *particles, REAL dt)
 {
     // Move
     m_position += m_velocity * dt;
 
     // Decrease this particle's amplitude
-    m_amplitude -= WAVE_AMPLITUDE_FALLOFF * dt;
+    m_amplitude += WAVE_AMPLITUDE_FALLOFF * dt * -sign(m_amplitude);
 
     // Die if the amplitude is too low
-    if (m_amplitude < WAVE_MIN_AMPLITUDE)
+    if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE)
     {
-        liveParticles.removeAll(this);
+        liveParticles->removeAll(this);
         free();
     }
 
@@ -179,7 +184,7 @@ void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *parti
 
         theta = theta0 + thetaLeft;
         Vector2 dir(cos(theta), sin(theta));
-        left->setPosition(dir * dist);
+        left->setPosition(m_dispersionOrigin + dir * dist);
         left->setVelocity(dir * m_velocity.getMagnitude());
 
         right->setAmplitude(m_amplitude);
@@ -190,7 +195,11 @@ void WaveParticle::update(QLinkedList<WaveParticle *> liveParticles, Pool *parti
         theta = theta0 + thetaRight;
         dir.x = cos(theta);
         dir.y = sin(theta);
-        right->setPosition(dir * dist);
+        right->setPosition(m_dispersionOrigin + dir * dist);
         right->setVelocity(dir * m_velocity.getMagnitude());
+
+        liveParticles->append(here);
+        liveParticles->append(left);
+        liveParticles->append(right);
     }
 }
