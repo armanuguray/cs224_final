@@ -16,7 +16,6 @@
 #ifndef __DEBUG
 
 // disable logging
-    #define printf(...)
     #define log_(...)
     #define logln(...)
 

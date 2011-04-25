@@ -112,7 +112,7 @@ void DrawEngine::drawFrame(float time_elapsed)
 
     static int frame = 0;
     static float t = 0;
-    if (frame % 5 == 0)
+    if (frame % 120 == 0)
     {
         int PARTICLES_PER_RING = 10;
         float dispersionAngle = 2 * M_PI / PARTICLES_PER_RING;
@@ -120,7 +120,7 @@ void DrawEngine::drawFrame(float time_elapsed)
         {
             float theta = 2 * M_PI * i / PARTICLES_PER_RING;
             WaveParticle *p = (WaveParticle*)m_particles.alloc();
-            p->spawn(TEST_AMPLITUDE * sin(t * 4.f), 1.f, Vector2(0.f, 0.f), dispersionAngle, theta);
+            p->spawn(TEST_AMPLITUDE /* sin(t * 4.f) */, 1.f, Vector2(0.f, 0.f), dispersionAngle, theta);
             m_liveParticles.append(p);
         }
     }
@@ -159,7 +159,7 @@ void DrawEngine::mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButt
         m_projectorcamera->lookVectorRotate(delta);
         break;
     case MouseButtonRight:
-        m_projectorcamera->filmPlaneTranslate(delta);
+        m_projectorcamera->filmPlaneTranslate(delta*1.5);
         break;
     case MouseButtonCTRLLeft:
         this->mouse_down(new_mouse_pos, button);
