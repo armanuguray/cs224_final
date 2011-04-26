@@ -7,7 +7,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
+GLWidget::GLWidget(QWidget *parent)
+    : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent), m_renderOverlay(true)
 {
     this->setFocusPolicy(Qt::StrongFocus);
     this->setMouseTracking(true);
@@ -37,7 +38,11 @@ void GLWidget::paintGL()
     float time = m_time->elapsed();
     m_time->restart();
     m_drawengine->drawFrame(time);
-//    m_drawengine->drawFrame((float)m_time->elapsed());
+
+    if (m_renderOverlay) {
+        this->renderOverlayText();
+    }
+
     glFlush();
 }
 
@@ -76,4 +81,33 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     m_old = Vector2(event->x(), event->y());
     if (event->buttons() & Qt::LeftButton && event->modifiers() & Qt::ControlModifier)
         m_drawengine->mouse_down(m_old, MouseButtonCTRLLeft);
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    bool ignore = true;
+
+    switch (event->key()) {
+    case Qt::Key_S:
+        m_renderOverlay = !m_renderOverlay;
+        ignore = false;
+        break;
+
+    default:
+        break;
+    }
+
+    if (ignore) event->ignore();
+}
+
+void GLWidget::renderOverlayText() {
+    const static int x = 10;
+    const static int y = 20;
+    const static int text_height = 15;
+    const static QColor text_color(Qt::white);
+
+    this->qglColor(text_color);
+    this->renderText(x, y, "ESC: Exit fullscreen");
+    this->renderText(x, y + text_height, "F/F11: Toggle fullscreen");
+    this->renderText(x, y + 2 * text_height, "S: Toggle debug information draw");
 }

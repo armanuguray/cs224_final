@@ -37,10 +37,18 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
 
+    // keyboard event
+    virtual void keyPressEvent(QKeyEvent *event);
+
+    // the overlay text
+    void renderOverlayText();
+
 private:
     QTime *m_time;
     QTimer *m_timer;
     DrawEngine *m_drawengine;
+
+    bool m_renderOverlay;
 
     Vector2 m_old; // previous mouse location for mouse interaction
 };
