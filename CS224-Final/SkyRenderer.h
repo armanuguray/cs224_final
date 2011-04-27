@@ -11,6 +11,7 @@ public:
     SkyRenderer();
     ~SkyRenderer();
 
+    inline GLuint getTexture() { return skytexture; }
     void renderSkyBox(Camera *camera);
 
 private:

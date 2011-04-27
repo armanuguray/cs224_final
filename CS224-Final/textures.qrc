@@ -6,5 +6,7 @@
         <file alias="posx">textures/posx.png</file>
         <file alias="posy">textures/posy.png</file>
         <file alias="posz">textures/posz.png</file>
+        <file alias="fresnel.frag">shaders/fresnel.frag</file>
+        <file alias="fresnel.vert">shaders/fresnel.vert</file>
     </qresource>
 </RCC>

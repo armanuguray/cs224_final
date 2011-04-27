@@ -275,6 +275,7 @@ void ProjectorCamera::renderProjectedGrid()
         gluLookAt(50,50,50,0,0,0,0,1,0);
 #endif
         glColor3f(0, 1, 1);
+        glNormal3f(0.0, 1.0, 0.0);
 
         if (settings.line_mode)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

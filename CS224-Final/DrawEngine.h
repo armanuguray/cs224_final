@@ -15,6 +15,7 @@
 #include <GL/glu.h>
 #endif
 
+class QGLContext;
 class QGLShaderProgram;
 class ProjectorCamera;
 class SkyRenderer;
@@ -28,11 +29,9 @@ typedef enum {
 class DrawEngine
 {
 public:
-    DrawEngine(int width, int height);
+    DrawEngine(const QGLContext *context, int width, int height);
     ~DrawEngine();
 
-    // does initial OpenGL setup
-    void setupGL();
     // draws to the rendering context. Should be called each frame
     void drawFrame(float time_elapsed);
     // should be called when the window gets resized
@@ -47,7 +46,12 @@ public:
     void mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button);
 
 protected:
+    // causes interaction with the water surface
     void interact(Vector2 &mouse_pos);
+    // does initial OpenGL setup
+    void setupGL();
+    // loads shaders
+    void loadShaders(const QGLContext *context);
 
     SkyRenderer *m_skyrenderer; // handles the rendering of the sky, including the sun.
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid

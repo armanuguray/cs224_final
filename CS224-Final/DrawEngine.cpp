@@ -10,9 +10,10 @@
 #define SHOW_ORIGIN
 #define PARTICLE_TEST
 
-DrawEngine::DrawEngine(int width, int height)
+DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
 {
     setupGL();
+    loadShaders(context);
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
 
@@ -55,7 +56,20 @@ void DrawEngine::setupGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_NORMALIZE);
     glEnable(GL_DEPTH_TEST);
+}
 
+void DrawEngine::loadShaders(const QGLContext *context)
+{
+    QGLShaderProgram *shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/fresnel.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/fresnel.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["fresnel"] = shader;
 }
 
 void DrawEngine::drawFrame(float time_elapsed)
@@ -66,7 +80,12 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_skyrenderer->renderSkyBox(m_projectorcamera);
 
     // render water
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
+    m_shaderprograms["fresnel"]->bind();
+    m_shaderprograms["fresnel"]->setUniformValue("cube", 0);
     m_projectorcamera->renderProjectedGrid();
+    m_shaderprograms["fresnel"]->release();
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN

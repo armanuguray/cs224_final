@@ -24,7 +24,7 @@ GLWidget::~GLWidget()
 
 void GLWidget::initializeGL()
 {
-    m_drawengine = new DrawEngine(this->width(), this->height());
+    m_drawengine = new DrawEngine(this->context(), this->width(), this->height());
 
     // start the rendering loop
     m_time = new QTime();
