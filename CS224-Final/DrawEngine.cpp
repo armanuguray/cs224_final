@@ -44,6 +44,7 @@ void DrawEngine::resize(REAL width, REAL height)
 
 void DrawEngine::setupGL()
 {
+    // TODO Set this up before and after each draw.
     glClearColor(0.0, 0.0, 0.0, 0);
     glFrontFace(GL_CCW);
     glDisable(GL_DITHER);
@@ -83,7 +84,7 @@ void DrawEngine::drawFrame(float time_elapsed)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
     m_shaderprograms["fresnel"]->bind();
-    m_shaderprograms["fresnel"]->setUniformValue("cube", 0);
+    m_shaderprograms["fresnel"]->setUniformValue("cube", GL_TEXTURE0);
     m_projectorcamera->renderProjectedGrid();
     m_shaderprograms["fresnel"]->release();
 
