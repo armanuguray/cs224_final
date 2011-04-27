@@ -50,7 +50,7 @@ void DrawEngine::setupGL()
     glDisable(GL_LIGHTING);
     glShadeModel(GL_SMOOTH);
     glCullFace (GL_BACK);
-    glEnable (GL_CULL_FACE);
+//    glEnable (GL_CULL_FACE);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -90,7 +90,7 @@ void DrawEngine::drawFrame(float time_elapsed)
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDisable(GL_CULL_FACE);
+//    glDisable(GL_CULL_FACE);
     glBegin(GL_QUAD_STRIP);
     {
         glColor3f(1.0,0.0,0.0);
@@ -103,7 +103,7 @@ void DrawEngine::drawFrame(float time_elapsed)
         glVertex3f(0.5, 0.5, 0.0);
     }
     glEnd();
-    glEnable(GL_CULL_FACE);
+//    glEnable(GL_CULL_FACE);
 #endif
 
 #ifdef PARTICLE_TEST

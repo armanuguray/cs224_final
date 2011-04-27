@@ -1,6 +1,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include <QFont>
+#include <QObject>
+#include <QPoint>
 #include "CS123Algebra.h"
 
 struct Settings
@@ -18,6 +21,14 @@ struct Settings
      * "dv" stands for "displaceable volume", taken from the projected grid paper.
      */
     REAL dv_scale;
+
+    /**
+     * Values relating to the position of the overlay text
+     */
+    QPoint overlay_text_offset;
+    float overlay_text_max_border;
+    QFont overlay_text_font;
+    QString overlay_text;
 };
 
 extern Settings settings;

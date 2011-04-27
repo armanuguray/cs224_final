@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "CS123Algebra.h"
 #include "DrawEngine.h"
+#include "Settings.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
 
@@ -13,6 +14,7 @@ GLWidget::GLWidget(QWidget *parent)
     this->setFocusPolicy(Qt::StrongFocus);
     this->setMouseTracking(true);
     //this->setAutoBufferSwap(false);
+    this->setAutoFillBackground(false);
 }
 
 GLWidget::~GLWidget()
@@ -29,21 +31,31 @@ void GLWidget::initializeGL()
     // start the rendering loop
     m_time = new QTime();
     m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(repaint()));
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
     m_timer->start(30.0);
 }
 
-void GLWidget::paintGL()
+void GLWidget::paintEvent(QPaintEvent *event)
 {
+    QGLWidget::paintEvent(event);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
     float time = m_time->elapsed();
     m_time->restart();
     m_drawengine->drawFrame(time);
 
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
     if (m_renderOverlay) {
         this->renderOverlayText();
     }
-
-    glFlush();
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -101,13 +113,23 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 }
 
 void GLWidget::renderOverlayText() {
-    const static int x = 10;
-    const static int y = 20;
-    const static int text_height = 15;
-    const static QColor text_color(Qt::white);
+    const float &x = settings.overlay_text_offset.x();
+    const float &y = settings.overlay_text_offset.y();
+    const int &max_border = settings.overlay_text_max_border;
 
-    this->qglColor(text_color);
-    this->renderText(x, y, "ESC: Exit fullscreen");
-    this->renderText(x, y + text_height, "F/F11: Toggle fullscreen");
-    this->renderText(x, y + 2 * text_height, "S: Toggle debug information draw");
+    painter.begin(this);
+
+    painter.setFont(settings.overlay_text_font);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::white);
+
+    QFontMetrics metrics = QFontMetrics(painter.font());
+    int border = qMax(max_border, metrics.leading());
+
+    QRect box = metrics.boundingRect(rect(), Qt::TextWordWrap, settings.overlay_text);
+
+    painter.fillRect(QRect(x, y, box.width() + 2 * border, box.height() + 2 * border), QColor(0, 0, 0, 127));
+    painter.drawText(x + border, y + border, box.width(), box.height(), Qt::TextWordWrap, settings.overlay_text);
+
+    painter.end();
 }
