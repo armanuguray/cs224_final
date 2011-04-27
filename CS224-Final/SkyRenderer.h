@@ -9,6 +9,7 @@ class SkyRenderer
 {
 public:
     SkyRenderer();
+    ~SkyRenderer();
 
     void renderSkyBox(Camera *camera);
 

@@ -1,5 +1,6 @@
 #include "SkyRenderer.h"
 #include "Camera.h"
+#include "GLFileLoader.h"
 
 SkyRenderer::SkyRenderer()
 {
@@ -45,7 +46,22 @@ SkyRenderer::SkyRenderer()
     glEndList();
 
     // load skybox texture
+    QString cube[6];
+    cube[0] = ":/posx";
+    cube[1] = ":/negx";
+    cube[2] = ":/posy";
+    cube[3] = ":/negy";
+    cube[4] = ":/posz";
+    cube[5] = ":/negz";
+    glEnable(GL_TEXTURE_CUBE_MAP);
+    if (!GLFileLoader::loadCubeMap(cube, skytexture))
+        skytexture = 0;
+}
 
+SkyRenderer::~SkyRenderer()
+{
+    glDeleteTextures(1, &skytexture);
+    glDeleteLists(skybox, 1);
 }
 
 void SkyRenderer::renderSkyBox(Camera *camera)
@@ -61,8 +77,10 @@ void SkyRenderer::renderSkyBox(Camera *camera)
     gluLookAt(0.0, 0.0, 0.0,
               center.x, center.y, center.z,
               up.x, up.y, up.z);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: remove this line later
+   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: remove this line later
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skytexture);
     glCallList(skybox);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
 }

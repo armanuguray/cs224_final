@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="negx">textures/negx.png</file>
+        <file alias="negy">textures/negy.png</file>
+        <file alias="negz">textures/negz.png</file>
+        <file alias="posx">textures/posx.png</file>
+        <file alias="posy">textures/posy.png</file>
+        <file alias="posz">textures/posz.png</file>
+    </qresource>
+</RCC>

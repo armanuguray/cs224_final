@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     pool/Pool.cpp \
     pool/PoolIterator.cpp \
     waveparticles/WaveParticle.cpp \
-    SkyRenderer.cpp
+    SkyRenderer.cpp \
+    convenience/GLFileLoader.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -45,12 +46,18 @@ HEADERS  += MainWindow.h \
     pool/PoolIterator.h \
     waveparticles/WaveParticle.h \
     SkyRenderer.h \
-    waveparticles/WaveConstants.h
+    waveparticles/WaveConstants.h \
+    convenience/GLFileLoader.h
 
 FORMS    += MainWindow.ui
 
-INCLUDEPATH += math camera waveparticles pool
-DEPENDPATH += math camera
+INCLUDEPATH += math camera waveparticles pool convenience
+DEPENDPATH += math camera waveparticles pool convenience
 
 unix:LIBS += -L/usr/local/lib -lm
 win32:LIBS += c:/mylibs/math.lib
+
+OTHER_FILES +=
+
+RESOURCES += \
+    textures.qrc
