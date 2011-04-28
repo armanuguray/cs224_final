@@ -77,6 +77,7 @@ void DrawEngine::loadShaders(const QGLContext *context)
 void DrawEngine::drawFrame(float time_elapsed)
 {    
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    if (glGetError() != GL_NO_ERROR) logln("Error");
 
     // render sky
     m_skyrenderer->renderSkyBox(m_projectorcamera);

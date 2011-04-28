@@ -47,6 +47,9 @@ bool GLFileLoader::loadCubeMap(QString filenames[6], GLuint &texture_id)
         }
         images[i] = images[i].mirrored(false, true);
         textures[i] = QGLWidget::convertToGLFormat(images[i]);
+#ifndef __APPLE__
+        textures[i] = textures[i].scaledToWidth(512, Qt::SmoothTransformation);
+#endif
     }
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);

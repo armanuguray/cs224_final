@@ -10,6 +10,7 @@
 #include "Settings.h"
 #include <list>
 
+//#define PRINT_VALS
 //#define CORNER_LINES
 //#define ALT_CAMERA // render the projected grid from the perspective of an alternative camera
 
@@ -163,12 +164,16 @@ void ProjectorCamera::loadMatrices()
 
     // if no intersections are found, return false so that the surface isn't rendered
     if (intersections.size() == 0) {
-        logln("NO");
+#ifdef PRINT_VALS
+        logln("NOT VISIBLE");
+#endif
         delete[] corners;
         grid_visible = false;
         return;
     }
-    logln("YES");
+#ifdef PRINT_VALS
+    logln("VISIBLE");
+#endif
     grid_visible = true;
 
 
@@ -198,12 +203,14 @@ void ProjectorCamera::loadMatrices()
             lr = (*it);
         }
     }
+#ifdef PRINT_VALS
     logln(intersections.size());
     logln("RESULTS: \n");
     logln(lli);
     logln(lri);
     logln(uli);
     logln(uri);
+#endif
     delete[] corners;
 
     // store the left and right sides of the projected grid
