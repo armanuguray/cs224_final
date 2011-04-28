@@ -13,9 +13,5 @@ extern "C" {
 }
 #endif
 
-#define GL_GLEXT_PROTOTYPES
-extern "C" {
-    extern void APIENTRY glActiveTexture(GLenum);
-}
 
 #endif // OPENGLINCLUDE_H
