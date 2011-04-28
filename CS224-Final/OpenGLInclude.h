@@ -7,6 +7,8 @@
 #else
     #include <GL/gl.h>
     #include <GL/glu.h>
+    #include <GL/glut.h>
+    #include <GL/freeglut.h>
 #define GL_GLEXT_PROTOTYPES
 extern "C" {
     void APIENTRY glActiveTexture(GLenum);

@@ -102,6 +102,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 }
 
 void GLWidget::renderOverlayText() {
+    /*
     glDisable(GL_CULL_FACE);
     const float &x = settings.overlay_text_offset.x();
     const float &y = settings.overlay_text_offset.y();
@@ -123,4 +124,9 @@ void GLWidget::renderOverlayText() {
 
     painter.end();
     glEnable(GL_CULL_FACE);
+    */
+
+//    glRasterPos2i(10, 20);
+//    glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+//    glutBitmapString(GLUT_BITMAP_HELVETICA_18, (unsigned char *) "text to render");
 }

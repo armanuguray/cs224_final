@@ -2,11 +2,17 @@
     <qresource prefix="/">
         <file alias="fresnel.frag">shaders/fresnel.frag</file>
         <file alias="fresnel.vert">shaders/fresnel.vert</file>
-        <file alias="negx">textures/negx.jpg</file>
-        <file alias="negy">textures/negy.jpg</file>
-        <file alias="negz">textures/negz.jpg</file>
-        <file alias="posx">textures/posx.jpg</file>
-        <file alias="posy">textures/posy.jpg</file>
-        <file alias="posz">textures/posz.jpg</file>
+        <file alias="mountain-negx">textures/negx.jpg</file>
+        <file alias="mountain-negy">textures/negy.jpg</file>
+        <file alias="mountain-negz">textures/negz.jpg</file>
+        <file alias="mountain-posx">textures/posx.jpg</file>
+        <file alias="mountain-posy">textures/posy.jpg</file>
+        <file alias="mountain-posz">textures/posz.jpg</file>
+        <file alias="negy">textures/redsky/redsky_down.jpg</file>
+        <file alias="negx">textures/redsky/redsky_east.jpg</file>
+        <file alias="negz">textures/redsky/redsky_north.jpg</file>
+        <file alias="posz">textures/redsky/redsky_south.jpg</file>
+        <file alias="posy">textures/redsky/redsky_up.jpg</file>
+        <file alias="posx">textures/redsky/redsky_west.jpg</file>
     </qresource>
 </RCC>

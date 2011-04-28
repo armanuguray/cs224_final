@@ -54,7 +54,7 @@ FORMS    += MainWindow.ui
 INCLUDEPATH += math camera waveparticles pool convenience
 DEPENDPATH += math camera waveparticles pool convenience
 
-unix:LIBS += -L/usr/local/lib -lm
+unix:LIBS += -L/usr/local/lib -lm -lglut
 win32:LIBS += c:/mylibs/math.lib
 
 OTHER_FILES +=
