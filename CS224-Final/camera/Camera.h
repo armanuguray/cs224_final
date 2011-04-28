@@ -35,6 +35,9 @@ public:
     void lookVectorRotate(const Vector2 &delta);
     void lookVectorTranslate(REAL delta);
 
+    // converts a screen space mouse position to a world space ray from the eye of the camera
+    void getMouseRay(const Vector2 &mouse, Vector4 &out);
+
 protected:
 
     virtual void loadMatrices();

@@ -74,3 +74,15 @@ void Camera::resize(int width, int height)
     m_height = height;
     loadMatrices();
 }
+
+void Camera::getMouseRay(const Vector2 &mouse, Vector4 &out)
+{
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    gluUnProject(mouse.x, (GLdouble)viewport[3] - mouse.y - 1.0, 1.0,
+                 m_modelview_matrix, m_projection_matrix, viewport,
+                 &out.x, &out.y, &out.z);
+    out.w = 1.0;
+    out -= m_eye;
+    out.normalize();
+}

@@ -127,7 +127,7 @@ void DrawEngine::drawFrame(float time_elapsed)
         float lerp = .5f + .5f * (p->amplitude() / TEST_AMPLITUDE);
         glColor3f(lerp, 0.f, 1.f - lerp);
 
-        gluSphere(m_quadric, p->radius(), 3, 3);
+        gluSphere(m_quadric, 0.2, 3, 3);
 
         glPopMatrix();
     }
