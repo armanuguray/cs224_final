@@ -9,7 +9,7 @@
 #include <QWheelEvent>
 
 GLWidget::GLWidget(QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent), m_renderOverlay(true)
+    : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
 {
     this->setFocusPolicy(Qt::StrongFocus);
     this->setMouseTracking(true);
@@ -35,16 +35,14 @@ void GLWidget::initializeGL()
     m_timer->start(30.0);
 }
 
-void GLWidget::paintEvent(QPaintEvent *event)
+void GLWidget::paintGL()
 {
-    QGLWidget::paintEvent(event);
-
     float time = m_time->elapsed();
     m_time->restart();
     m_drawengine->drawFrame(time);
     glFlush();
 
-    if (m_renderOverlay) {
+    if (settings.render_overlay) {
         this->renderOverlayText();
     }
 }
@@ -92,7 +90,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 
     switch (event->key()) {
     case Qt::Key_S:
-        m_renderOverlay = !m_renderOverlay;
+        settings.render_overlay = !settings.render_overlay;
         ignore = false;
         break;
 

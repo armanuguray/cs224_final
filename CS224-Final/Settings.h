@@ -29,6 +29,8 @@ struct Settings
     float overlay_text_max_border;
     QFont overlay_text_font;
     QString overlay_text;
+
+    bool render_overlay;
 };
 
 extern Settings settings;

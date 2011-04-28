@@ -8,6 +8,7 @@ Settings::Settings()
     line_mode = false;
     dv_scale = 1.4;
 
+    render_overlay = false;
     overlay_text_offset = QPoint(10, 10);
     overlay_text_max_border = 10;
     overlay_text_font = QFont("Sans", 10);

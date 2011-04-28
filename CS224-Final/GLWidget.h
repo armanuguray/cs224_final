@@ -29,7 +29,7 @@ public:
 protected:
     // QGLWidget overrides
     void initializeGL();
-    void paintEvent(QPaintEvent *event);
+    void paintGL();
     void resizeGL(int width, int height);
 
     // mouse events
@@ -48,7 +48,6 @@ private:
     QTimer *m_timer;
     DrawEngine *m_drawengine;
 
-    bool m_renderOverlay;
     QPainter painter;
 
     Vector2 m_old; // previous mouse location for mouse interaction
