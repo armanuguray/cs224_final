@@ -39,19 +39,10 @@ void GLWidget::paintEvent(QPaintEvent *event)
 {
     QGLWidget::paintEvent(event);
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
     float time = m_time->elapsed();
     m_time->restart();
     m_drawengine->drawFrame(time);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    glFlush();
 
     if (m_renderOverlay) {
         this->renderOverlayText();
@@ -113,6 +104,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 }
 
 void GLWidget::renderOverlayText() {
+    glDisable(GL_CULL_FACE);
     const float &x = settings.overlay_text_offset.x();
     const float &y = settings.overlay_text_offset.y();
     const int &max_border = settings.overlay_text_max_border;
@@ -132,4 +124,5 @@ void GLWidget::renderOverlayText() {
     painter.drawText(x + border, y + border, box.width(), box.height(), Qt::TextWordWrap, settings.overlay_text);
 
     painter.end();
+    glEnable(GL_CULL_FACE);
 }

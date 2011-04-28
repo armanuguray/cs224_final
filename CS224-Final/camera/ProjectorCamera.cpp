@@ -277,9 +277,9 @@ void ProjectorCamera::renderProjectedGrid()
         glColor3f(0, 1, 1);
         glNormal3f(0.0, 1.0, 0.0);
 
-        if (settings.line_mode)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //    if (settings.line_mode)
+    //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+     //   else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         Vector2 v0curr, v1curr, v0next, v1next;
         Vector2 xdircurr, xdirnext;
         Vector2 vcurr, vnext;

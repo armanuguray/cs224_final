@@ -53,7 +53,7 @@ SkyRenderer::SkyRenderer()
     cube[3] = ":/negy";
     cube[4] = ":/posz";
     cube[5] = ":/negz";
-    glEnable(GL_TEXTURE_CUBE_MAP);
+
     if (!GLFileLoader::loadCubeMap(cube, skytexture))
         skytexture = 0;
 }

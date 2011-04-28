@@ -51,12 +51,13 @@ void DrawEngine::setupGL()
     glDisable(GL_LIGHTING);
     glShadeModel(GL_SMOOTH);
     glCullFace (GL_BACK);
-//    glEnable (GL_CULL_FACE);
+    glEnable (GL_CULL_FACE);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_NORMALIZE);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_CUBE_MAP);
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)
@@ -81,17 +82,18 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_skyrenderer->renderSkyBox(m_projectorcamera);
 
     // render water
+    m_shaderprograms["fresnel"]->bind();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
-    m_shaderprograms["fresnel"]->bind();
-    m_shaderprograms["fresnel"]->setUniformValue("cube", GL_TEXTURE0);
+    m_shaderprograms["fresnel"]->setUniformValue("cube", 0);
     m_projectorcamera->renderProjectedGrid();
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     m_shaderprograms["fresnel"]->release();
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//    glDisable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
     glBegin(GL_QUAD_STRIP);
     {
         glColor3f(1.0,0.0,0.0);
@@ -104,7 +106,7 @@ void DrawEngine::drawFrame(float time_elapsed)
         glVertex3f(0.5, 0.5, 0.0);
     }
     glEnd();
-//    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 #endif
 
 #ifdef PARTICLE_TEST
