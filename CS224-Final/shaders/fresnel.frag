@@ -12,7 +12,7 @@ void main(void)
     float eta = 0.67;
     float cos = dot(view, normal);
     if (cos > 0.0) {
-        eta = 1.33;
+        // eta = 1.33;
         nNormal *= -1.0;
     }
     
