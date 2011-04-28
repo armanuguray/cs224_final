@@ -1,12 +1,12 @@
 <RCC>
     <qresource prefix="/">
+        <file alias="negx">textures/negx.png</file>
+        <file alias="negy">textures/negy.png</file>
+        <file alias="negz">textures/negz.png</file>
+        <file alias="posx">textures/posx.png</file>
+        <file alias="posy">textures/posy.png</file>
+        <file alias="posz">textures/posz.png</file>
         <file alias="fresnel.frag">shaders/fresnel.frag</file>
         <file alias="fresnel.vert">shaders/fresnel.vert</file>
-        <file alias="negx">textures/negx.jpg</file>
-        <file alias="negy">textures/negy.jpg</file>
-        <file alias="negz">textures/negz.jpg</file>
-        <file alias="posx">textures/posx.jpg</file>
-        <file alias="posy">textures/posy.jpg</file>
-        <file alias="posz">textures/posz.jpg</file>
     </qresource>
 </RCC>
