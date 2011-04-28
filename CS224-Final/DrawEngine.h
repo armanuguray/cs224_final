@@ -8,6 +8,7 @@
 
 #include "Pool.h"
 #include "WaveParticle.h"
+#include "WaveParticleManager.h"
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
@@ -58,9 +59,8 @@ protected:
 
     std::map<string, QGLShaderProgram *> m_shaderprograms; // maps a shader program object to a given name.
 
-    Pool m_particles;    // The particles in this simulation
+    WaveParticleManager m_waveParticles;
     GLUquadric *m_quadric;
-    QLinkedList<WaveParticle*> m_liveParticles;
 };
 
 #endif // DRAWENGINE_H

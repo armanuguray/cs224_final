@@ -17,9 +17,6 @@ DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
 
-    for (int i = 0; i < WAVE_PARTICLE_COUNT; ++i)
-        m_particles.add(new WaveParticle());
-
     m_quadric = gluNewQuadric();
 }
 
@@ -30,8 +27,6 @@ DrawEngine::~DrawEngine()
     for (std::map<string, QGLShaderProgram *>::iterator it = m_shaderprograms.begin(); it != m_shaderprograms.end(); ++it) {
         delete it->second;
     }
-
-    m_particles.clear();
 
     gluDeleteQuadric(m_quadric);
     m_quadric = 0;
@@ -111,44 +106,19 @@ void DrawEngine::drawFrame(float time_elapsed)
 #endif
 
 #ifdef PARTICLE_TEST
-    float dt = time_elapsed / 1000.f;   // ms -> s
-    float TEST_AMPLITUDE = 7.5f;
-    QLinkedListIterator<WaveParticle*> it(m_liveParticles);
-    while (it.hasNext())
-    {
-        WaveParticle *p = (WaveParticle*)it.next();
-        assert(p->isAlive());
-
-        p->update(&m_liveParticles, &m_particles, dt);
-
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glTranslatef(p->position().x, 0.f, p->position().y);
-
-        float lerp = .5f + .5f * (p->amplitude() / TEST_AMPLITUDE);
-        glColor3f(lerp, 0.f, 1.f - lerp);
-
-        gluSphere(m_quadric, 0.2, 3, 3);
-
-        glPopMatrix();
-    }
+    m_waveParticles.update(time_elapsed);
+    m_waveParticles.drawParticles(m_quadric);
 
     static int frame = 0;
-    static float t = 0;
     if (frame % 120 == 0)
     {
         int PARTICLES_PER_RING = 10;
-        float dispersionAngle = 2 * M_PI / PARTICLES_PER_RING;
-        for (int i = 0; i < PARTICLES_PER_RING; ++i)
-        {
-            float theta = 2 * M_PI * i / PARTICLES_PER_RING;
-            WaveParticle *p = (WaveParticle*)m_particles.alloc();
-            p->spawn(TEST_AMPLITUDE /* sin(t * 4.f) */, 1.f, Vector2(0.f, 0.f), dispersionAngle, theta);
-            m_liveParticles.append(p);
-        }
+        float TEST_AMPLITUDE = 7.5f;
+
+        m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 1.f);
     }
+
     ++frame;
-    t += dt;
 #endif
 }
 

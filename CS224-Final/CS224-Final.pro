@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     pool/PoolIterator.cpp \
     waveparticles/WaveParticle.cpp \
     SkyRenderer.cpp \
-    convenience/GLFileLoader.cpp
+    convenience/GLFileLoader.cpp \
+    WaveParticleManager.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -47,7 +48,8 @@ HEADERS  += MainWindow.h \
     waveparticles/WaveParticle.h \
     SkyRenderer.h \
     waveparticles/WaveConstants.h \
-    convenience/GLFileLoader.h
+    convenience/GLFileLoader.h \
+    WaveParticleManager.h
 
 FORMS    += MainWindow.ui
 
