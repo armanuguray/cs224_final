@@ -1,7 +1,7 @@
 #ifndef WAVEPARTICLEMANAGER_H
 #define WAVEPARTICLEMANAGER_H
 
-#include <QLinkedList>
+#include <QSet>
 
 #include "Pool.h"
 #include "WaveParticle.h"
@@ -23,7 +23,7 @@ public:
 
 private:
     Pool m_particleStore;
-    QLinkedList<WaveParticle *> m_liveParticles;
+    QSet<WaveParticle *> m_liveParticles;
 
 };
 

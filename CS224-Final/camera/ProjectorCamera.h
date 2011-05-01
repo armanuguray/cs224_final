@@ -13,7 +13,10 @@ public:
     void renderProjectedGrid();
 
     // intersects a line segment with a plane that is perpendicular to the y-axis
-    static bool intersectSegmentPlane(Vector4 v1, Vector4 v2, REAL y, Vector4 &intersect);
+    static bool intersectSegmentPlane(const Vector4 &v1, const Vector4 &v2, REAL y, Vector4 &intersect);
+
+    // intersects a ray with a plane that's perpendicular to the y-axis
+    static bool intersectRayPlane(const Vector4 &src, const Vector4 &dir, REAL y, Vector4 &out);
 
 private:
 

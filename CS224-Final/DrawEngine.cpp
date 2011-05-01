@@ -110,10 +110,10 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_waveParticles.drawParticles(m_quadric);
 
     static int frame = 0;
-    if (frame % 120 == 0)
+    if (frame % 60 == 0)
     {
-        int PARTICLES_PER_RING = 10;
-        float TEST_AMPLITUDE = 7.5f;
+        int PARTICLES_PER_RING = 20;
+        float TEST_AMPLITUDE = 15.f;
 
         m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 1.f);
     }
@@ -136,7 +136,14 @@ void DrawEngine::mouse_down(Vector2 &mouse_pos, MouseButton button)
 
 void DrawEngine::interact(Vector2 &mouse_pos)
 {
-    logln("FUCKING RIPPLE!");
+    Vector4 rayDir, intersect;
+
+    m_projectorcamera->getMouseRay(mouse_pos, rayDir);
+    bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
+
+    if (intersects) {
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 1);
+    }
 }
 
 void DrawEngine::mouse_scroll(REAL delta)
