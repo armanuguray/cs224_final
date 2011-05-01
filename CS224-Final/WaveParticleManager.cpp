@@ -46,9 +46,6 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
 
 void WaveParticleManager::drawParticles(GLUquadric *quadric)
 {
-    // tala: is this a scale factor?
-    float TEST_AMPLITUDE = 7.5f;
-
     QLinkedListIterator<WaveParticle*> it(m_liveParticles);
     while (it.hasNext())
     {
@@ -59,7 +56,7 @@ void WaveParticleManager::drawParticles(GLUquadric *quadric)
         glPushMatrix();
         glTranslatef(p->position().x, 0.f, p->position().y);
 
-        float lerp = .5f + .5f * (p->amplitude() / TEST_AMPLITUDE);
+        float lerp = .5f + .5f * (p->amplitude());
         glColor3f(lerp, 0.f, 1.f - lerp);
 
         gluSphere(quadric, 0.2, 3, 3);
