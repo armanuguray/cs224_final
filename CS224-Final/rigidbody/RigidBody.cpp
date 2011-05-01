@@ -3,12 +3,12 @@
 
 
 
-RigidBody::onAlloc()
+void RigidBody::onAlloc()
 {
 
 }
 
-RigidBody::onFree()
+void RigidBody::onFree()
 {
 
 }
