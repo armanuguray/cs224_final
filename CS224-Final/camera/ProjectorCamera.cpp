@@ -284,9 +284,10 @@ void ProjectorCamera::renderProjectedGrid()
         glColor3f(0, 1, 1);
         glNormal3f(0.0, 1.0, 0.0);
 
-    //    if (settings.line_mode)
-    //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-     //   else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        if (settings.line_mode)
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         Vector2 v0curr, v1curr, v0next, v1next;
         Vector2 xdircurr, xdirnext;
         Vector2 vcurr, vnext;
@@ -302,7 +303,8 @@ void ProjectorCamera::renderProjectedGrid()
             xdirnext = v1next - v0next;
             xdirnext = xdirnext.getNormalized() * (xdirnext.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
             glBegin(GL_QUAD_STRIP);
-            for (unsigned i = 0; i <= settings.grid_resolution; i++) {
+            for (unsigned j = 0; j <= settings.grid_resolution; j++) {
+                glTexCoord2f((float)j / (float)settings.grid_resolution, (float)i / (float)settings.grid_resolution);
                 glVertex3f(vcurr.x, 0, vcurr.y);
                 glVertex3f(vnext.x, 0, vnext.y);
                 vcurr += xdircurr;

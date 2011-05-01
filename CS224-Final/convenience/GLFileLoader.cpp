@@ -12,15 +12,20 @@ bool GLFileLoader::loadTexture2D(QString &filename, GLuint &texture_id)
     }
     image = image.mirrored(false, true);
     texture = QGLWidget::convertToGLFormat(image);
-
+#ifndef __APPLE__
+        texture = texture.scaledToWidth(512, Qt::SmoothTransformation);
+#endif
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 3, 3, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
         std::cerr << "Error loading \"" << filename.toStdString() <<  "\" to VRAM." << std::endl;
+        std::cerr << gluErrorString(err) << std::endl;
         glDeleteTextures(1, &texture_id);
         glBindTexture(GL_TEXTURE_2D, 0);
         return false;
@@ -28,7 +33,7 @@ bool GLFileLoader::loadTexture2D(QString &filename, GLuint &texture_id)
     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, image.width(), image.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
     err = glGetError();
     if (err != GL_NO_ERROR) {
-        std::cerr << "Error loading mipmaps for \"" << filename.toStdString() <<  "\"." << std::endl;
+        std::cerr << "Error loaintding mipmaps for \"" << filename.toStdString() <<  "\"." << std::endl;
         glDeleteTextures(1, &texture_id);
         glBindTexture(GL_TEXTURE_2D, 0);
         return false;

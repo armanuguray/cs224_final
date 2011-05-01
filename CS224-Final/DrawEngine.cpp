@@ -1,6 +1,7 @@
 #include "DrawEngine.h"
 #include "ProjectorCamera.h"
 #include <QGLShaderProgram>
+#include <QGLFramebufferObject>
 #include "OpenGLInclude.h"
 #include "SkyRenderer.h"
 
@@ -8,12 +9,13 @@
 #include "WaveConstants.h"
 
 #define SHOW_ORIGIN
-#define PARTICLE_TEST
+//#define PARTICLE_TEST
 
 DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
 {
     setupGL();
     loadShaders(context);
+    createFbos();
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
 
@@ -25,6 +27,10 @@ DrawEngine::~DrawEngine()
     delete m_skyrenderer;
     delete m_projectorcamera;
     for (std::map<string, QGLShaderProgram *>::iterator it = m_shaderprograms.begin(); it != m_shaderprograms.end(); ++it) {
+        delete it->second;
+    }
+
+    for (std::map<string, QGLFramebufferObject *>::iterator it = m_fbos.begin(); it != m_fbos.end(); ++it) {
         delete it->second;
     }
 
@@ -53,6 +59,7 @@ void DrawEngine::setupGL()
     glEnable(GL_NORMALIZE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)
@@ -67,10 +74,153 @@ void DrawEngine::loadShaders(const QGLContext *context)
         exit(1);
     }
     m_shaderprograms["fresnel"] = shader;
+
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/wavetest.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/wavetest.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["wavetest"] = shader;
+
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/heightmap.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/heightmap.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["heightmap"] = shader;
+}
+
+void DrawEngine::createFbos()
+{
+    m_fbos["heightmap"] = new QGLFramebufferObject(WAVE_HEIGHTMAP_RESOLUTION,
+                                                   WAVE_HEIGHTMAP_RESOLUTION,
+                                                   QGLFramebufferObject::NoAttachment,
+                                                   GL_TEXTURE_2D,
+                                                   GL_RGB16);
+}
+
+void DrawEngine::debugDrawHeightmap()
+{
+    int r = WAVE_HEIGHTMAP_RESOLUTION,
+        w = WAVE_HEIGHTMAP_WIDTH,
+        h = WAVE_HEIGHTMAP_HEIGHT;
+
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glOrtho(0, r, r, 0, -1.f, 1.f);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+
+    bool flip = false;
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f,flip ? 1.0f : 0.0f);
+    glVertex2f(0.0f,0.0f);
+    glTexCoord2f(1.0f,flip ? 1.0f : 0.0f);
+    glVertex2f(  r,0.0f);
+    glTexCoord2f(1.0f,flip ? 0.0f : 1.0f);
+    glVertex2f(  r,   r);
+    glTexCoord2f(0.0f,flip ? 0.0f : 1.0f);
+    glVertex2f(0.0f,  r);
+    glEnd();
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 }
 
 void DrawEngine::drawFrame(float time_elapsed)
-{    
+{
+    // draw heightmap
+    int r = WAVE_HEIGHTMAP_RESOLUTION,
+        w = WAVE_HEIGHTMAP_WIDTH,
+        h = WAVE_HEIGHTMAP_HEIGHT;
+
+    m_fbos["heightmap"]->bind();
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glViewport(0, 0, r, r);
+    gluOrtho2D(0, 1.f, 1.f, 0.f);
+
+    m_shaderprograms["heightmap"]->bind();
+    m_shaderprograms["heightmap"]->setUniformValue("tl", QVector3D(-w * .5f, 0, -h * .5f));
+    m_shaderprograms["heightmap"]->setUniformValue("tr", QVector3D( w * .5f, 0, -h * .5f));
+    m_shaderprograms["heightmap"]->setUniformValue("bl", QVector3D(-w * .5f, 0,  h * .5f));
+    m_shaderprograms["heightmap"]->setUniformValue("br", QVector3D( w * .5f, 0,  h * .5f));
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    bool flip = true;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f,flip ? 1.0f : 0.0f);
+    glVertex2f(0.0f, 0.0f);
+
+    glTexCoord2f(1.0f,flip ? 1.0f : 0.0f);
+    glVertex2f(1.0f, 0.0f);
+
+    glTexCoord2f(1.0f,flip ? 0.0f : 1.0f);
+    glVertex2f(1.0f, 1.0f);
+
+    glTexCoord2f(0.0f,flip ? 0.0f : 1.0f);
+    glVertex2f(0.0f, 1.0f);
+    glEnd();
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    m_shaderprograms["heightmap"]->release();
+
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    m_fbos["heightmap"]->release();
+
+    glViewport(0, 0, m_projectorcamera->getWidth(), m_projectorcamera->getHeight());
+
+//    debugDrawHeightmap();
+//    return;
+
+    // render the world
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     if (glGetError() != GL_NO_ERROR) logln("Error");
 
@@ -78,13 +228,24 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_skyrenderer->renderSkyBox(m_projectorcamera);
 
     // render water
-    m_shaderprograms["fresnel"]->bind();
+//    m_shaderprograms["fresnel"]->bind();
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
+//    m_shaderprograms["fresnel"]->setUniformValue("cube", 0);
+
+    m_shaderprograms["wavetest"]->bind();
+    m_shaderprograms["wavetest"]->setUniformValue("tl", QVector3D(-w, 0, -h));
+    m_shaderprograms["wavetest"]->setUniformValue("tr", QVector3D( w, 0, -h));
+    m_shaderprograms["wavetest"]->setUniformValue("bl", QVector3D(-w, 0,  h));
+    m_shaderprograms["wavetest"]->setUniformValue("br", QVector3D( w, 0,  h));
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
-    m_shaderprograms["fresnel"]->setUniformValue("cube", 0);
+    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+    m_shaderprograms["wavetest"]->setUniformValue("texture", 0);
     m_projectorcamera->renderProjectedGrid();
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    m_shaderprograms["fresnel"]->release();
+    m_shaderprograms["wavetest"]->release();
+
+    //    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+//    m_shaderprograms["fresnel"]->release();
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN

@@ -14,5 +14,9 @@
         <file alias="posz">textures/redsky/redsky_south.jpg</file>
         <file alias="posy">textures/redsky/redsky_up.jpg</file>
         <file alias="posx">textures/redsky/redsky_west.jpg</file>
+        <file alias="wavetest.frag">shaders/wavetest.frag</file>
+        <file alias="wavetest.vert">shaders/wavetest.vert</file>
+        <file alias="heightmap.frag">shaders/heightmap.frag</file>
+        <file alias="heightmap.vert">shaders/heightmap.vert</file>
     </qresource>
 </RCC>

@@ -59,7 +59,13 @@ DEPENDPATH += math camera waveparticles pool convenience
 unix:LIBS += -L/usr/local/lib -lm -lglut
 win32:LIBS += c:/mylibs/math.lib
 
-OTHER_FILES +=
+OTHER_FILES += \
+    shaders/fresnel.vert \
+    shaders/fresnel.frag \
+    shaders/wavetest.vert \
+    shaders/wavetest.frag \
+    shaders/heightmap.vert \
+    shaders/heightmap.frag
 
 RESOURCES += \
     textures.qrc

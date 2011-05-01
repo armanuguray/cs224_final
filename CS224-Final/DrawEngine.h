@@ -18,6 +18,7 @@
 
 class QGLContext;
 class QGLShaderProgram;
+class QGLFramebufferObject;
 class ProjectorCamera;
 class SkyRenderer;
 
@@ -53,11 +54,16 @@ protected:
     void setupGL();
     // loads shaders
     void loadShaders(const QGLContext *context);
+    // creates fbos
+    void createFbos();
+
+    void debugDrawHeightmap();
 
     SkyRenderer *m_skyrenderer; // handles the rendering of the sky, including the sun.
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
 
     std::map<string, QGLShaderProgram *> m_shaderprograms; // maps a shader program object to a given name.
+    std::map<string, QGLFramebufferObject *> m_fbos;
 
     WaveParticleManager m_waveParticles;
     GLUquadric *m_quadric;

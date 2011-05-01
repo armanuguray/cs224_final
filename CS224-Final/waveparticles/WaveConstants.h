@@ -20,4 +20,12 @@
 // The maximum number of wave particles to pre-allocate for the entire simulation
 #define WAVE_PARTICLE_COUNT 100000
 
+// Heightmap width in world space (centered at the origin)
+#define WAVE_HEIGHTMAP_WIDTH  1000
+
+// Heightmap height in world space (centered at the origin)
+#define WAVE_HEIGHTMAP_HEIGHT 1000
+
+#define WAVE_HEIGHTMAP_RESOLUTION 1024
+
 #endif // WAVECONSTANTS_H

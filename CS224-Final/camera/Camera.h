@@ -38,6 +38,9 @@ public:
     // converts a screen space mouse position to a world space ray from the eye of the camera
     void getMouseRay(const Vector2 &mouse, Vector4 &out);
 
+    int getWidth() { return m_width; }
+    int getHeight() { return m_height; }
+
 protected:
 
     virtual void loadMatrices();
