@@ -115,7 +115,7 @@ void DrawEngine::drawFrame(float time_elapsed)
         int PARTICLES_PER_RING = 20;
         float TEST_AMPLITUDE = 15.f;
 
-        m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 1.f);
+        m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 10.f);
     }
 
     ++frame;
@@ -142,7 +142,7 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 1);
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 10.f);
     }
 }
 

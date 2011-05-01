@@ -39,6 +39,8 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
         float theta = 2 * M_PI * i / numParticles;
 
         WaveParticle *p = (WaveParticle*) m_particleStore.alloc();
+        if (p == NULL) return;
+
         p->spawn(amplitude, radius, origin, dispersionAngle, theta);
         m_liveParticles.insert(p);
     }
@@ -59,8 +61,10 @@ void WaveParticleManager::drawParticles(GLUquadric *quadric)
         float lerp = .5f + .5f * (p->amplitude());
         glColor3f(lerp, 0.f, 1.f - lerp);
 
-        gluSphere(quadric, 0.2, 3, 3);
+        gluSphere(quadric, p->radius() / 10.f, 3, 3);
 
         glPopMatrix();
     }
+
+    logln(m_particleStore.deadCount() << ", " << m_particleStore.liveCount() << ", " << m_particleStore.capacity());
 }

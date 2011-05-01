@@ -10,7 +10,7 @@
 
 // The rate at which the amplitude of a particle decreases, in world coordinates (distance
 // from the projection grid plane) per second
-#define WAVE_AMPLITUDE_FALLOFF 0
+#define WAVE_AMPLITUDE_FALLOFF .5f
 
 // When multiplied by the radius of a wave particle, yields the maximum distance (in world coordinates)
 // between neighboring wave particles (i.e. before subidivision occurs)

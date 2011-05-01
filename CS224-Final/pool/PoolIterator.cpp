@@ -1,7 +1,8 @@
 
 #include "PoolIterator.h"
 
-PoolIterator::PoolIterator(Pool *pool) : m_it(pool->m_data), m_next(0)
+/** TODO fix the m_allocated */
+PoolIterator::PoolIterator(Pool *pool) : m_it(pool->m_allocated), m_next(0)
 {
     walk();
 }

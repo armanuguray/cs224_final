@@ -140,7 +140,7 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
     if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE)
     {
         liveParticles->remove(this);
-        free();
+        particles->free(this);
     }
 
     // Subdivide if necessary
@@ -161,10 +161,22 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         // TODO: how to compute the new amplitude? Just using a simple average for now, but I'm not sure that's right
         m_amplitude *= .25;
 
-        // Create the particles
+        // Create the particles; do nothing if we're out of particles
         WaveParticle *here = (WaveParticle *)particles->alloc();
+        if (here == NULL) return;
+
         WaveParticle *left = (WaveParticle *)particles->alloc();
+        if (left == NULL) {
+            particles->free(here);
+            return;
+        }
+
         WaveParticle *right = (WaveParticle *)particles->alloc();
+        if (right == NULL) {
+            particles->free(here);
+            particles->free(left);
+            return;
+        }
 
         here->setAmplitude(m_amplitude);
         here->setDispersionAngle(m_dispersionAngle);

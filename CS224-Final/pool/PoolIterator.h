@@ -1,7 +1,7 @@
 #ifndef POOLITERATOR_H
 #define POOLITERATOR_H
 
-#include <QLinkedList>
+#include <QSet>
 #include "Pool.h"
 
 /**
@@ -12,7 +12,7 @@ class PoolIterator
 {
 private:
     /** The iterator into the Pool's Poolable list */
-    QLinkedListIterator<Poolable *> m_it;
+    QSetIterator<Poolable *> m_it;
     /** The next live Poolable found */
     Poolable *m_next;
 

@@ -55,6 +55,9 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui
 
+QMAKE_CXXFLAGS_DEBUG += -pg
+QMAKE_LFLAGS_DEBUG += -pg
+
 INCLUDEPATH += math camera waveparticles pool convenience
 DEPENDPATH += math camera waveparticles pool convenience
 
