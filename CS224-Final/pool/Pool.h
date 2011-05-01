@@ -1,7 +1,7 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include <QLinkedList>
+#include <QSet>
 #include "Poolable.h"
 
 /**
@@ -29,8 +29,11 @@
 class Pool
 {
 private:
-    /** All objects in this pool, both allocated and unallocated. */
-    QLinkedList<Poolable*> m_data;
+    /** All allocated objects in this pool */
+    QSet<Poolable *> m_allocated;
+
+    /** All unallocated objects in this pool */
+    QSet<Poolable *> m_unallocated;
 
     friend class PoolIterator;
 
@@ -69,6 +72,10 @@ public:
       * no more free objects in the pool, NULL is returned instead
       */
     Poolable* alloc();
+    /**
+      * Frees an allocated object; if the object did not come from this pool then nothing happens.
+      */
+    void free(Poolable *poolable);
 };
 
 #endif // POOL_H

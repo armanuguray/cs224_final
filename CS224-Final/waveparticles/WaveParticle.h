@@ -1,7 +1,7 @@
 #ifndef WAVEPARTICLE_H
 #define WAVEPARTICLE_H
 
-#include <QLinkedList>
+#include <QSet>
 #include "CS123Algebra.h"
 #include "Pool.h"
 #include "Poolable.h"
@@ -56,7 +56,7 @@ public:
      * Updates this particle
      * @param dt The amount of time that has elapsed since the last update() call, in seconds
      */
-    void update(QLinkedList<WaveParticle*> *liveParticles, Pool *particles, REAL dt);
+    void update(QSet<WaveParticle*> *liveParticles, Pool *particles, REAL dt);
 };
 
 #endif // WAVEPARTICLE_H

@@ -20,16 +20,22 @@ void lerp(Vector2 v0, Vector2 v1, REAL x, REAL &y)
     y = v0.y + ((x - v0.x) * v1.y - (x - v0.x) * v0.y)/(v1.x - v0.x);
 }
 
-bool ProjectorCamera::intersectSegmentPlane(Vector4 v1, Vector4 v2, REAL y, Vector4 &intersect)
+bool ProjectorCamera::intersectSegmentPlane(const Vector4 &v1, const Vector4 &v2, REAL y, Vector4 &intersect)
 {
     Vector4 dir = v2 - v1;
     REAL dist = dir.getMagnitude();
     dir = dir.getNormalized();
+
+    bool intersectsRay = ProjectorCamera::intersectRayPlane(v1, dir, y, intersect);
+    // do line segment test, to make sure that it falls within [v1, v2]
+    return intersectsRay && (intersect - v1).getMagnitude() <= dist;
+}
+
+bool ProjectorCamera::intersectRayPlane(const Vector4 &src, const Vector4 &dir, REAL y, Vector4 &out) {
     if (dir.y >= DBL_EPSILON || dir.y <= -DBL_EPSILON) {
-        REAL t = (y-v1.y)/dir.y;
-        dir *= t;
-        if (t >= 0 && dir.getMagnitude() <= dist) {
-            intersect = v1 + dir;
+        REAL t = (y-src.y) / dir.y;
+        if (t >= 0) {
+            out = src + dir * t;
             return true;
         }
     }

@@ -128,7 +128,7 @@ void WaveParticle::setDispersionAngle(REAL r)
     m_dispersionAngle = r;
 }
 
-void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *particles, REAL dt)
+void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, REAL dt)
 {
     // Move
     m_position += m_velocity * dt;
@@ -139,8 +139,8 @@ void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *part
     // Die if the amplitude is too low
     if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE)
     {
-        liveParticles->removeAll(this);
-        free();
+        liveParticles->remove(this);
+        particles->free(this);
     }
 
     // Subdivide if necessary
@@ -161,10 +161,22 @@ void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *part
         // TODO: how to compute the new amplitude? Just using a simple average for now, but I'm not sure that's right
         m_amplitude *= .25;
 
-        // Create the particles
+        // Create the particles; do nothing if we're out of particles
         WaveParticle *here = (WaveParticle *)particles->alloc();
+        if (here == NULL) return;
+
         WaveParticle *left = (WaveParticle *)particles->alloc();
+        if (left == NULL) {
+            particles->free(here);
+            return;
+        }
+
         WaveParticle *right = (WaveParticle *)particles->alloc();
+        if (right == NULL) {
+            particles->free(here);
+            particles->free(left);
+            return;
+        }
 
         here->setAmplitude(m_amplitude);
         here->setDispersionAngle(m_dispersionAngle);
@@ -198,8 +210,8 @@ void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *part
         right->setPosition(m_dispersionOrigin + dir * dist);
         right->setVelocity(dir * m_velocity.getMagnitude());
 
-        liveParticles->append(here);
-        liveParticles->append(left);
-        liveParticles->append(right);
+        liveParticles->insert(here);
+        liveParticles->insert(left);
+        liveParticles->insert(right);
     }
 }

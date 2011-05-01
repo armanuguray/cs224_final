@@ -10,106 +10,83 @@ Pool::~Pool()
 
 bool Pool::hasLive() const
 {
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-        if (it.next()->isAlive())
-            return true;
-    return false;
+    return liveCount() > 0;
 }
 
 bool Pool::hasDead() const
 {
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-        if (!it.next()->isAlive())
-            return true;
-    return false;
+    return deadCount() > 0;
 }
 
 int Pool::capacity() const
 {
-    return m_data.count();
+    return liveCount() + deadCount();
 }
 
 int Pool::liveCount() const
 {
-    int c = 0;
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-        if (it.next()->isAlive())
-            ++c;
-    return c;
+    return m_allocated.size();
 }
 
 int Pool::deadCount() const
 {
-    int c = 0;
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-        if (!it.next()->isAlive())
-            ++c;
-    return c;
+    return m_unallocated.size();
 }
 
 void Pool::add(Poolable *p)
 {
-    m_data.append(p);
+    m_unallocated.insert(p);
 }
 
 void Pool::remove(bool removeLive)
 {
-    Poolable *live = 0, *dead = 0;
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-    {
-        Poolable *p = it.next();
-        if (p->isAlive())
-        {
-            live = p;
-        }
-        else
-        {
-            dead = p;
-            break;
-        }
+    if (!m_unallocated.empty()) {
+        Poolable *toRemove = *m_unallocated.end();
+        m_allocated.remove(toRemove);
+        delete toRemove;
+        return;
     }
 
-    if (dead)
-    {
-        m_data.removeAll(dead);
-        delete dead;
-    }
-    else if (removeLive)
-    {
-        m_data.removeAll(live);
-        delete live;
+    // every object is allocated; we must remove an allocated one!
+    if (removeLive) {
+        Poolable *toRemove = *m_allocated.end();
+        m_allocated.remove(toRemove);
+        delete toRemove;
+        return;
     }
 }
 
 void Pool::clear()
 {
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-        delete it.next();
-    m_data.clear();
+    foreach (Poolable *poolable, m_allocated) {
+        poolable->free();
+        delete poolable;
+    }
+
+    foreach (Poolable *poolable, m_unallocated) {
+        poolable->free();
+        delete poolable;
+    }
+
+    m_allocated.clear();
+    m_unallocated.clear();
 }
 
 Poolable *Pool::alloc()
 {
-    Poolable *free = 0;
-    QLinkedListIterator<Poolable*> it(m_data);
-    while (it.hasNext())
-    {
-        Poolable *p = it.next();
-        if (!p->isAlive())
-        {
-            free = p;
-            break;
-        }
+    if (m_unallocated.size() == 0) {
+        return NULL;
     }
 
-    if (free)
-        free->alloc();
+    Poolable *toAlloc = *m_unallocated.begin();
+    m_unallocated.remove(toAlloc);
+    m_allocated.insert(toAlloc);
+    toAlloc->alloc();
+    return toAlloc;
+}
 
-    return free;
+void Pool::free(Poolable *poolable) {
+    poolable->free();
+    m_allocated.remove(poolable);
+    m_unallocated.insert(poolable);
 }

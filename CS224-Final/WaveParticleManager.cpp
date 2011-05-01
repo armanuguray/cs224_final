@@ -20,7 +20,7 @@ void WaveParticleManager::update(float time_elapsed)
 {
     float dt = time_elapsed / 1000.f;   // ms -> s
 
-    QLinkedListIterator<WaveParticle *> it(m_liveParticles);
+    QSetIterator<WaveParticle *> it(m_liveParticles);
     while (it.hasNext())
     {
         WaveParticle *p = (WaveParticle *) it.next();
@@ -39,17 +39,16 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
         float theta = 2 * M_PI * i / numParticles;
 
         WaveParticle *p = (WaveParticle*) m_particleStore.alloc();
+        if (p == NULL) return;
+
         p->spawn(amplitude, radius, origin, dispersionAngle, theta);
-        m_liveParticles.append(p);
+        m_liveParticles.insert(p);
     }
 }
 
 void WaveParticleManager::drawParticles(GLUquadric *quadric)
 {
-    // tala: is this a scale factor?
-    float TEST_AMPLITUDE = 7.5f;
-
-    QLinkedListIterator<WaveParticle*> it(m_liveParticles);
+    QSetIterator<WaveParticle*> it(m_liveParticles);
     while (it.hasNext())
     {
         WaveParticle *p = (WaveParticle*)it.next();
@@ -59,11 +58,16 @@ void WaveParticleManager::drawParticles(GLUquadric *quadric)
         glPushMatrix();
         glTranslatef(p->position().x, 0.f, p->position().y);
 
-        float lerp = .5f + .5f * (p->amplitude() / TEST_AMPLITUDE);
-        glColor3f(lerp, 0.f, 1.f - lerp);
+        float scaledAmp = p->amplitude() / 20;
+        float rlerp = .2f + (scaledAmp) * .2f;
+        float glerp = .4f + (scaledAmp) * .4f;
+        float blerp = .6f + (scaledAmp);
+        glColor3f(rlerp, glerp, blerp);
 
-        gluSphere(quadric, 0.2, 3, 3);
+        gluSphere(quadric, p->radius() / 10.f, 3, 3);
 
         glPopMatrix();
     }
+
+    //logln(m_particleStore.deadCount() << ", " << m_particleStore.liveCount() << ", " << m_particleStore.capacity());
 }

@@ -29,7 +29,8 @@ SOURCES += main.cpp \
     waveparticles/WaveParticle.cpp \
     SkyRenderer.cpp \
     convenience/GLFileLoader.cpp \
-    WaveParticleManager.cpp
+    WaveParticleManager.cpp \
+    rigidbody/RigidBody.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -49,9 +50,13 @@ HEADERS  += MainWindow.h \
     SkyRenderer.h \
     waveparticles/WaveConstants.h \
     convenience/GLFileLoader.h \
-    WaveParticleManager.h
+    WaveParticleManager.h \
+    rigidbody/RigidBody.h
 
 FORMS    += MainWindow.ui
+
+QMAKE_CXXFLAGS_DEBUG += -pg
+QMAKE_LFLAGS_DEBUG += -pg
 
 INCLUDEPATH += math camera waveparticles pool convenience
 DEPENDPATH += math camera waveparticles pool convenience
