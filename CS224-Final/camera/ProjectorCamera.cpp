@@ -20,7 +20,7 @@ void lerp(Vector2 v0, Vector2 v1, REAL x, REAL &y)
     y = v0.y + ((x - v0.x) * v1.y - (x - v0.x) * v0.y)/(v1.x - v0.x);
 }
 
-bool ProjectorCamera::intersectSegmentPlane(Vector4 v1, Vector4 v2, REAL y, Vector4 &intersect)
+bool ProjectorCamera::intersectSegmentPlane(const Vector4 &v1, const Vector4 &v2, REAL y, Vector4 &intersect)
 {
     Vector4 dir = (v2 - v1).getNormalized();
     REAL dist = dir.getMagnitude();

@@ -128,7 +128,7 @@ void WaveParticle::setDispersionAngle(REAL r)
     m_dispersionAngle = r;
 }
 
-void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *particles, REAL dt)
+void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, REAL dt)
 {
     // Move
     m_position += m_velocity * dt;
@@ -139,7 +139,7 @@ void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *part
     // Die if the amplitude is too low
     if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE)
     {
-        liveParticles->removeAll(this);
+        liveParticles->remove(this);
         free();
     }
 
@@ -198,8 +198,8 @@ void WaveParticle::update(QLinkedList<WaveParticle *> *liveParticles, Pool *part
         right->setPosition(m_dispersionOrigin + dir * dist);
         right->setVelocity(dir * m_velocity.getMagnitude());
 
-        liveParticles->append(here);
-        liveParticles->append(left);
-        liveParticles->append(right);
+        liveParticles->insert(here);
+        liveParticles->insert(left);
+        liveParticles->insert(right);
     }
 }

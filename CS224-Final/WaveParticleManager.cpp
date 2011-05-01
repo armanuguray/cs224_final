@@ -20,7 +20,7 @@ void WaveParticleManager::update(float time_elapsed)
 {
     float dt = time_elapsed / 1000.f;   // ms -> s
 
-    QLinkedListIterator<WaveParticle *> it(m_liveParticles);
+    QSetIterator<WaveParticle *> it(m_liveParticles);
     while (it.hasNext())
     {
         WaveParticle *p = (WaveParticle *) it.next();
@@ -40,13 +40,13 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
 
         WaveParticle *p = (WaveParticle*) m_particleStore.alloc();
         p->spawn(amplitude, radius, origin, dispersionAngle, theta);
-        m_liveParticles.append(p);
+        m_liveParticles.insert(p);
     }
 }
 
 void WaveParticleManager::drawParticles(GLUquadric *quadric)
 {
-    QLinkedListIterator<WaveParticle*> it(m_liveParticles);
+    QSetIterator<WaveParticle*> it(m_liveParticles);
     while (it.hasNext())
     {
         WaveParticle *p = (WaveParticle*)it.next();
