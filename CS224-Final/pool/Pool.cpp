@@ -1,7 +1,12 @@
 
 #include "Pool.h"
 
-Pool::Pool() {}
+#include <btBulletCollisionCommon.h>
+
+Pool::Pool()
+{
+    btBroadphaseInterface* broadphase = new btDbvtBroadphase();
+}
 
 Pool::~Pool()
 {

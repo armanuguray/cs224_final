@@ -58,10 +58,15 @@ FORMS    += MainWindow.ui
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg
 
-INCLUDEPATH += math camera waveparticles pool convenience
+INCLUDEPATH += math camera waveparticles pool convenience ../bullet/include/bullet
 DEPENDPATH += math camera waveparticles pool convenience
 
-unix:LIBS += -L/usr/local/lib -lm
+unix:LIBS += -L/usr/local/lib -lm -L$$_PRO_FILE_PWD_/../bullet/lib \
+-lBulletMultiThreaded \
+-lBulletSoftBody \
+-lBulletDynamics \
+-lBulletCollision \
+-lLinearMath
 win32:LIBS += c:/mylibs/math.lib
 
 OTHER_FILES +=
