@@ -61,7 +61,15 @@ QMAKE_LFLAGS_DEBUG += -pg
 INCLUDEPATH += math camera waveparticles pool convenience ../bullet/include/bullet
 DEPENDPATH += math camera waveparticles pool convenience
 
-unix:LIBS += -L/usr/local/lib -lm -L$$_PRO_FILE_PWD_/../bullet/lib \
+unix:!mac {
+    LIBS += -L$$_PRO_FILE_PWD_/../bullet/lib
+}
+
+mac {
+    LIBS += -L$$_PRO_FILE_PWD_/../bullet-mac/lib
+}
+
+unix:LIBS += -L/usr/local/lib -lm \
 -lBulletMultiThreaded \
 -lBulletSoftBody \
 -lBulletDynamics \

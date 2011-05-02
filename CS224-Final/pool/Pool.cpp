@@ -1,4 +1,3 @@
-
 #include "Pool.h"
 
 #include <btBulletCollisionCommon.h>
