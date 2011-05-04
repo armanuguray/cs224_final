@@ -2,6 +2,8 @@
 varying vec3 n;
 varying vec3 view;
 
+varying vec3 test;
+
 uniform float wp_max_amplitude;
 uniform float heightmap_resolution;
 
@@ -18,8 +20,6 @@ uniform vec3 htl;
 uniform vec3 htr;
 uniform vec3 hbl;
 uniform vec3 hbr;
-
-varying vec3 test;
 
 void main()
 {
