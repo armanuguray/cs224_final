@@ -32,7 +32,7 @@ void main()
     vec2 lookup = vec2((world.x - htl.x) / (htr.x - htl.x),
                        (world.z - htr.z) / (hbr.z - htr.z));
 
-    float delta = 1.0 / (heightmap_resolution * .0625);
+    float delta = 1.0 / (heightmap_resolution);
     float dx = (htr.x - htl.x) * delta;
     float dz = (htr.z - hbr.z) * delta;
     float y0 = wp_max_amplitude * texture2D(texture, lookup).r;

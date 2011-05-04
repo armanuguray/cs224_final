@@ -2,7 +2,7 @@
 #define WAVECONSTANTS_H
 
 // The speed of each wave particle, in world coordinates per second
-#define WAVE_SPEED 50
+#define WAVE_SPEED 30
 
 // The minimum amplitude of each particle, in world coordinates (distance from projection grid plane).
 // When a particle's amplitude is less than WAVE_MIN_AMPLITUDE, it dies
