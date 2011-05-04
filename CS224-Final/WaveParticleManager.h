@@ -21,6 +21,8 @@ public:
      */
     void drawParticles(GLUquadric *quadric);
 
+    QSet<WaveParticle *>& liveParticles() { return m_liveParticles; }
+
 private:
     Pool m_particleStore;
     QSet<WaveParticle *> m_liveParticles;

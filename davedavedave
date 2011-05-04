@@ -1,27 +1,42 @@
 X Nix the current particle demo
 X For now, swap the Fresnel shader with a simple lambertian diffuse
   shader (to make looking at particles easier)
-- Render wave particles to texture
+X Render wave particles to texture
 	X Set up a framebuffer object
 	X Choose the bounds of the heightmap relative to the world
 	X Create a texture with format R32, or something else with 1
 	  channel and pretty good precision
 	X Attach this texture to the FBO
-	- Write a fragment shader that
-		- Maps the texcoords of a quad to world-space 
+	X Write a fragment shader that
+		X Maps the texcoords of a quad to world-space 
  		  heightmap coordinates
-		- Uses waveparticles.pdf Eq. 7 to render each particle 
+		X Uses waveparticles.pdf Eq. 7 to render each particle 
 		  to the height map
 	X Set additive blending mode
 	X Draw a screen aligned quad using the above shader
-- Fragment shader to blit the heightmap to the screen for testing
-- Fragment shader to just render the heightmap onto the projected grid
+X Fragment shader to blit the heightmap to the screen for testing
+X Fragment shader to just render the heightmap onto the projected grid
   (the heightmap's a texture anyways) for testing
+- Rewrite the heightmap shader to draw points and do two convolutions
 - Vertex shader to perturb Y coords according to paper
 - Vertex shader to perturn X/Z coords according to paper
+- Normal perturbation (look up any bump mapping tut)
+- Put the Fresnel shader back in
+- :D :D :D
+- Back to the lambertian shader
 - Wave fronts
 - Put the Fresnel shader back in
 
 
 - May need to change settings::grid_resolution
+
+- Optimization: put all the particles in a glGenBuffer and use 
+  attributes. Avoids lots of shader binding/unbding when rendering
+  wave particles
+
+
+- TODO
+
+	- Fix normals
+	- Negative amplitudes don't work as expected
 

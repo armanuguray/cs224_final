@@ -109,9 +109,7 @@ void DrawEngine::createFbos()
 
 void DrawEngine::debugDrawHeightmap()
 {
-    int r = WAVE_HEIGHTMAP_RESOLUTION,
-        w = WAVE_HEIGHTMAP_WIDTH,
-        h = WAVE_HEIGHTMAP_HEIGHT;
+    int r = WAVE_HEIGHTMAP_RESOLUTION;
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -189,19 +187,27 @@ void DrawEngine::drawFrame(float time_elapsed)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f,flip ? 1.0f : 0.0f);
-    glVertex2f(0.0f, 0.0f);
+    foreach (WaveParticle *particle, m_waveParticles.liveParticles())
+    {
+        m_shaderprograms["heightmap"]->setUniformValue("wp_pos", QVector2D(particle->position().x, particle->position().y));
+        m_shaderprograms["heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude());
+        m_shaderprograms["heightmap"]->setUniformValue("wp_radius", (GLfloat)particle->radius());
+        m_shaderprograms["heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
 
-    glTexCoord2f(1.0f,flip ? 1.0f : 0.0f);
-    glVertex2f(1.0f, 0.0f);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f,flip ? 1.0f : 0.0f);
+        glVertex2f(0.0f, 0.0f);
 
-    glTexCoord2f(1.0f,flip ? 0.0f : 1.0f);
-    glVertex2f(1.0f, 1.0f);
+        glTexCoord2f(1.0f,flip ? 1.0f : 0.0f);
+        glVertex2f(1.0f, 0.0f);
 
-    glTexCoord2f(0.0f,flip ? 0.0f : 1.0f);
-    glVertex2f(0.0f, 1.0f);
-    glEnd();
+        glTexCoord2f(1.0f,flip ? 0.0f : 1.0f);
+        glVertex2f(1.0f, 1.0f);
+
+        glTexCoord2f(0.0f,flip ? 0.0f : 1.0f);
+        glVertex2f(0.0f, 1.0f);
+        glEnd();
+    }
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -217,35 +223,45 @@ void DrawEngine::drawFrame(float time_elapsed)
 
     glViewport(0, 0, m_projectorcamera->getWidth(), m_projectorcamera->getHeight());
 
+    m_waveParticles.update(time_elapsed);
 //    debugDrawHeightmap();
 //    return;
 
     // render the world
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    if (glGetError() != GL_NO_ERROR) logln("Error");
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR)
+        logln(gluErrorString(err));
 
     // render sky
     m_skyrenderer->renderSkyBox(m_projectorcamera);
 
     // render water
-//    m_shaderprograms["fresnel"]->bind();
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
-//    m_shaderprograms["fresnel"]->setUniformValue("cube", 0);
-
     m_shaderprograms["wavetest"]->bind();
-    m_shaderprograms["wavetest"]->setUniformValue("tl", QVector3D(-w, 0, -h));
-    m_shaderprograms["wavetest"]->setUniformValue("tr", QVector3D( w, 0, -h));
-    m_shaderprograms["wavetest"]->setUniformValue("bl", QVector3D(-w, 0,  h));
-    m_shaderprograms["wavetest"]->setUniformValue("br", QVector3D( w, 0,  h));
+    m_shaderprograms["wavetest"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    m_shaderprograms["wavetest"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
+    m_shaderprograms["wavetest"]->setUniformValue("htl", QVector3D(-w * .5, 0, -h * .5));
+    m_shaderprograms["wavetest"]->setUniformValue("htr", QVector3D( w * .5, 0, -h * .5));
+    m_shaderprograms["wavetest"]->setUniformValue("hbl", QVector3D(-w * .5, 0,  h * .5));
+    m_shaderprograms["wavetest"]->setUniformValue("hbr", QVector3D( w * .5, 0,  h * .5));
+    m_shaderprograms["wavetest"]->setUniformValue("tl", QVector3D(m_projectorcamera->ul.x / m_projectorcamera->ul.w, m_projectorcamera->ul.y / m_projectorcamera->ul.w, m_projectorcamera->ul.z / m_projectorcamera->ul.w));
+    m_shaderprograms["wavetest"]->setUniformValue("tr", QVector3D(m_projectorcamera->ur.x / m_projectorcamera->ur.w, m_projectorcamera->ur.y / m_projectorcamera->ur.w, m_projectorcamera->ur.z / m_projectorcamera->ur.w));
+    m_shaderprograms["wavetest"]->setUniformValue("bl", QVector3D(m_projectorcamera->ll.x / m_projectorcamera->ll.w, m_projectorcamera->ll.y / m_projectorcamera->ll.w, m_projectorcamera->ll.z / m_projectorcamera->ll.w));
+    m_shaderprograms["wavetest"]->setUniformValue("br", QVector3D(m_projectorcamera->lr.x / m_projectorcamera->lr.w, m_projectorcamera->lr.y / m_projectorcamera->lr.w, m_projectorcamera->lr.z / m_projectorcamera->lr.w));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
     m_shaderprograms["wavetest"]->setUniformValue("texture", 0);
-    m_projectorcamera->renderProjectedGrid();
-    m_shaderprograms["wavetest"]->release();
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
+    m_shaderprograms["wavetest"]->setUniformValue("cube", 1);
 
-    //    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-//    m_shaderprograms["fresnel"]->release();
+    m_projectorcamera->renderProjectedGrid();
+
+    m_shaderprograms["wavetest"]->release();
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN
@@ -274,7 +290,7 @@ void DrawEngine::drawFrame(float time_elapsed)
     if (frame % 60 == 0)
     {
         int PARTICLES_PER_RING = 20;
-        float TEST_AMPLITUDE = 15.f;
+        float TEST_AMPLITUDE = 1.f;
 
         m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 10.f);
     }
@@ -303,7 +319,7 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 10.f);
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -1.f, 10.f);
     }
 }
 

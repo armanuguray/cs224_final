@@ -24,6 +24,7 @@ private:
 
     virtual void loadMatrices();
 
+    float *depths;          // Linearized depths, for texcoords
     Vector4 *left_points;
     Vector4 *right_points;
 
