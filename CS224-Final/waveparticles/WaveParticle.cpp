@@ -146,7 +146,8 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
     // Subdivide if necessary
     REAL maxDist = m_radius * WAVE_SUBDIVISION_COEFFICIENT;
     Vector2 fromCenter = m_position - m_dispersionOrigin;
-    REAL dist = fromCenter.getMagnitude() * m_dispersionAngle;
+//    REAL dist = fromCenter.getMagnitude() * m_dispersionAngle;
+    REAL dist = 2.0 * fromCenter.getMagnitude() * tan(m_dispersionAngle * .5);
     if (dist > maxDist)
     {
         // Find the current angle from the origin
@@ -157,33 +158,21 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         float thetaRight = theta + .5 * m_dispersionAngle;
 
         // Compute the new amplitude and dispersion angle
-        m_dispersionAngle *= .5;
+        m_dispersionAngle *= .3333;
         // TODO: how to compute the new amplitude? Just using a simple average for now, but I'm not sure that's right
-        m_amplitude *= .25;
+        m_amplitude *= .3333;
 
         // Create the particles; do nothing if we're out of particles
-        WaveParticle *here = (WaveParticle *)particles->alloc();
-        if (here == NULL) return;
-
         WaveParticle *left = (WaveParticle *)particles->alloc();
         if (left == NULL) {
-            particles->free(here);
             return;
         }
 
         WaveParticle *right = (WaveParticle *)particles->alloc();
         if (right == NULL) {
-            particles->free(here);
             particles->free(left);
             return;
         }
-
-        here->setAmplitude(m_amplitude);
-        here->setDispersionAngle(m_dispersionAngle);
-        here->setDispersionOrigin(m_dispersionOrigin);
-        here->setRadius(m_radius);
-        here->setPosition(m_position);
-        here->setVelocity(m_velocity);
 
         left->setAmplitude(m_amplitude);
         left->setDispersionAngle(m_dispersionAngle);
@@ -210,7 +199,6 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         right->setPosition(m_dispersionOrigin + dir * dist);
         right->setVelocity(dir * m_velocity.getMagnitude());
 
-        liveParticles->insert(here);
         liveParticles->insert(left);
         liveParticles->insert(right);
     }

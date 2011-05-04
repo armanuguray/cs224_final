@@ -1,42 +1,18 @@
-X Nix the current particle demo
-X For now, swap the Fresnel shader with a simple lambertian diffuse
-  shader (to make looking at particles easier)
-X Render wave particles to texture
-	X Set up a framebuffer object
-	X Choose the bounds of the heightmap relative to the world
-	X Create a texture with format R32, or something else with 1
-	  channel and pretty good precision
-	X Attach this texture to the FBO
-	X Write a fragment shader that
-		X Maps the texcoords of a quad to world-space 
- 		  heightmap coordinates
-		X Uses waveparticles.pdf Eq. 7 to render each particle 
-		  to the height map
-	X Set additive blending mode
-	X Draw a screen aligned quad using the above shader
-X Fragment shader to blit the heightmap to the screen for testing
-X Fragment shader to just render the heightmap onto the projected grid
-  (the heightmap's a texture anyways) for testing
-- Rewrite the heightmap shader to draw points and do two convolutions
-- Vertex shader to perturb Y coords according to paper
-- Vertex shader to perturn X/Z coords according to paper
-- Normal perturbation (look up any bump mapping tut)
-- Put the Fresnel shader back in
-- :D :D :D
-- Back to the lambertian shader
-- Wave fronts
-- Put the Fresnel shader back in
-
-
-- May need to change settings::grid_resolution
-
 - Optimization: put all the particles in a glGenBuffer and use 
   attributes. Avoids lots of shader binding/unbding when rendering
-  wave particles
+  wave particles. Need per-particle attributes for enabling/disabling
+  the rendering of a particle (e.g. don't render dead particles).
+  - Actually this optimization causes the program to always draw all
+    the particles, which sucks. Forget that!
 
+So it looks like the problem with the normal is because the particles
+are individual particles, and not wavefronts. My understanding is that
+'wavefronts' are actually groups of particles that can't get more
+than (small number * radius) away from each other.
 
-- TODO
-
-	- Fix normals
-	- Negative amplitudes don't work as expected
-
+TODO
+- Rewrite what we currently have to
+	- Draw wave particles as single pixels in textures
+	- Separated convoluation filters for generating the heights
+- Look at the dissertation, investigate projected heightmap for
+  infinite ocean rendering
