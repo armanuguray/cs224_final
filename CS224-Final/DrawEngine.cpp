@@ -53,6 +53,12 @@ void DrawEngine::setupGL()
     glEnable(GL_NORMALIZE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_CUBE_MAP);
+
+    btVector3 inertia(0, 0, 0);
+
+    // TODO: the following is for testing only. Remove when done
+    btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
+    m_rigidbodysim.addRigidBody(RigidBodyTypeCube, 20, inertia, t);
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)
@@ -85,6 +91,10 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_projectorcamera->renderProjectedGrid();
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     m_shaderprograms["fresnel"]->release();
+
+    // render rigidbodies
+    m_rigidbodysim.stepSimulation(time_elapsed);
+    m_rigidbodysim.renderAll();
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN

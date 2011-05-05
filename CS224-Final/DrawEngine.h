@@ -9,6 +9,7 @@
 #include "Pool.h"
 #include "WaveParticle.h"
 #include "WaveParticleManager.h"
+#include "RigidBodySimulation.h"
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
@@ -61,6 +62,7 @@ protected:
 
     GLUquadric *m_quadric;
     WaveParticleManager m_waveParticles;
+    RigidBodySimulation m_rigidbodysim;
 };
 
 #endif // DRAWENGINE_H

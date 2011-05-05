@@ -14,5 +14,6 @@
         <file alias="posz">textures/redsky/redsky_south.jpg</file>
         <file alias="posy">textures/redsky/redsky_up.jpg</file>
         <file alias="posx">textures/redsky/redsky_west.jpg</file>
+        <file alias="crate">textures/crate-texture.jpg</file>
     </qresource>
 </RCC>

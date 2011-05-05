@@ -1,4 +1,5 @@
 #include "RigidBody.h"
+#include "RigidBodyRendering.h"
 
 RigidBody::RigidBody()
 {
@@ -40,5 +41,15 @@ void RigidBody::initialize(btScalar mass, btVector3 &inertia, const btTransform 
 void RigidBody::render()
 {
     if (m_render_function != NULL)
+    {
+        btScalar m[15];
+        btTransform t;
+        m_internal_rigidbody->getMotionState()->getWorldTransform(t);
+        t.getOpenGLMatrix(m);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glMultMatrixf(m);
         m_render_function();
+        glPopMatrix();
+    }
 }

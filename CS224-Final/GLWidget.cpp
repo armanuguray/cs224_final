@@ -7,6 +7,7 @@
 #include "Settings.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include "RigidBodyRendering.h"
 
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)

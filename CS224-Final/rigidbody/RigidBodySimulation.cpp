@@ -5,6 +5,9 @@
 
 RigidBodySimulation::RigidBodySimulation()
 {
+    // setup rigidbody rendering utilities
+    RigidBodyRendering::initialize();
+
     // setup the dynamics world
     m_broadphase = new btDbvtBroadphase();
     m_collision_configuration = new btDefaultCollisionConfiguration();
@@ -43,6 +46,9 @@ RigidBodySimulation::~RigidBodySimulation()
     delete m_dispatcher;
     delete m_collision_configuration;
     delete m_broadphase;
+
+    // cleanup rigidbody rendering resources
+    RigidBodyRendering::cleanup();
 }
 
 void RigidBodySimulation::stepSimulation(double seconds)
@@ -71,6 +77,7 @@ void RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVect
     RigidBody *rb = (RigidBody *)m_rigidbody_pool.alloc();
     rb->initialize(mass, inertia, initial_transform, cs, render_func);
     m_dynamics_world->addRigidBody(rb->getInternalRigidBody());
+    m_rigidbodies.insert(rb);
 }
 
 void RigidBodySimulation::removeRigidBody(RigidBody *body)
@@ -78,4 +85,13 @@ void RigidBodySimulation::removeRigidBody(RigidBody *body)
     m_dynamics_world->removeRigidBody(body->getInternalRigidBody());
     m_rigidbodies.erase(m_rigidbodies.find(body));
     m_rigidbody_pool.free(body);
+}
+
+void RigidBodySimulation::renderAll()
+{
+    RigidBody *rb;
+    for (std::set<RigidBody *>::iterator it = m_rigidbodies.begin(); it != m_rigidbodies.end(); ++ it) {
+        rb = (*it);
+        rb->render();
+    }
 }

@@ -63,8 +63,8 @@ FORMS    += MainWindow.ui
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg
 
-INCLUDEPATH += math camera waveparticles pool convenience ../bullet/include/bullet
-DEPENDPATH += math camera waveparticles pool convenience
+INCLUDEPATH += math camera waveparticles pool convenience rigidbody ../bullet/include/bullet
+DEPENDPATH += math camera waveparticles pool convenience rigidbody
 
 unix:!mac {
     LIBS += -L$$_PRO_FILE_PWD_/../bullet/lib

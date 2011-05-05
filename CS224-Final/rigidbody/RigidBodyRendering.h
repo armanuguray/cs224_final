@@ -10,9 +10,13 @@
 
 namespace RigidBodyRendering
 {
+    // initialize should be called to initialize rendering code (textures, lists etc)
+    void initialize();
+    void cleanup();
+
     void renderBox();
     void renderSphere();
     void renderBoat();
-}
+};
 
 #endif // RIGIDBODYRENDERING_H
