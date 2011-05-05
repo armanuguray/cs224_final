@@ -21,8 +21,6 @@ uniform vec3 hbr;
 const float SPECULAR_EXP = 24.0;
 const float SPECULAR_COEFF = 0.8;
 
-varying vec3 test;
-
 void main(void)
 {
     vec3 nNormal = normalize(n);
@@ -45,9 +43,7 @@ void main(void)
 
     gl_FragColor = mix(refractColor, reflectColor, fresnel);
     //gl_FragColor = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), fresnel);
-    //gl_FragColor = vec4(nNormal, 1.0);
-    //gl_FragColor = vec4(test, 1.0);
-    // Trippy! Also it looks like the particles are spreading too much before subdividing ...
+    //gl_FragColor = vec4(vec3(.5) + .5 * nNormal, 1.0);
 
     // specular lighting
     float specular = max(dot(reflected, vec3(0.0, 1.0, 0.0)), 0.0);

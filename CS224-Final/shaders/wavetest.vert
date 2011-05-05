@@ -2,8 +2,6 @@
 varying vec3 n;
 varying vec3 view;
 
-varying vec3 test;
-
 uniform float wp_max_amplitude;
 uniform float heightmap_resolution;
 
@@ -21,6 +19,20 @@ uniform vec3 htr;
 uniform vec3 hbl;
 uniform vec3 hbr;
 
+float readHeight(vec2 lookup)
+{
+    vec2 factors = texture2D(texture, lookup).rg;
+    return wp_max_amplitude * (factors.x - factors.y);
+}
+
+vec3 gradientNormal(float dx, float dz, float wdx, float wdz, float y0, vec2 lookup)
+{
+    float ydx = readHeight(lookup + vec2(dx, 0.0));
+    float ydz = readHeight(lookup + vec2(0.0, dz));
+
+    return cross(vec3(wdx, ydx - y0, 0.0), vec3(0.0, ydz - y0, wdz));
+}
+
 void main()
 {
     gl_TexCoord[0].xy = gl_MultiTexCoord0.xy;
@@ -35,14 +47,8 @@ void main()
     float delta = 1.0 / (heightmap_resolution);
     float dx = (htr.x - htl.x) * delta;
     float dz = (htr.z - hbr.z) * delta;
-    float y0 = wp_max_amplitude * texture2D(texture, lookup).r;
-    y0 -= wp_max_amplitude * texture2D(texture, lookup).g;
-    float y1 = wp_max_amplitude * texture2D(texture, lookup + vec2(delta, 0.0)).r;
-    y1 -= wp_max_amplitude * texture2D(texture, lookup + vec2(delta, 0.0)).g;
-    float y2 = wp_max_amplitude * texture2D(texture, lookup + vec2(0.0, delta)).r;
-    y2 -= wp_max_amplitude * texture2D(texture, lookup + vec2(0.0, delta)).g;
 
-    test = vec3(y0, y1, y2);
+    float y0 = readHeight(lookup);
 
     vec4 vert = gl_Vertex;
     n = gl_Normal;
@@ -50,9 +56,14 @@ void main()
     if (lookup.x >= 0.0 && lookup.x <= 1.0 && lookup.y >= 0.0 && lookup.y <= 1.0)
     {
         vert.y += y0;
-        n = cross(normalize(vec3(dx, y1 - y0, 0.0)), normalize(vec3(0.0, y2 - y0, dz)));
+        n = normalize(
+                        gradientNormal(-delta, -delta, -dx, -dz, y0, lookup) +
+                       -gradientNormal( delta, -delta,  dx, -dz, y0, lookup) +
+                       -gradientNormal(-delta,  delta, -dx,  dz, y0, lookup) +
+                        gradientNormal( delta,  delta,  dx,  dz, y0, lookup)
+                     );
     }
 
-    view = normalize(gl_Vertex.xyz - (gl_ModelViewMatrixInverse * vec4(0, 0, 0, 1)).xyz);
     gl_Position = gl_ModelViewProjectionMatrix * vert;
+    view = normalize(vert.xyz - (gl_ModelViewMatrixInverse * vec4(0, 0, 0, 1)).xyz);
 }
