@@ -30,7 +30,9 @@ SOURCES += main.cpp \
     SkyRenderer.cpp \
     convenience/GLFileLoader.cpp \
     WaveParticleManager.cpp \
-    rigidbody/RigidBody.cpp
+    rigidbody/RigidBody.cpp \
+    rigidbody/RigidBodySimulation.cpp \
+    rigidbody/RigidBodyRendering.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -51,7 +53,10 @@ HEADERS  += MainWindow.h \
     waveparticles/WaveConstants.h \
     convenience/GLFileLoader.h \
     WaveParticleManager.h \
-    rigidbody/RigidBody.h
+    rigidbody/RigidBody.h \
+    rigidbody/RigidBodySimulation.h \
+    rigidbody/RigidBodyConstants.h \
+    rigidbody/RigidBodyRendering.h
 
 FORMS    += MainWindow.ui
 
