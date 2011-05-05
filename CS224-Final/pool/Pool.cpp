@@ -4,7 +4,6 @@
 
 Pool::Pool()
 {
-    btBroadphaseInterface* broadphase = new btDbvtBroadphase();
 }
 
 Pool::~Pool()

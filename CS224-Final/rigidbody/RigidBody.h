@@ -27,12 +27,16 @@ public:
     // returns the internal Bullet Physics rigid body representation
     inline btRigidBody *getInternalRigidBody() const { return m_internal_rigidbody; }
 
+    /* force computations */
+    void applyBuoyancy();
+    void applyLiftAndDrag();
+protected:
     // computes the volume of this rigidbody that is currently submerged under water.
     // this computation is done on the GPU and requires a pre-rendered heightmap
     // TODO: the initial render from this function can be used for the silhouette pyramid
     btScalar computeSubmergedVolume(GLuint heightmap);
 
-protected:
+    // Poolable methods
     void onAlloc();
     void onFree();
 

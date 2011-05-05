@@ -53,3 +53,21 @@ void RigidBody::render()
         glPopMatrix();
     }
 }
+
+void RigidBody::applyBuoyancy()
+{
+    // TODO: compute the submerged volume and use it to apply buoyancy
+}
+
+void RigidBody::applyLiftAndDrag()
+{
+    // TODO:
+}
+
+btScalar RigidBody::computeSubmergedVolume(GLuint heightmap)
+{
+    return 0;
+    // TODO: bind framebuffer
+    // TODO: render body using orthogonal projection in object space using a special shader (need a mapping to heightmap coordinates)
+    // TODO: loop through the buoyancy image to compute total volume and the buoyancy force, which will be used to apply the buoyancy force
+}
