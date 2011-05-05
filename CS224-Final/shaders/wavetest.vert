@@ -45,11 +45,14 @@ void main()
     test = vec3(y0, y1, y2);
 
     vec4 vert = gl_Vertex;
+    n = gl_Normal;
 
     if (lookup.x >= 0.0 && lookup.x <= 1.0 && lookup.y >= 0.0 && lookup.y <= 1.0)
+    {
         vert.y += y0;
+        n = cross(normalize(vec3(dx, y1 - y0, 0.0)), normalize(vec3(0.0, y2 - y0, dz)));
+    }
 
-    n = cross(normalize(vec3(dx, y1 - y0, 0.0)), normalize(vec3(0.0, y2 - y0, dz)));
     view = normalize(gl_Vertex.xyz - (gl_ModelViewMatrixInverse * vec4(0, 0, 0, 1)).xyz);
     gl_Position = gl_ModelViewProjectionMatrix * vert;
 }

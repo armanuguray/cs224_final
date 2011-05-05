@@ -22,8 +22,8 @@ void main()
 
     float dist = length(world.xz - wp_pos.xy);
 
-    float amp = 0;
-    if (dist < wp_radius)
+    float amp = 0.0;
+    if (wp_radius - dist > -1e-1)
         amp = ((.5 * wp_amplitude) * cos(PI * dist / wp_radius));
 
     // Awesometastic hacks for additive blending!

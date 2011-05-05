@@ -254,6 +254,10 @@ void DrawEngine::drawFrame(float time_elapsed)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
     m_shaderprograms["wavetest"]->setUniformValue("texture", 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyrenderer->getTexture());
     m_shaderprograms["wavetest"]->setUniformValue("cube", 1);
@@ -322,7 +326,7 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.5f, 7.f);
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.25f, 7.f);
     }
 }
 
