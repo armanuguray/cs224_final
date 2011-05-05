@@ -29,7 +29,8 @@ public:
     // renders all rigid bodies that are currently alive
     void renderAll();
 
-    void addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform);
+    // adds a rigidbody to the simulation and returns a pointer to it
+    RigidBody* addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform);
     void removeRigidBody(RigidBody *body);
 
 private:

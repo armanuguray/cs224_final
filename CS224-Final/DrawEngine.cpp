@@ -6,6 +6,7 @@
 
 #include "PoolIterator.h"
 #include "WaveConstants.h"
+#include "RigidBody.h"
 
 #define SHOW_ORIGIN
 #define PARTICLE_TEST
@@ -58,7 +59,9 @@ void DrawEngine::setupGL()
 
     // TODO: the following is for testing only. Remove when done
     btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
-    m_rigidbodysim.addRigidBody(RigidBodyTypeCube, 20, inertia, t);
+    RigidBody *rb = m_rigidbodysim.addRigidBody(RigidBodyTypeCube, 20, inertia, t);
+    // add torque for fun
+    rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(10,10,0));
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)

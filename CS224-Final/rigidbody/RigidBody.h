@@ -8,6 +8,7 @@
 
 #include "Poolable.h"
 #include <btBulletDynamicsCommon.h>
+#include "OpenGLInclude.h"
 
 class RigidBody : public Poolable
 {
@@ -15,11 +16,21 @@ public:
     RigidBody();
     ~RigidBody();
 
+    /* Initialization and rendering */
+
+    // initializes this rigid body
+    void initialize(btScalar mass, btVector3 &inertia, const btTransform &initial_transform, btCollisionShape *collision_shape, void (*render_function)());
+    // renders the rigidbody using the rendering function provided upon initialization
     void render();
 
-    void initialize(btScalar mass, btVector3 &inertia, const btTransform &initial_transform, btCollisionShape *collision_shape, void (*render_function)());
-
+    /* accessors */
+    // returns the internal Bullet Physics rigid body representation
     inline btRigidBody *getInternalRigidBody() const { return m_internal_rigidbody; }
+
+    // computes the volume of this rigidbody that is currently submerged under water.
+    // this computation is done on the GPU and requires a pre-rendered heightmap
+    // TODO: the initial render from this function can be used for the silhouette pyramid
+    btScalar computeSubmergedVolume(GLuint heightmap);
 
 protected:
     void onAlloc();

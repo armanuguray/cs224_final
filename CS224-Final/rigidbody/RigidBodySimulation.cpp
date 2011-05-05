@@ -56,7 +56,7 @@ void RigidBodySimulation::stepSimulation(double seconds)
     m_dynamics_world->stepSimulation(seconds);
 }
 
-void RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform)
+RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform)
 {
     void (*render_func)();
     btCollisionShape *cs;
@@ -78,6 +78,7 @@ void RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVect
     rb->initialize(mass, inertia, initial_transform, cs, render_func);
     m_dynamics_world->addRigidBody(rb->getInternalRigidBody());
     m_rigidbodies.insert(rb);
+    return rb;
 }
 
 void RigidBodySimulation::removeRigidBody(RigidBody *body)
