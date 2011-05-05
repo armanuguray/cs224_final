@@ -96,6 +96,28 @@ void DrawEngine::loadShaders(const QGLContext *context)
         exit(1);
     }
     m_shaderprograms["heightmap"] = shader;
+
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/vblur-heightmap.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/vblur-heightmap.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["vblur-heightmap"] = shader;
+
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/hblur-heightmap.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/hblur-heightmap.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["hblur-heightmap"] = shader;
 }
 
 void DrawEngine::createFbos()
@@ -111,6 +133,9 @@ void DrawEngine::debugDrawHeightmap()
 {
     int r = WAVE_HEIGHTMAP_RESOLUTION;
 
+    glViewport(0, 0, r, r);
+
+    glColor3f(1.f, 1.f, 1.f);
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -149,86 +174,89 @@ void DrawEngine::debugDrawHeightmap()
     glPopMatrix();
 }
 
+float clamp01(float x)
+{
+    if (x < 0.f) return 0.f;
+    if (x > 1.f) return 1.f;
+    return x;
+//    return x < 0.f ? 0.f : x > 1.f ? 1.f : x;
+}
+
 void DrawEngine::drawFrame(float time_elapsed)
 {
-    // draw heightmap
+    // draw
     int r = WAVE_HEIGHTMAP_RESOLUTION,
         w = WAVE_HEIGHTMAP_WIDTH,
         h = WAVE_HEIGHTMAP_HEIGHT;
 
+    // Plot the particles (convolve later)
     m_fbos["heightmap"]->bind();
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-
+    gluOrtho2D(0.f, 1.f, 1.f, 0.f);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
     glViewport(0, 0, r, r);
-    gluOrtho2D(0, 1.f, 1.f, 0.f);
-
-    m_shaderprograms["heightmap"]->bind();
-    m_shaderprograms["heightmap"]->setUniformValue("tl", QVector3D(-w * .5f, 0, -h * .5f));
-    m_shaderprograms["heightmap"]->setUniformValue("tr", QVector3D( w * .5f, 0, -h * .5f));
-    m_shaderprograms["heightmap"]->setUniformValue("bl", QVector3D(-w * .5f, 0,  h * .5f));
-    m_shaderprograms["heightmap"]->setUniformValue("br", QVector3D( w * .5f, 0,  h * .5f));
-
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
+    glDisable(GL_TEXTURE_2D);
 
     bool flip = true;
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    float plotwidth = 1.f / WAVE_HEIGHTMAP_RESOLUTION;
 
     foreach (WaveParticle *particle, m_waveParticles.liveParticles())
     {
-        m_shaderprograms["heightmap"]->setUniformValue("wp_pos", QVector2D(particle->position().x, particle->position().y));
-        m_shaderprograms["heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude());
-        m_shaderprograms["heightmap"]->setUniformValue("wp_radius", (GLfloat)particle->radius());
-        m_shaderprograms["heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+        glColor3f(clamp01(particle->amplitude() / (float)WAVE_MAX_AMPLITUDE), clamp01(-particle->amplitude() / (float)WAVE_MAX_AMPLITUDE), 0.f);
+        glPushMatrix();
+
+        float x = (particle->position().x + .5 * w) / WAVE_HEIGHTMAP_WIDTH;
+        float y = 1.f - (particle->position().y + .5 * h) / WAVE_HEIGHTMAP_HEIGHT;
+        glTranslatef(x, y, 0.f);
 
         glBegin(GL_QUADS);
         glTexCoord2f(0.0f,flip ? 1.0f : 0.0f);
         glVertex2f(0.0f, 0.0f);
 
         glTexCoord2f(1.0f,flip ? 1.0f : 0.0f);
-        glVertex2f(1.0f, 0.0f);
+        glVertex2f(plotwidth, 0.0f);
 
         glTexCoord2f(1.0f,flip ? 0.0f : 1.0f);
-        glVertex2f(1.0f, 1.0f);
+        glVertex2f(plotwidth, plotwidth);
 
         glTexCoord2f(0.0f,flip ? 0.0f : 1.0f);
-        glVertex2f(0.0f, 1.0f);
+        glVertex2f(0.0f, plotwidth);
         glEnd();
+
+        glPopMatrix();
     }
+
+    m_fbos["heightmap"]->release();
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    m_shaderprograms["heightmap"]->release();
-
+    glEnable(GL_TEXTURE_2D);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    m_fbos["heightmap"]->release();
 
-    glViewport(0, 0, m_projectorcamera->getWidth(), m_projectorcamera->getHeight());
+    // TODO: hblur into a new FBO
+    // TODO: vblur into the heightmap FBO
 
     m_waveParticles.update(time_elapsed);
 //    debugDrawHeightmap();
 //    return;
+
+    glViewport(0, 0, m_projectorcamera->getWidth(), m_projectorcamera->getHeight());
 
     // render the world
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

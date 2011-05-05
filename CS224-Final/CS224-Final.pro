@@ -69,7 +69,11 @@ OTHER_FILES += \
     shaders/wavetest.vert \
     shaders/wavetest.frag \
     shaders/heightmap.vert \
-    shaders/heightmap.frag
+    shaders/heightmap.frag \
+    shaders/vblur-heightmap.vert \
+    shaders/vblur-heightmap.frag \
+    shaders/hblur-heightmap.vert \
+    shaders/hblur-heightmap.frag
 
 RESOURCES += \
     textures.qrc

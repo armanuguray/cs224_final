@@ -2,7 +2,7 @@
 #define WAVECONSTANTS_H
 
 // The speed of each wave particle, in world coordinates per second
-#define WAVE_SPEED 5
+#define WAVE_SPEED .5
 
 // The minimum amplitude of each particle, in world coordinates (distance from projection grid plane).
 // When a particle's amplitude is less than WAVE_MIN_AMPLITUDE, it dies
@@ -29,6 +29,7 @@
 // Heightmap height in world space (centered at the origin)
 #define WAVE_HEIGHTMAP_HEIGHT 75
 
+// The resolution of the heightmap, in pixels
 #define WAVE_HEIGHTMAP_RESOLUTION 512
 
 #endif // WAVECONSTANTS_H
