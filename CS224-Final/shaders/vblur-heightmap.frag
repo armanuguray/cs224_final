@@ -19,8 +19,8 @@ void main()
     {
         vec3 w = weights[i];
         float r = float(i);
-        c += dot(w, 2.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(0.0, dz * r)).rgb - vec3(1.0));
-        c += dot(w, 2.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(0.0, dz * -r)).rgb - vec3(1.0));
+        c += w * (2.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(0.0, dz *  r)).rgb - vec3(1.0));
+        c += w * (2.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(0.0, dz * -r)).rgb - vec3(1.0));
     }
 
     gl_FragColor = vec4(vec3(.5) + .5 * c, 0.0);
