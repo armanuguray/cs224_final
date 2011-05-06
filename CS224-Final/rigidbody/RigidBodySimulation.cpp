@@ -38,12 +38,10 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
 RigidBodySimulation::~RigidBodySimulation()
 {
     // remove all objects from the simulation (their deletion will be handled by the pool)
-    RigidBody *rb;
-    m_rigidbodies.clear();
-    for (std::set<RigidBody *>::iterator it = m_rigidbodies.begin(); it != m_rigidbodies.end(); ++ it) {
-        rb = (*it);
+    foreach (RigidBody *rb, m_rigidbodies) {
         m_dynamics_world->removeRigidBody(rb->getInternalRigidBody());
     }
+
     m_rigidbody_pool.clear();
 
     // delete collision shapes
@@ -95,10 +93,8 @@ void RigidBodySimulation::stepSimulation()
 {
     // apply forces on all objects
     btScalar volume;
-    RigidBody *rb;
-    for (std::set<RigidBody *>::iterator it = m_rigidbodies.begin(); it != m_rigidbodies.end(); ++it)
+    foreach (RigidBody *rb, m_rigidbodies)
     {
-        rb = *it;
         if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight()) > 0)) { // TODO: pass the heightmap instead of 0
             // TODO: apply buoyancy force if the object is floating (not applying unnecessary forces makes bullet run faster)
         }
@@ -143,9 +139,7 @@ void RigidBodySimulation::removeRigidBody(RigidBody *body)
 
 void RigidBodySimulation::renderAll()
 {
-    RigidBody *rb;
-    for (std::set<RigidBody *>::iterator it = m_rigidbodies.begin(); it != m_rigidbodies.end(); ++it) {
-        rb = (*it);
+    foreach (RigidBody *rb, m_rigidbodies) {
         rb->render();
     }
 }

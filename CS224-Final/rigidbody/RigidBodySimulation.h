@@ -7,7 +7,7 @@
 
 #include "Pool.h"
 #include <btBulletDynamicsCommon.h>
-#include <set>
+#include <QSet>
 #include <map>
 #include <string>
 
@@ -44,7 +44,7 @@ private:
     // pool of rigidbodies allocated on startup
     Pool m_rigidbody_pool;
     // set of current bodies that are in the simulation
-    std::set<RigidBody *> m_rigidbodies;
+    QSet<RigidBody *> m_rigidbodies;
 
     /* dynamic world simulation */
     btBroadphaseInterface *m_broadphase;
