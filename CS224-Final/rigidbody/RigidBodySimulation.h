@@ -61,14 +61,14 @@ private:
     /* Shader programs used in force calculations */
     void load_shaders(const QGLContext *context);
     std::map<std::string, QGLShaderProgram*> m_shaders;
+
+    /* frame buffers */
     void load_fbos();
     QGLFramebufferObject *m_lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
+    GLfloat *m_lowres; // low resolution buffer to store the contents of m_lowresbuffer on the CPU
 
     // the current camera
     Camera *m_camera;
-
-    /* utility buffers */
-    GLfloat *m_lowres; // low resolution buffer to store the buoyancy image after its pulled from the GPU
 };
 
 #endif // RIGIDBODYSIMULATION_H

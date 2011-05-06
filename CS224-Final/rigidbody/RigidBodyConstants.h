@@ -7,12 +7,14 @@
 const unsigned RIGIDBODY_MAX_COUNT = 1000;
 // resolution of the buoyancy image. this should be relatively low for performance reasons
 const unsigned BUOYANCY_IMAGE_RESOLUTION = 16;
+// impulse scale factor shooting boxes
+const float IMPULSE_SCALE = 10000.0f;
 // water density (kg/m^2)
 const float WATER_DENSITY = 1000.0f;
-// clip height
+// clip height (unused)
 const float MAX_ABS_HEIGHT = 1000.0f;
 // mass of a crate (kg)
-const float BOX_MASS = 600.f;
+const float BOX_MASS = 800.f;
 // gravitational acceleration (m/s^2)
 const float GRAVITY = 10.f;
 // length of one side of an object bounding box

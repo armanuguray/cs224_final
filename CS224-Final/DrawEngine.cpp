@@ -1,5 +1,3 @@
-#define IMPULSE_SCALE 10000
-
 #include "DrawEngine.h"
 #include "ProjectorCamera.h"
 #include <QGLShaderProgram>
