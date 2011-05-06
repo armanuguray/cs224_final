@@ -33,6 +33,9 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
     // load shaders
     load_shaders(context);
     load_fbos();
+
+    // allocate utility buffers
+    m_lowres = new GLfloat[BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION];
 }
 
 RigidBodySimulation::~RigidBodySimulation()
@@ -64,6 +67,8 @@ RigidBodySimulation::~RigidBodySimulation()
 
     // delete framebuffers
     delete m_lowresbuffer;
+
+    delete[] m_lowres;
 }
 
 void RigidBodySimulation::load_fbos()
@@ -95,7 +100,7 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     btScalar volume;
     foreach (RigidBody *rb, m_rigidbodies)
     {
-        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight()) > 0)) { // TODO: pass the heightmap instead of 0
+        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres) > 0)) { // TODO: pass the heightmap instead of 0
             // TODO: apply buoyancy force if the object is floating (not applying unnecessary forces makes bullet run faster)
         }
         // TODO: apply lift and drag

@@ -10,6 +10,7 @@
 #include <QSet>
 #include <map>
 #include <string>
+#include "OpenGLInclude.h"
 
 class QGLContext;
 class QGLFramebufferObject;
@@ -65,6 +66,9 @@ private:
 
     // the current camera
     Camera *m_camera;
+
+    /* utility buffers */
+    GLfloat *m_lowres; // low resolution buffer to store the buoyancy image after its pulled from the GPU
 };
 
 #endif // RIGIDBODYSIMULATION_H

@@ -41,7 +41,7 @@ public:
      * @param Current width of the screen, used to restore matrix state after computations
      * @param Current height of the screen, used to restore matrix state after computations
      */
-    btScalar computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height);
+    btScalar computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer);
 
     /* force computations */
     void applyBuoyancy(btScalar buoyancy, const btVector3 &volume_centroid);

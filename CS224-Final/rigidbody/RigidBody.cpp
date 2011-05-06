@@ -69,7 +69,7 @@ void RigidBody::applyLiftAndDrag()
     // TODO:
 }
 
-btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height)
+btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer)
 {
     // TODO: bind framebuffer
     // TODO: render body using orthogonal projection in object space using a special shader (need a mapping to heightmap coordinates)
