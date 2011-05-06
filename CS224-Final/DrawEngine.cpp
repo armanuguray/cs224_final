@@ -138,19 +138,7 @@ void DrawEngine::drawFrame(float time_elapsed)
 #endif
 }
 
-void DrawEngine::mouse_down(Vector2 &mouse_pos, MouseButton button)
-{
-    switch (button)
-    {
-    case MouseButtonCTRLLeft:
-        interact(mouse_pos);
-        break;
-    default:
-        break;
-    }
-}
-
-void DrawEngine::interact(Vector2 &mouse_pos)
+void DrawEngine::createWave(const Vector2 &mouse_pos)
 {
     Vector4 rayDir, intersect;
 
@@ -162,24 +150,17 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     }
 }
 
-void DrawEngine::mouse_scroll(REAL delta)
+void DrawEngine::turn(const Vector2 &delta)
 {
-    m_projectorcamera->lookVectorTranslate(delta);
+    m_projectorcamera->lookVectorRotate(delta);
 }
 
-void DrawEngine::mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button)
+void DrawEngine::pan(const Vector2 &delta)
 {
-    switch (button)
-    {
-    case MouseButtonLeft:
-        m_projectorcamera->lookVectorRotate(delta);
-        break;
-    case MouseButtonRight:
-        m_projectorcamera->filmPlaneTranslate(delta*1.5);
-        break;
-    case MouseButtonCTRLLeft:
-        this->mouse_down(new_mouse_pos, button);
-    default:
-        break;
-    }
+    m_projectorcamera->filmPlaneTranslate(delta);
+}
+
+void DrawEngine::zoom(REAL delta)
+{
+    m_projectorcamera->lookVectorTranslate(delta);
 }

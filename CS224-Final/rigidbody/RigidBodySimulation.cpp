@@ -109,6 +109,7 @@ RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, 
 {
     void (*render_func)();
     btCollisionShape *cs;
+
     switch (type)
     {
     case RigidBodyTypeSphere:
