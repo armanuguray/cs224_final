@@ -62,7 +62,7 @@ protected:
 
     GLUquadric *m_quadric;
     WaveParticleManager m_waveParticles;
-    RigidBodySimulation m_rigidbodysim;
+    RigidBodySimulation *m_rigidbodysim;
 };
 
 #endif // DRAWENGINE_H

@@ -13,16 +13,19 @@
 
 DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
 {
-    setupGL();
-    loadShaders(context);
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
+    m_rigidbodysim = new RigidBodySimulation(context, m_projectorcamera);
+
+    setupGL();
+    loadShaders(context);
 
     m_quadric = gluNewQuadric();
 }
 
 DrawEngine::~DrawEngine()
 {
+    delete m_rigidbodysim;
     delete m_skyrenderer;
     delete m_projectorcamera;
     for (std::map<string, QGLShaderProgram *>::iterator it = m_shaderprograms.begin(); it != m_shaderprograms.end(); ++it) {
@@ -59,7 +62,7 @@ void DrawEngine::setupGL()
 
     // TODO: the following is for testing only. Remove when done
     btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
-    RigidBody *rb = m_rigidbodysim.addRigidBody(RigidBodyTypeCube, 20, inertia, t);
+    RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, 20, inertia, t);
     // add torque for fun
     rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(10,10,0));
 }
@@ -96,8 +99,8 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_shaderprograms["fresnel"]->release();
 
     // render rigidbodies
-    m_rigidbodysim.stepSimulation(time_elapsed);
-    m_rigidbodysim.renderAll();
+    m_rigidbodysim->stepSimulation();
+    m_rigidbodysim->renderAll();
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN

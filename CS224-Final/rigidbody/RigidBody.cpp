@@ -1,6 +1,9 @@
 #include "RigidBody.h"
 #include "RigidBodyRendering.h"
 
+#include <QGLFramebufferObject>
+#include <QGLShaderProgram>
+
 RigidBody::RigidBody()
 {
     m_internal_rigidbody = NULL;
@@ -54,7 +57,7 @@ void RigidBody::render()
     }
 }
 
-void RigidBody::applyBuoyancy()
+void RigidBody::applyBuoyancy(btScalar buoyancy, const btVector3 &volume_centroid)
 {
     // TODO: compute the submerged volume and use it to apply buoyancy
 }
@@ -64,10 +67,62 @@ void RigidBody::applyLiftAndDrag()
     // TODO:
 }
 
-btScalar RigidBody::computeSubmergedVolume(GLuint heightmap)
+btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height)
 {
-    return 0;
     // TODO: bind framebuffer
     // TODO: render body using orthogonal projection in object space using a special shader (need a mapping to heightmap coordinates)
     // TODO: loop through the buoyancy image to compute total volume and the buoyancy force, which will be used to apply the buoyancy force
+    // enable texture 2d
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
+
+    framebuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT);
+    btScalar m[15];
+    btTransform t;
+    m_internal_rigidbody->getMotionState()->getWorldTransform(t);
+    t.getOpenGLMatrix(m);
+    glViewport(0,0,512,512);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    // all objects have unit volume for simplicity
+    glOrtho(-1.75,1.75,-1.75,1.75,0,3.5);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    btVector3 &translate = t.getOrigin();
+    gluLookAt(translate.x(), translate.y() + 1.75, translate.z(),
+              translate.x(), translate.y(), translate.z(),
+              0, 0, 1);
+    glMultMatrixf(m);
+    m_render_function();
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    // restore viewport
+    glViewport(0,0,screen_width,screen_height);
+    framebuffer->release();
+
+    // enable again, as the rendering function will disable it
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
+
+    // THIS IS FOR TESTING
+    glBindTexture(GL_TEXTURE_2D, framebuffer->texture());
+    glBegin(GL_QUADS);
+    {
+        glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, 1.0, -0.5);
+        glTexCoord2f(1.0, 0.0); glVertex3f(-0.5, 1.0, 0.5);
+        glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 1.0, 0.5);
+        glTexCoord2f(0.0, 1.0); glVertex3f(0.5, 1.0, -0.5);
+    }
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // reenable cubemap
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_CUBE_MAP);
+    return 0;
 }

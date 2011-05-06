@@ -8,8 +8,14 @@
 #include "Pool.h"
 #include <btBulletDynamicsCommon.h>
 #include <set>
+#include <map>
+#include <string>
 
+class QGLContext;
+class QGLFramebufferObject;
+class QGLShaderProgram;
 class RigidBody;
+class Camera;
 
 typedef enum {
     RigidBodyTypeSphere,
@@ -20,11 +26,11 @@ typedef enum {
 class RigidBodySimulation
 {
 public:
-    RigidBodySimulation();
+    RigidBodySimulation(const QGLContext *context, Camera *camera);
     ~RigidBodySimulation();
 
-    // steps the simulation by the given time
-    void stepSimulation(double seconds);
+    // steps the simulation
+    void stepSimulation();
 
     // renders all rigid bodies that are currently alive
     void renderAll();
@@ -50,6 +56,15 @@ private:
     /* Collision shapes that are shared among resources */
     btCollisionShape *m_sphere_collisionshape;
     btCollisionShape *m_cube_collisionshape;
+
+    /* Shader programs used in force calculations */
+    void load_shaders(const QGLContext *context);
+    std::map<std::string, QGLShaderProgram*> m_shaders;
+    void load_fbos();
+    QGLFramebufferObject *m_lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
+
+    // the current camera
+    Camera *m_camera;
 };
 
 #endif // RIGIDBODYSIMULATION_H

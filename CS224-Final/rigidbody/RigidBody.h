@@ -10,6 +10,9 @@
 #include <btBulletDynamicsCommon.h>
 #include "OpenGLInclude.h"
 
+class QGLShaderProgram;
+class QGLFramebufferObject;
+
 class RigidBody : public Poolable
 {
 public:
@@ -27,14 +30,23 @@ public:
     // returns the internal Bullet Physics rigid body representation
     inline btRigidBody *getInternalRigidBody() const { return m_internal_rigidbody; }
 
+    /**
+     * computes the volume of this rigidbody that is currently submerged under water.
+     * this computation is done on the GPU and requires a pre-rendered heightmap
+     * TODO: the initial render from this function can be used for the silhouette pyramid
+     *
+     * @param Heightmap to look up the water depth from
+     * @param Framebuffer object to render the buoyancy image to. The resolution should be
+     *        in accordance with the value in RigidBodyConstants
+     * @param Current width of the screen, used to restore matrix state after computations
+     * @param Current height of the screen, used to restore matrix state after computations
+     */
+    btScalar computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height);
+
     /* force computations */
-    void applyBuoyancy();
+    void applyBuoyancy(btScalar buoyancy, const btVector3 &volume_centroid);
     void applyLiftAndDrag();
 protected:
-    // computes the volume of this rigidbody that is currently submerged under water.
-    // this computation is done on the GPU and requires a pre-rendered heightmap
-    // TODO: the initial render from this function can be used for the silhouette pyramid
-    btScalar computeSubmergedVolume(GLuint heightmap);
 
     // Poolable methods
     void onAlloc();
@@ -42,6 +54,7 @@ protected:
 
     // function that will be called for rendering.
     void (*m_render_function)();
+
 
     /* internal bullet representation for the rigid body simulation. Has to be reinitialized whenever a body is spawned. */
     btRigidBody *m_internal_rigidbody;

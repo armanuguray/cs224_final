@@ -15,5 +15,7 @@
         <file alias="posy">textures/redsky/redsky_up.jpg</file>
         <file alias="posx">textures/redsky/redsky_west.jpg</file>
         <file alias="crate">textures/crate-texture.jpg</file>
+        <file alias="buoyancy.frag">shaders/buoyancy.frag</file>
+        <file alias="buoyancy.vert">shaders/buoyancy.vert</file>
     </qresource>
 </RCC>
