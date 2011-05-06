@@ -141,17 +141,44 @@ void DrawEngine::computeWeights()
     int middle = WAVE_CONVOLUTION_KERNEL_RADIUS;
     for (int i = 0; i <= WAVE_CONVOLUTION_KERNEL_RADIUS; ++i)
     {
-        // X
         float dist = (float)i * WAVE_HEIGHTMAP_WIDTH / WAVE_HEIGHTMAP_RESOLUTION;
-        float value = .5f * (cos(M_PI * dist / WAVE_PARTICLE_RADIUS) + 1) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
-        _verticalWeightsX[middle + i] = value;
-        _verticalWeightsX[middle - i] = value;
+        float piDistOverR = M_PI * dist / WAVE_PARTICLE_RADIUS;
+        float value = 0.f;
+        float boxFactor = dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f;
 
-        // Z
+        // Xx
+        value = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+        _xWeightsX[middle + i] = value;
+        _xWeightsX[middle - i] = value;
+
+        // Yx
+        value = .5f * (cos(piDistOverR) + 1) * boxFactor;
+        _yWeightsX[middle + i] = value;
+        _yWeightsX[middle - i] = value;
+
+        // Zx
+        value = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+        _zWeightsX[middle + i] = value;
+        _zWeightsX[middle - i] = value;
+
         dist = (float)i * WAVE_HEIGHTMAP_HEIGHT / WAVE_HEIGHTMAP_RESOLUTION;
-        value = .5f * (cos(M_PI * dist / WAVE_PARTICLE_RADIUS) + 1) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
-        _verticalWeightsZ[middle + i] = value;
-        _verticalWeightsZ[middle - i] = value;
+        piDistOverR = M_PI * dist / WAVE_PARTICLE_RADIUS;
+        boxFactor = dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f;
+
+        // Xz
+        value = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+        _xWeightsZ[middle + i] = value;
+        _xWeightsZ[middle - i] = value;
+
+        // Yz
+        value = .5f * (cos(piDistOverR) + 1) * boxFactor;
+        _yWeightsZ[middle + i] = value;
+        _yWeightsZ[middle - i] = value;
+
+        // Zz
+        value = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+        _zWeightsZ[middle + i] = value;
+        _zWeightsZ[middle - i] = value;
     }
 }
 
@@ -272,7 +299,9 @@ void DrawEngine::drawFrame(float time_elapsed)
     glColor3f(1.f, 1.f, 1.f);
 
     m_shaderprograms["hblur-heightmap"]->bind();
-    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("weights", (GLfloat*)_verticalWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("xweights", (GLfloat*)_xWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("yweights", (GLfloat*)_yWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("zweights", (GLfloat*)_zWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
     glActiveTexture(GL_TEXTURE0);
@@ -304,7 +333,9 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_fbos["heightmap"]->bind();
     glClear(GL_COLOR_BUFFER_BIT);
     m_shaderprograms["vblur-heightmap"]->bind();
-    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("weights", (GLfloat*)_verticalWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("xweights", (GLfloat*)_xWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("yweights", (GLfloat*)_yWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("zweights", (GLfloat*)_zWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
     glBindTexture(GL_TEXTURE_2D, m_fbos["convolve"]->texture());
@@ -443,7 +474,7 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.125f, 7.f);
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.125f);
     }
 }
 

@@ -30,7 +30,7 @@ void WaveParticleManager::update(float time_elapsed)
     }
 }
 
-void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &origin, float amplitude, float radius)
+void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &origin, float amplitude)
 {
     float dispersionAngle = 2 * M_PI / numParticles;
 
@@ -41,7 +41,7 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
         WaveParticle *p = (WaveParticle*) m_particleStore.alloc();
         if (p == NULL) return;
 
-        p->spawn(amplitude, radius, origin, dispersionAngle, theta);
+        p->spawn(amplitude, origin, dispersionAngle, theta);
         m_liveParticles.insert(p);
     }
 }
@@ -64,7 +64,7 @@ void WaveParticleManager::drawParticles(GLUquadric *quadric)
         float blerp = .6f + (scaledAmp);
         glColor3f(rlerp, glerp, blerp);
 
-        gluSphere(quadric, p->radius() / 10.f, 3, 3);
+        gluSphere(quadric, WAVE_PARTICLE_RADIUS / 10.f, 3, 3);
 
         glPopMatrix();
     }

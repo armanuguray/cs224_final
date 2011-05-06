@@ -5,27 +5,24 @@
 WaveParticle::WaveParticle() : m_position(0, 0),
                                m_velocity(0, 0),
                                m_amplitude(0),
-                               m_radius(0),
                                m_dispersionOrigin(0, 0),
                                m_dispersionAngle(0)
 {
 }
 
-WaveParticle::WaveParticle(const Vector2 &position, const Vector2 &velocity, REAL amplitude, REAL radius, const Vector2 &dispersionOrigin, REAL dispersionAngle)
+WaveParticle::WaveParticle(const Vector2 &position, const Vector2 &velocity, REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle)
                          : m_position(position),
                            m_velocity(velocity),
                            m_amplitude(amplitude),
-                           m_radius(radius),
                            m_dispersionOrigin(dispersionOrigin),
                            m_dispersionAngle(dispersionAngle)
 {
 }
 
-WaveParticle::WaveParticle(REAL amplitude, REAL radius, const Vector2 &dispersionOrigin, REAL dispersionAngle, REAL movementAngle)
+WaveParticle::WaveParticle(REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle, REAL movementAngle)
                          : m_position(dispersionOrigin),
                            m_velocity(WAVE_SPEED * cos(movementAngle), WAVE_SPEED * sin(movementAngle)),
                            m_amplitude(amplitude),
-                           m_radius(radius),
                            m_dispersionOrigin(dispersionOrigin),
                            m_dispersionAngle(dispersionAngle)
 {
@@ -48,22 +45,20 @@ void WaveParticle::onFree()
 {
 }
 
-void WaveParticle::spawn(const Vector2 &position, const Vector2 &velocity, REAL amplitude, REAL radius, const Vector2 &dispersionOrigin, REAL dispersionAngle)
+void WaveParticle::spawn(const Vector2 &position, const Vector2 &velocity, REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle)
 {
     m_position = position;
     m_velocity = velocity;
     m_amplitude = amplitude;
-    m_radius = radius;
     m_dispersionOrigin = dispersionOrigin;
     m_dispersionAngle = dispersionAngle;
 }
 
-void WaveParticle::spawn(REAL amplitude, REAL radius, const Vector2 &dispersionOrigin, REAL dispersionAngle, REAL movementAngle)
+void WaveParticle::spawn(REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle, REAL movementAngle)
 {
     m_position = dispersionOrigin;
     m_velocity = Vector2(WAVE_SPEED * cos(movementAngle), WAVE_SPEED * sin(movementAngle));
     m_amplitude = amplitude;
-    m_radius = radius;
     m_dispersionOrigin = dispersionOrigin;
     m_dispersionAngle = dispersionAngle;
 }
@@ -96,16 +91,6 @@ REAL WaveParticle::amplitude()
 void WaveParticle::setAmplitude(REAL a)
 {
     m_amplitude = a;
-}
-
-REAL WaveParticle::radius()
-{
-    return m_radius;
-}
-
-void WaveParticle::setRadius(REAL r)
-{
-    m_radius = r;
 }
 
 Vector2& WaveParticle::dispersionOrigin()
@@ -144,7 +129,7 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
     }
 
     // Subdivide if necessary
-    REAL maxDist = m_radius * WAVE_SUBDIVISION_COEFFICIENT;
+    REAL maxDist = WAVE_PARTICLE_RADIUS * WAVE_SUBDIVISION_COEFFICIENT;
     Vector2 fromCenter = m_position - m_dispersionOrigin;
 //    REAL dist = fromCenter.getMagnitude() * m_dispersionAngle;
     REAL dist = 2.0 * fromCenter.getMagnitude() * tan(m_dispersionAngle * .5);
@@ -176,7 +161,6 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         left->setAmplitude(m_amplitude);
         left->setDispersionAngle(m_dispersionAngle);
         left->setDispersionOrigin(m_dispersionOrigin);
-        left->setRadius(m_radius);
 
         Vector2 off = m_position - m_dispersionOrigin;
         float dist = off.getMagnitude();
@@ -189,7 +173,6 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         right->setAmplitude(m_amplitude);
         right->setDispersionAngle(m_dispersionAngle);
         right->setDispersionOrigin(m_dispersionOrigin);
-        right->setRadius(m_radius);
 
         theta = thetaRight;
         dir.x = cos(theta);

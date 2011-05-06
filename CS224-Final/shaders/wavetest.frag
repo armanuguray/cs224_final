@@ -42,8 +42,6 @@ void main(void)
     fresnel = max(0.0, min(fresnel, 1.0));
 
     gl_FragColor = mix(refractColor, reflectColor, fresnel);
-    //gl_FragColor = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), fresnel);
-    //gl_FragColor = vec4(vec3(.5) + .5 * nNormal, 1.0);
 
     // specular lighting
     float specular = max(dot(reflected, vec3(0.0, 1.0, 0.0)), 0.0);

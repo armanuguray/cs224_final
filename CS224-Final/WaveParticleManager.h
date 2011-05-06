@@ -14,7 +14,7 @@ public:
 
     void update(float time_elapsed);
 
-    void generateUniformWave(int numParticles, const Vector2 &origin, float amplitude, float radius);
+    void generateUniformWave(int numParticles, const Vector2 &origin, float amplitude);
 
     /**
      * Renders all particles onto the screen as spheres. This is pretty much just for testing.

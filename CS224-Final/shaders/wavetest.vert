@@ -21,16 +21,15 @@ uniform vec3 hbr;
 
 float readHeight(vec2 lookup)
 {
-    vec2 factors = texture2D(texture, lookup).rg;
-    return wp_max_amplitude * (factors.x - factors.y);
+    return wp_max_amplitude * (2.0 * texture2D(texture, lookup).y - 1.0);
 }
 
-vec3 gradientNormal(float dx, float dz, float wdx, float wdz, float y0, vec2 lookup)
+vec3 gradientNormal(float hdx, float hdz, float wdx, float wdz, vec3 v0, vec3 world, vec2 lookup)
 {
-    float ydx = readHeight(lookup + vec2(dx, 0.0));
-    float ydz = readHeight(lookup + vec2(0.0, dz));
+    vec3 vdx = world + vec3(wdx, 0.0, 0.0) + wp_max_amplitude * (2.0 * texture2D(texture, lookup + vec2(hdx, 0.0)).xyz - vec3(1.0));
+    vec3 vdz = world + vec3(0.0, 0.0, wdz) + wp_max_amplitude * (2.0 * texture2D(texture, lookup + vec2(0.0, hdz)).xyz - vec3(1.0));
 
-    return cross(vec3(wdx, ydx - y0, 0.0), vec3(0.0, ydz - y0, wdz));
+    return cross(vdx - v0, vdz - v0);
 }
 
 void main()
@@ -48,19 +47,19 @@ void main()
     float dx = (htr.x - htl.x) * delta;
     float dz = (htr.z - hbr.z) * delta;
 
-    float y0 = readHeight(lookup);
+    vec3 dvert = wp_max_amplitude * (2.0 * texture2D(texture, lookup).xyz - vec3(1.0));
 
     vec4 vert = gl_Vertex;
     n = gl_Normal;
 
     if (lookup.x >= 0.0 && lookup.x <= 1.0 && lookup.y >= 0.0 && lookup.y <= 1.0)
     {
-        vert.y += y0;
+        vert.xyz += dvert;
         n = normalize(
-                        gradientNormal(-delta, -delta, -dx, -dz, y0, lookup) +
-                       -gradientNormal( delta, -delta,  dx, -dz, y0, lookup) +
-                       -gradientNormal(-delta,  delta, -dx,  dz, y0, lookup) +
-                        gradientNormal( delta,  delta,  dx,  dz, y0, lookup)
+                        gradientNormal(-delta, -delta, -dx, -dz, vert.xyz, world, lookup) +
+                       -gradientNormal( delta, -delta,  dx, -dz, vert.xyz, world, lookup) +
+                       -gradientNormal(-delta,  delta, -dx,  dz, vert.xyz, world, lookup) +
+                        gradientNormal( delta,  delta,  dx,  dz, vert.xyz, world, lookup)
                      );
     }
 
