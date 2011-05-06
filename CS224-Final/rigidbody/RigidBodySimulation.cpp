@@ -144,7 +144,7 @@ void RigidBodySimulation::removeRigidBody(RigidBody *body)
 void RigidBodySimulation::renderAll()
 {
     RigidBody *rb;
-    for (std::set<RigidBody *>::iterator it = m_rigidbodies.begin(); it != m_rigidbodies.end(); ++ it) {
+    for (std::set<RigidBody *>::iterator it = m_rigidbodies.begin(); it != m_rigidbodies.end(); ++it) {
         rb = (*it);
         rb->render();
     }
