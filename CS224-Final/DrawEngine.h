@@ -72,12 +72,8 @@ protected:
     GLUquadric *m_quadric;
     WaveParticleManager m_waveParticles;
 
-    float _xWeightsX[WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _xWeightsZ[WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _yWeightsX[WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _yWeightsZ[WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _zWeightsX[WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _zWeightsZ[WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float _weightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float _weightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
 };
 
 #endif // DRAWENGINE_H
