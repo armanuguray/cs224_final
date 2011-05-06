@@ -12,18 +12,15 @@ uniform sampler2D texture;
 void main()
 {
     gl_FragColor = vec4(0.0);
-    float weightsum = 0.0;
     float dx = 1.0 / heightmap_resolution;
 
     int middle = RADIUS;
     for (int i = 0; i <= RADIUS; ++i)
     {
         float weight = weights[middle + i];
-        weightsum += weight;
         gl_FragColor += weight * texture2D(texture, gl_TexCoord[0].xy + vec2(dx * float(i), 0.0));
 
         weight = weights[middle - i];
-        weightsum += weight;
         gl_FragColor += weight * texture2D(texture, gl_TexCoord[0].xy + vec2(dx * float(-i), 0.0));
     }
 }

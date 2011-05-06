@@ -2,18 +2,18 @@
 #define WAVECONSTANTS_H
 
 // The speed of each wave particle, in world coordinates per second
-#define WAVE_SPEED 5
+#define WAVE_SPEED 10
 
 // The minimum amplitude of each particle, in world coordinates (distance from projection grid plane).
 // When a particle's amplitude is less than WAVE_MIN_AMPLITUDE, it dies
-#define WAVE_MIN_AMPLITUDE .005
+#define WAVE_MIN_AMPLITUDE .0025
 
 // The maximum amplitude any particle may have. For rendering purposes.
 #define WAVE_MAX_AMPLITUDE 5
 
 // The rate at which the amplitude of a particle decreases, in world coordinates (distance
 // from the projection grid plane) per second
-#define WAVE_AMPLITUDE_FALLOFF 0.0025f
+#define WAVE_AMPLITUDE_FALLOFF 0.00f
 
 // When multiplied by the radius of a wave particle, yields the maximum distance (in world coordinates)
 // between neighboring wave particles (i.e. before subidivision occurs)
@@ -30,7 +30,7 @@
 #define WAVE_HEIGHTMAP_HEIGHT 512
 
 // The resolution of the heightmap, in pixels
-#define WAVE_HEIGHTMAP_RESOLUTION 2048
+#define WAVE_HEIGHTMAP_RESOLUTION 1024
 
 // The 'area of effect' of a single wave particle
 #define WAVE_PARTICLE_RADIUS 7.f
@@ -39,7 +39,7 @@
 // ceil(worldspace_to_heightmapspace(particle radius)) =
 //
 // ceil(WAVE_HEIGHTMAP_RESOLUTION / WAVE_HEIGHTMAP_WIDTH * WAVE_PARTICLE_RADIUS) =
-// ceil(512 / 256 * 7) =
+// ceil(1024 / 512 * 7) =
 // 14
 #define WAVE_CONVOLUTION_KERNEL_RADIUS 14
 

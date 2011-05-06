@@ -19,11 +19,9 @@ void main()
     for (int i = 0; i <= RADIUS; ++i)
     {
         float weight = weights[middle + i];
-        weightsum += weight;
         gl_FragColor += weight * texture2D(texture, gl_TexCoord[0].xy + vec2(0.0, dz * float(i)));
 
         weight = weights[middle - i];
-        weightsum += weight;
         gl_FragColor += weight * texture2D(texture, gl_TexCoord[0].xy + vec2(0.0, dz * float(-i)));
     }
 }

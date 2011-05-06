@@ -128,12 +128,12 @@ void DrawEngine::createFbos()
                                                    WAVE_HEIGHTMAP_RESOLUTION,
                                                    QGLFramebufferObject::NoAttachment,
                                                    GL_TEXTURE_2D,
-                                                   GL_RGBA);
+                                                   GL_RGB32F_ARB);
     m_fbos["convolve"] = new QGLFramebufferObject(WAVE_HEIGHTMAP_RESOLUTION,
                                                   WAVE_HEIGHTMAP_RESOLUTION,
                                                   QGLFramebufferObject::NoAttachment,
                                                   GL_TEXTURE_2D,
-                                                  GL_RGBA);
+                                                  GL_RGB32F_ARB);
 }
 
 void DrawEngine::computeWeights()
@@ -143,13 +143,13 @@ void DrawEngine::computeWeights()
     {
         // X
         float dist = (float)i * WAVE_HEIGHTMAP_WIDTH / WAVE_HEIGHTMAP_RESOLUTION;
-        float value = .5f * cos(M_PI * dist / WAVE_PARTICLE_RADIUS) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
+        float value = .5f * (cos(M_PI * dist / WAVE_PARTICLE_RADIUS) + 1) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
         _verticalWeightsX[middle + i] = value;
         _verticalWeightsX[middle - i] = value;
 
         // Z
         dist = (float)i * WAVE_HEIGHTMAP_HEIGHT / WAVE_HEIGHTMAP_RESOLUTION;
-        value = .5f * cos(M_PI * dist / WAVE_PARTICLE_RADIUS) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
+        value = .5f * (cos(M_PI * dist / WAVE_PARTICLE_RADIUS) + 1) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
         _verticalWeightsZ[middle + i] = value;
         _verticalWeightsZ[middle - i] = value;
     }
@@ -443,7 +443,7 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.25f, 7.f);
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.125f, 7.f);
     }
 }
 
