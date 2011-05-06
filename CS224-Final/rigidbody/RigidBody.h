@@ -37,7 +37,8 @@ public:
      *
      * @param Heightmap to look up the water depth from
      * @param Framebuffer object to render the buoyancy image to. The resolution should be
-     *        in accordance with the value in RigidBodyConstants
+     *        in accordance with the value in RigidBodyConstants, and the internal format is
+     *        assumed to be floating point
      * @param Current width of the screen, used to restore matrix state after computations
      * @param Current height of the screen, used to restore matrix state after computations
      */

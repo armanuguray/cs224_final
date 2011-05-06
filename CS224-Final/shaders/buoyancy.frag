@@ -17,10 +17,10 @@ void main(void)
         // if normal is pointing up
         if (n.y > 0.0) 
             // negative
-            gl_FragColor = vec4(0.0, -pos.y/max_abs_height, 0.0, 1.0);
+            gl_FragColor = vec4(pos.y, 0.0, 0.0, 1.0);
         // if normal is pointing down
         else if (n.y < 0.0) 
             // positive
-            gl_FragColor = vec4(-pos.y/max_abs_height, 0.0, 0.0, 1.0);
+            gl_FragColor = vec4(-pos.y, 0.0, 0.0, 1.0);
     } else gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

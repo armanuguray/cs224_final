@@ -82,7 +82,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     framebuffer->bind();
     buoyancy_shader->bind();
 
-    // render the object directly from above
+    // render the object as seen from a top orthogonal view
     glClear(GL_COLOR_BUFFER_BIT);
     btScalar m[16];
     btTransform t;
@@ -124,34 +124,21 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     buoyancy_shader->release();
     framebuffer->release();
 
-    // enable again, as the rendering function will disable it
-    glDisable(GL_TEXTURE_CUBE_MAP);
-    glEnable(GL_TEXTURE_2D);
-
     glDisable(GL_BLEND);
     glEnable(GL_CULL_FACE);
 
-    // THIS IS FOR TESTING
-    glBindTexture(GL_TEXTURE_2D, framebuffer->texture());
-    glBegin(GL_QUADS);
-    {
-        glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, 1.0, -0.5);
-        glTexCoord2f(1.0, 0.0); glVertex3f(-0.5, 1.0, 0.5);
-        glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 1.0, 0.5);
-        glTexCoord2f(0.0, 1.0); glVertex3f(0.5, 1.0, -0.5);
-    }
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // reenable cubemap
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_CUBE_MAP);
+    /*
+     * (these get disabled by m_render_function())
+     * glDisable(GL_TEXTURE_2D);
+     * glEnable(GL_TEXTURE_CUBE_MAP);
+     */
 
     // compute volume
     btScalar volume = 0;
     for (unsigned i = 0; i < BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION*3; i += 3)
-        volume += ((btScalar)lowres_buffer[i]-(btScalar)lowres_buffer[i+1])*MAX_ABS_HEIGHT;
+        volume += lowres_buffer[i];
     btScalar unit_area = 3.5/(btScalar)BUOYANCY_IMAGE_RESOLUTION; unit_area *= unit_area;
     volume *= unit_area;
+    logln(volume);
     return volume;
 }

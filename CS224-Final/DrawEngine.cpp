@@ -11,7 +11,7 @@
 #include "WaveConstants.h"
 #include "RigidBody.h"
 
-#define SHOW_ORIGIN
+//#define SHOW_ORIGIN
 #define PARTICLE_TEST
 
 DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
