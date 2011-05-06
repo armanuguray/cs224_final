@@ -16,6 +16,8 @@ DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
     setupGL();
     loadShaders(context);
     createFbos();
+    computeWeights();
+
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
 
@@ -126,7 +128,31 @@ void DrawEngine::createFbos()
                                                    WAVE_HEIGHTMAP_RESOLUTION,
                                                    QGLFramebufferObject::NoAttachment,
                                                    GL_TEXTURE_2D,
-                                                   GL_RGB16);
+                                                   GL_RGBA);
+    m_fbos["convolve"] = new QGLFramebufferObject(WAVE_HEIGHTMAP_RESOLUTION,
+                                                  WAVE_HEIGHTMAP_RESOLUTION,
+                                                  QGLFramebufferObject::NoAttachment,
+                                                  GL_TEXTURE_2D,
+                                                  GL_RGBA);
+}
+
+void DrawEngine::computeWeights()
+{
+    int middle = WAVE_CONVOLUTION_KERNEL_RADIUS;
+    for (int i = 0; i <= WAVE_CONVOLUTION_KERNEL_RADIUS; ++i)
+    {
+        // X
+        float dist = (float)i * WAVE_HEIGHTMAP_WIDTH / WAVE_HEIGHTMAP_RESOLUTION;
+        float value = .5f * cos(M_PI * dist / WAVE_PARTICLE_RADIUS) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
+        _verticalWeightsX[middle + i] = value;
+        _verticalWeightsX[middle - i] = value;
+
+        // Z
+        dist = (float)i * WAVE_HEIGHTMAP_HEIGHT / WAVE_HEIGHTMAP_RESOLUTION;
+        value = .5f * cos(M_PI * dist / WAVE_PARTICLE_RADIUS) * (dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f);
+        _verticalWeightsZ[middle + i] = value;
+        _verticalWeightsZ[middle - i] = value;
+    }
 }
 
 void DrawEngine::debugDrawHeightmap()
@@ -153,6 +179,7 @@ void DrawEngine::debugDrawHeightmap()
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+//    glBindTexture(GL_TEXTURE_2D, m_fbos["convolve"]->texture());
 
     bool flip = false;
     glBegin(GL_QUADS);
@@ -176,10 +203,7 @@ void DrawEngine::debugDrawHeightmap()
 
 float clamp01(float x)
 {
-    if (x < 0.f) return 0.f;
-    if (x > 1.f) return 1.f;
-    return x;
-//    return x < 0.f ? 0.f : x > 1.f ? 1.f : x;
+    return x < 0.f ? 0.f : x > 1.f ? 1.f : x;
 }
 
 void DrawEngine::drawFrame(float time_elapsed)
@@ -239,6 +263,74 @@ void DrawEngine::drawFrame(float time_elapsed)
 
     m_fbos["heightmap"]->release();
 
+    // Blur horizontally
+    m_fbos["convolve"]->bind();
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.f, 1.f, 1.f);
+
+    m_shaderprograms["hblur-heightmap"]->bind();
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("weights", (GLfloat*)_verticalWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["hblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    m_shaderprograms["hblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+    m_shaderprograms["hblur-heightmap"]->setUniformValue("texture", 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, flip ? 1.0f : 0.0f);
+    glVertex2f(0.0f, 0.0f);
+
+    glTexCoord2f(1.0f, flip ? 1.0f : 0.0f);
+    glVertex2f(1.f, 0.0f);
+
+    glTexCoord2f(1.0f, flip ? 0.0f : 1.0f);
+    glVertex2f(1.f, 1.f);
+
+    glTexCoord2f(0.0f, flip ? 0.0f : 1.0f);
+    glVertex2f(0.0f, 1.f);
+    glEnd();
+
+    m_shaderprograms["hblur-heightmap"]->release();
+    m_fbos["convolve"]->release();
+
+    // Blur vertically
+    m_fbos["heightmap"]->bind();
+    glClear(GL_COLOR_BUFFER_BIT);
+    m_shaderprograms["vblur-heightmap"]->bind();
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("weights", (GLfloat*)_verticalWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 1);
+    m_shaderprograms["vblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    m_shaderprograms["vblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
+    glBindTexture(GL_TEXTURE_2D, m_fbos["convolve"]->texture());
+    m_shaderprograms["vblur-heightmap"]->setUniformValue("texture", 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, flip ? 1.0f : 0.0f);
+    glVertex2f(0.0f, 0.0f);
+
+    glTexCoord2f(1.0f, flip ? 1.0f : 0.0f);
+    glVertex2f(1.f, 0.0f);
+
+    glTexCoord2f(1.0f, flip ? 0.0f : 1.0f);
+    glVertex2f(1.f, 1.f);
+
+    glTexCoord2f(0.0f, flip ? 0.0f : 1.0f);
+    glVertex2f(0.0f, 1.f);
+    glEnd();
+
+    m_shaderprograms["vblur-heightmap"]->release();
+    m_fbos["heightmap"]->release();
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -248,9 +340,6 @@ void DrawEngine::drawFrame(float time_elapsed)
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-
-    // TODO: hblur into a new FBO
-    // TODO: vblur into the heightmap FBO
 
     m_waveParticles.update(time_elapsed);
 //    debugDrawHeightmap();
@@ -298,8 +387,8 @@ void DrawEngine::drawFrame(float time_elapsed)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN
+    // mark the origin as a point of reference
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
     glBegin(GL_QUAD_STRIP);

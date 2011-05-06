@@ -16,6 +16,8 @@
 #include <GL/glu.h>
 #endif
 
+#include "WaveConstants.h"
+
 class QGLContext;
 class QGLShaderProgram;
 class QGLFramebufferObject;
@@ -59,6 +61,8 @@ protected:
 
     void debugDrawHeightmap();
 
+    void computeWeights();
+
     SkyRenderer *m_skyrenderer; // handles the rendering of the sky, including the sun.
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
 
@@ -67,6 +71,9 @@ protected:
 
     GLUquadric *m_quadric;
     WaveParticleManager m_waveParticles;
+
+    float _verticalWeightsX[WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float _verticalWeightsZ[WAVE_CONVOLUTION_KERNEL_WIDTH];
 };
 
 #endif // DRAWENGINE_H
