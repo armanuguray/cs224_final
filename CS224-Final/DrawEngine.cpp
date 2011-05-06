@@ -99,7 +99,7 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_shaderprograms["fresnel"]->release();
 
     // render rigidbodies
-    m_rigidbodysim->stepSimulation();
+    m_rigidbodysim->stepSimulation(time_elapsed);
     m_rigidbodysim->renderAll();
 
     // mark the origin as a point of reference

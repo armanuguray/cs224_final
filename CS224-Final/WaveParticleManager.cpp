@@ -18,15 +18,13 @@ WaveParticleManager::~WaveParticleManager()
 
 void WaveParticleManager::update(float time_elapsed)
 {
-    float dt = time_elapsed / 1000.f;   // ms -> s
-
     QSetIterator<WaveParticle *> it(m_liveParticles);
     while (it.hasNext())
     {
         WaveParticle *p = (WaveParticle *) it.next();
         assert(p->isAlive());
 
-        p->update(&m_liveParticles, &m_particleStore, dt);
+        p->update(&m_liveParticles, &m_particleStore, time_elapsed);
     }
 }
 

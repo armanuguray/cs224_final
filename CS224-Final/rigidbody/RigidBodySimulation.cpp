@@ -89,7 +89,7 @@ void RigidBodySimulation::load_shaders(const QGLContext *context)
     m_shaders["buoyancy"] = shader;
 }
 
-void RigidBodySimulation::stepSimulation()
+void RigidBodySimulation::stepSimulation(float time_elapsed)
 {
     // apply forces on all objects
     btScalar volume;
@@ -102,7 +102,7 @@ void RigidBodySimulation::stepSimulation()
     }
 
     // step the bullet physics simulation
-    m_dynamics_world->stepSimulation(1);
+    m_dynamics_world->stepSimulation(time_elapsed);
 }
 
 RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform)

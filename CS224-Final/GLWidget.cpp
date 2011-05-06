@@ -38,14 +38,14 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-    float time = m_time->elapsed();
+    float time = m_time->elapsed() / 1000.f;
     m_time->restart();
     m_drawengine->drawFrame(time);
     glFlush();
 
-    if (settings.render_overlay) {
-        this->renderOverlayText();
-    }
+//    if (settings.render_overlay) {
+//        this->renderOverlayText();
+//    }
 }
 
 void GLWidget::resizeGL(int width, int height)

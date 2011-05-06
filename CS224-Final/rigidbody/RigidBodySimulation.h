@@ -30,7 +30,7 @@ public:
     ~RigidBodySimulation();
 
     // steps the simulation
-    void stepSimulation();
+    void stepSimulation(float time_elapsed);
 
     // renders all rigid bodies that are currently alive
     void renderAll();
