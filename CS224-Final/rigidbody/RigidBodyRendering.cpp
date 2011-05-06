@@ -1,5 +1,6 @@
 #include "RigidBodyRendering.h"
 #include "GLFileLoader.h"
+#include "RigidBodyConstants.h"
 
 GLuint boxTexture = 0;
 GLuint boxList = 0;
@@ -10,6 +11,8 @@ void RigidBodyRendering::initialize()
     QString s(":/crate");
     GLFileLoader::loadTexture2D(s, boxTexture);
 
+    const float extent = SIDE_LENGTH/2.0f;
+
     // load lists
     boxList = glGenLists(1);
     glNewList(boxList, GL_COMPILE);
@@ -18,40 +21,40 @@ void RigidBodyRendering::initialize()
         glBegin(GL_QUADS);
         {
             glNormal3f(0.0, 0.0, 1.0);
-            glTexCoord2f(1.0f,1.0f); glVertex3f(1.0,1.0,1.0);
-            glTexCoord2f(0.0f,1.0f); glVertex3f(-1.0,1.0,1.0);
-            glTexCoord2f(0.0f,0.0f); glVertex3f(-1.0,-1.0,1.0);
-            glTexCoord2f(1.0f,0.0f); glVertex3f(1.0,-1.0,1.0);
+            glTexCoord2f(1.0f,1.0f); glVertex3f(extent,extent,extent);
+            glTexCoord2f(0.0f,1.0f); glVertex3f(-extent,extent,extent);
+            glTexCoord2f(0.0f,0.0f); glVertex3f(-extent,-extent,extent);
+            glTexCoord2f(1.0f,0.0f); glVertex3f(extent,-extent,extent);
 
             glNormal3f(-1.0, 0.0, 0.0);
-            glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0,1.0,1.0);
-            glTexCoord2f(0.0f,1.0f); glVertex3f(-1.0,1.0,-1.0);
-            glTexCoord2f(0.0f,0.0f); glVertex3f(-1.0,-1.0,-1.0);
-            glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0,-1.0,1.0);
+            glTexCoord2f(1.0f,1.0f); glVertex3f(-extent,extent,extent);
+            glTexCoord2f(0.0f,1.0f); glVertex3f(-extent,extent,-extent);
+            glTexCoord2f(0.0f,0.0f); glVertex3f(-extent,-extent,-extent);
+            glTexCoord2f(1.0f,0.0f); glVertex3f(-extent,-extent,extent);
 
             glNormal3f(0.0, 0.0, -1.0);
-            glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0,1.0,-1.0);
-            glTexCoord2f(0.0f,1.0f); glVertex3f(1.0,1.0,-1.0);
-            glTexCoord2f(0.0f,0.0f); glVertex3f(1.0,-1.0,-1.0);
-            glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0,-1.0,-1.0);
+            glTexCoord2f(1.0f,1.0f); glVertex3f(-extent,extent,-extent);
+            glTexCoord2f(0.0f,1.0f); glVertex3f(extent,extent,-extent);
+            glTexCoord2f(0.0f,0.0f); glVertex3f(extent,-extent,-extent);
+            glTexCoord2f(1.0f,0.0f); glVertex3f(-extent,-extent,-extent);
 
             glNormal3f(1.0, 0.0, 0.0);
-            glTexCoord2f(1.0f,1.0f); glVertex3f(1.0,1.0,-1.0);
-            glTexCoord2f(0.0f,1.0f); glVertex3f(1.0,1.0,1.0);
-            glTexCoord2f(0.0f,0.0f); glVertex3f(1.0,-1.0,1.0);
-            glTexCoord2f(1.0f,0.0f); glVertex3f(1.0,-1.0,-1.0);
+            glTexCoord2f(1.0f,1.0f); glVertex3f(extent,extent,-extent);
+            glTexCoord2f(0.0f,1.0f); glVertex3f(extent,extent,extent);
+            glTexCoord2f(0.0f,0.0f); glVertex3f(extent,-extent,extent);
+            glTexCoord2f(1.0f,0.0f); glVertex3f(extent,-extent,-extent);
 
             glNormal3f(0.0, -1.0, 0.0);
-            glTexCoord2f(1.0f,1.0f); glVertex3f(1.0,-1.0,-1.0);
-            glTexCoord2f(0.0f,1.0f); glVertex3f(1.0,-1.0,1.0);
-            glTexCoord2f(0.0f,0.0f); glVertex3f(-1.0,-1.0,1.0);
-            glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0,-1.0,-1.0);
+            glTexCoord2f(1.0f,1.0f); glVertex3f(extent,-extent,-extent);
+            glTexCoord2f(0.0f,1.0f); glVertex3f(extent,-extent,extent);
+            glTexCoord2f(0.0f,0.0f); glVertex3f(-extent,-extent,extent);
+            glTexCoord2f(1.0f,0.0f); glVertex3f(-extent,-extent,-extent);
 
             glNormal3f(0.0, 1.0, 0.0);
-            glTexCoord2f(1.0f,1.0f); glVertex3f(-1.0,1.0,1.0);
-            glTexCoord2f(0.0f,1.0f); glVertex3f(1.0,1.0,1.0);
-            glTexCoord2f(0.0f,0.0f); glVertex3f(1.0,1.0,-1.0);
-            glTexCoord2f(1.0f,0.0f); glVertex3f(-1.0,1.0,-1.0);
+            glTexCoord2f(1.0f,1.0f); glVertex3f(-extent,extent,extent);
+            glTexCoord2f(0.0f,1.0f); glVertex3f(extent,extent,extent);
+            glTexCoord2f(0.0f,0.0f); glVertex3f(extent,extent,-extent);
+            glTexCoord2f(1.0f,0.0f); glVertex3f(-extent,extent,-extent);
         }
         glEnd();
     }

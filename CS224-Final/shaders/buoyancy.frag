@@ -1,6 +1,5 @@
 
 const float surface = 0.0; // this is going to change later and be looked up from the height map
-uniform float max_abs_height; // maximum absolute distance an object can have from the water
 
 varying vec3 normal;
 varying vec4 pos;

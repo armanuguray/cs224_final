@@ -24,7 +24,7 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
 
     // setup collision shapes
     m_sphere_collisionshape = new btSphereShape(1);
-    m_cube_collisionshape = new btBoxShape(btVector3(1.0, 1.0, 1.0));
+    m_cube_collisionshape = new btBoxShape(btVector3(SIDE_LENGTH/2.0f, SIDE_LENGTH/2.0f, SIDE_LENGTH/2.0f));
 
     // intialize the rigid body pool
     for (unsigned i = 0; i < RIGIDBODY_MAX_COUNT; i++)

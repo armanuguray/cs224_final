@@ -96,12 +96,13 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glPushMatrix();
     glLoadIdentity();
     // all objects have 2x2x2 volume for simplicity
-    glOrtho(-1.75,1.75,-1.75,1.75,0,3.5);
+    const float halfextent = OBJ_EXTENT/2.0f;
+    glOrtho(-halfextent,halfextent,-halfextent,halfextent,0,OBJ_EXTENT);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
     btVector3 &translate = t.getOrigin();
-    gluLookAt(translate.x(), translate.y() + 1.75, translate.z(),
+    gluLookAt(translate.x(), translate.y() + halfextent, translate.z(),
               translate.x(), translate.y(), translate.z(),
               0, 0, 1);
     // pass the ctm to the shader (sorry for this loop)
@@ -110,7 +111,6 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
         for (int j = 0; j < 4; j++)
             ctm[i][j] = m[4*i + j];
     buoyancy_shader->setUniformValue("ctm", ctm);
-    buoyancy_shader->setUniformValue("max_abs_height", MAX_ABS_HEIGHT);
     glMultMatrixf(m);
     m_render_function();
     glPopMatrix();
@@ -140,8 +140,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     btScalar volume = 0;
     for (unsigned i = 0; i < BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION*3; i += 3)
         volume += lowres_buffer[i];
-    btScalar unit_area = 3.5/(btScalar)BUOYANCY_IMAGE_RESOLUTION; unit_area *= unit_area;
+    btScalar unit_area = OBJ_EXTENT/(btScalar)BUOYANCY_IMAGE_RESOLUTION; unit_area *= unit_area;
     volume *= unit_area;
-    logln(volume);
     return volume;
 }
