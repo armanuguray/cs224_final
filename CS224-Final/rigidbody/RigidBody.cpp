@@ -79,7 +79,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
 
     framebuffer->bind();
     glClear(GL_COLOR_BUFFER_BIT);
-    btScalar m[15];
+    btScalar m[16];
     btTransform t;
     m_internal_rigidbody->getMotionState()->getWorldTransform(t);
     t.getOpenGLMatrix(m);
