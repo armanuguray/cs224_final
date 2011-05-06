@@ -3,6 +3,7 @@
 
 #include <QGLFramebufferObject>
 #include <QGLShaderProgram>
+#include "RigidBodyConstants.h"
 
 RigidBody::RigidBody()
 {
@@ -82,7 +83,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     btTransform t;
     m_internal_rigidbody->getMotionState()->getWorldTransform(t);
     t.getOpenGLMatrix(m);
-    glViewport(0,0,512,512);
+    glViewport(0,0,BUOYANCY_IMAGE_RESOLUTION,BUOYANCY_IMAGE_RESOLUTION);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
