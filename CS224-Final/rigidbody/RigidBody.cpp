@@ -73,11 +73,16 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     // TODO: bind framebuffer
     // TODO: render body using orthogonal projection in object space using a special shader (need a mapping to heightmap coordinates)
     // TODO: loop through the buoyancy image to compute total volume and the buoyancy force, which will be used to apply the buoyancy force
-    // enable texture 2d
+
+    // enable texture2d
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     framebuffer->bind();
+    buoyancy_shader->bind();
+
     glClear(GL_COLOR_BUFFER_BIT);
     btScalar m[16];
     btTransform t;
@@ -104,11 +109,15 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glMatrixMode(GL_MODELVIEW);
     // restore viewport
     glViewport(0,0,screen_width,screen_height);
+
+    buoyancy_shader->release();
     framebuffer->release();
 
     // enable again, as the rendering function will disable it
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
+
+    glDisable(GL_BLEND);
 
     // THIS IS FOR TESTING
     glBindTexture(GL_TEXTURE_2D, framebuffer->texture());
@@ -125,5 +134,5 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     // reenable cubemap
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_CUBE_MAP);
-    return 0;
+    return 0; // TODO: return real value
 }

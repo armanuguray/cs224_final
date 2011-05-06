@@ -45,7 +45,6 @@ private:
     Pool m_rigidbody_pool;
     // set of current bodies that are in the simulation
     QSet<RigidBody *> m_rigidbodies;
-//    std::set<RigidBody *> m_rigidbodies;
 
     /* dynamic world simulation */
     btBroadphaseInterface *m_broadphase;
