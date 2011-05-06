@@ -1,5 +1,6 @@
 
 const float surface = 0.0; // this is going to change later and be looked up from the height map
+uniform float max_abs_height; // maximum absolute distance an object can have from the water
 
 varying vec3 normal;
 varying vec4 pos;
@@ -15,13 +16,11 @@ void main(void)
     if (pos.y < surface) {
         // if normal is pointing up
         if (n.y > 0.0) 
-            depth = pos.y; // negative
+            // negative
+            gl_FragColor = vec4(pos.y, 0.0, 0.0, 1.0);
         // if normal is pointing down
         else if (n.y < 0.0) 
-            depth = -pos.y; // positive
-        gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-    } else gl_FragColor = vec4(0.0,1.0,0.0,1.0);
-    
-    // TODO: additively blend
-    //gl_FragColor += vec4(depth, 0.0, 0.0, 1.0);
+            // positive
+            gl_FragColor = vec4(-pos.y, 0.0, 0.0, 1.0);
+    } else gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

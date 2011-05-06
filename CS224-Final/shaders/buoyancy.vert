@@ -5,7 +5,7 @@ uniform mat4 ctm;
 
 void main(void)
 {
-    normal = normalize(gl_NormalMatrix * gl_Normal);
+    normal = normalize((ctm * vec4(gl_Normal, 0.0)).xyz);
     pos = ctm * gl_Vertex;
     gl_Position = ftransform();
 }

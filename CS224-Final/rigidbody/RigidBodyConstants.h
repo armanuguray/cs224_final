@@ -7,5 +7,7 @@ const unsigned RIGIDBODY_MAX_COUNT = 1000;
 const unsigned BUOYANCY_IMAGE_RESOLUTION = 512;
 // water density
 const float WATER_DENSITY = 1.0f;
+// clip height
+const float MAX_ABS_HEIGHT = 400.0f;
 
 #endif // RIGIDBODYCONSTANTS_H

@@ -80,6 +80,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
+    glDisable(GL_CULL_FACE);
 
     framebuffer->bind();
     buoyancy_shader->bind();
@@ -102,17 +103,20 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     gluLookAt(translate.x(), translate.y() + 1.75, translate.z(),
               translate.x(), translate.y(), translate.z(),
               0, 0, 1);
+    // pass the ctm to the shader (sorry for this loop)
     GLfloat ctm[4][4];
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             ctm[i][j] = m[4*i + j];
     buoyancy_shader->setUniformValue("ctm", ctm);
+    buoyancy_shader->setUniformValue("max_abs_height", 20.0f);
     glMultMatrixf(m);
     m_render_function();
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
+
     // restore viewport
     glViewport(0,0,screen_width,screen_height);
 
@@ -124,6 +128,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glEnable(GL_TEXTURE_2D);
 
     glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
 
     // THIS IS FOR TESTING
     glBindTexture(GL_TEXTURE_2D, framebuffer->texture());
