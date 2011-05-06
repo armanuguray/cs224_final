@@ -4,6 +4,7 @@
 #include <QGLFramebufferObject>
 #include <QGLShaderProgram>
 #include "RigidBodyConstants.h"
+#include <QDebug>
 
 RigidBody::RigidBody()
 {
@@ -101,6 +102,11 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     gluLookAt(translate.x(), translate.y() + 1.75, translate.z(),
               translate.x(), translate.y(), translate.z(),
               0, 0, 1);
+    GLfloat ctm[4][4];
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            ctm[i][j] = m[4*i + j];
+    buoyancy_shader->setUniformValue("ctm", ctm);
     glMultMatrixf(m);
     m_render_function();
     glPopMatrix();
