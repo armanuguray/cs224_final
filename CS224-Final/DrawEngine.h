@@ -41,6 +41,7 @@ public:
 
     // === mouse interaction ===
     void createWave(const Vector2 &mouse_pos);
+    void throwBody(const Vector2 &mouse_pos, const RigidBodyType &type);
     void turn(const Vector2 &delta);
     void pan(const Vector2 &delta);
     void zoom(REAL delta);

@@ -33,6 +33,14 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
     // load shaders
     load_shaders(context);
     load_fbos();
+
+    // this is a floor for testing
+//    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),1);
+//    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
+//    btRigidBody::btRigidBodyConstructionInfo
+//            groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
+//    btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+//    m_dynamics_world->addRigidBody(groundRigidBody);
 }
 
 RigidBodySimulation::~RigidBodySimulation()

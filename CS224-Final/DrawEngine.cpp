@@ -1,3 +1,6 @@
+#define BOX_MASS 200
+#define IMPULSE_SCALE 10000
+
 #include "DrawEngine.h"
 #include "ProjectorCamera.h"
 #include <QGLShaderProgram>
@@ -62,7 +65,7 @@ void DrawEngine::setupGL()
 
     // TODO: the following is for testing only. Remove when done
     btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
-    RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, 20, inertia, t);
+    RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, BOX_MASS, inertia, t);
     // add torque for fun
     rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(10,10,0));
 }
@@ -138,16 +141,32 @@ void DrawEngine::drawFrame(float time_elapsed)
 #endif
 }
 
-void DrawEngine::createWave(const Vector2 &mouse_pos)
+void DrawEngine::createWave(const Vector2 &mousePos)
 {
     Vector4 rayDir, intersect;
 
-    m_projectorcamera->getMouseRay(mouse_pos, rayDir);
+    m_projectorcamera->getMouseRay(mousePos, rayDir);
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
         m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 10.f);
     }
+}
+
+void DrawEngine::throwBody(const Vector2 &mousePos, const RigidBodyType &type)
+{
+    Vector4 rayDir;
+    m_projectorcamera->getMouseRay(mousePos, rayDir);
+
+    Vector4 eye = m_projectorcamera->getEye();
+
+    // TODO: the following is for testing only. Remove when done
+    btVector3 inertia;
+    btTransform t(btQuaternion(0, 0, 0, 1), btVector3(eye.x, eye.y, eye.z));
+    RigidBody *new_body = m_rigidbodysim->addRigidBody(type, BOX_MASS, inertia, t);
+
+    new_body->getInternalRigidBody()->applyTorqueImpulse(btVector3(10, 10, 0));
+    new_body->getInternalRigidBody()->applyCentralImpulse(btVector3(rayDir.x, rayDir.y, rayDir.z) * IMPULSE_SCALE);
 }
 
 void DrawEngine::turn(const Vector2 &delta)

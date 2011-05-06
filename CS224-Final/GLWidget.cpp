@@ -82,8 +82,12 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     m_old = Vector2(event->x(), event->y());
 
-    if (event->buttons() & Qt::LeftButton && event->modifiers() & Qt::ControlModifier) {
-        m_drawengine->createWave(m_old);
+    if (event->buttons() & Qt::LeftButton) {
+        if (event->modifiers() & Qt::ControlModifier) {
+            m_drawengine->createWave(m_old);
+        } else if (event->modifiers() & Qt::ShiftModifier) {
+            m_drawengine->throwBody(m_old, RigidBodyTypeCube);
+        }
     }
 }
 
