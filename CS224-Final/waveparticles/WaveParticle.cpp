@@ -154,12 +154,11 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         float theta = atan2(fromCenter.y, fromCenter.x);
 
         // Use the bisections between this and neighboring particles to find their angles
-        float thetaLeft  = theta - .5 * m_dispersionAngle;
-        float thetaRight = theta + .5 * m_dispersionAngle;
+        float thetaLeft  = theta - .3333 * m_dispersionAngle;
+        float thetaRight = theta + .3333 * m_dispersionAngle;
 
         // Compute the new amplitude and dispersion angle
         m_dispersionAngle *= .3333;
-        // TODO: how to compute the new amplitude? Just using a simple average for now, but I'm not sure that's right
         m_amplitude *= .3333;
 
         // Create the particles; do nothing if we're out of particles
@@ -181,9 +180,8 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
 
         Vector2 off = m_position - m_dispersionOrigin;
         float dist = off.getMagnitude();
-        float theta0 = atan2(off.y, off.x);
 
-        theta = theta0 + thetaLeft;
+        theta = thetaLeft;
         Vector2 dir(cos(theta), sin(theta));
         left->setPosition(m_dispersionOrigin + dir * dist);
         left->setVelocity(dir * m_velocity.getMagnitude());
@@ -193,7 +191,7 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         right->setDispersionOrigin(m_dispersionOrigin);
         right->setRadius(m_radius);
 
-        theta = theta0 + thetaRight;
+        theta = thetaRight;
         dir.x = cos(theta);
         dir.y = sin(theta);
         right->setPosition(m_dispersionOrigin + dir * dist);
