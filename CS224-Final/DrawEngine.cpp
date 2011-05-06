@@ -107,20 +107,59 @@ void DrawEngine::drawFrame(float time_elapsed)
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//    glDisable(GL_CULL_FACE);
+//    glBegin(GL_QUAD_STRIP);
+//    {
+//        glColor3f(1.0,0.0,0.0);
+//        glVertex3f(-0.5, -0.5, 0.0);
+//        glColor3f(0.0,1.0,0.0);
+//        glVertex3f(-0.5, 0.5, 0.0);
+//        glColor3f(0.0,0.0,1.0);
+//        glVertex3f(0.5, -0.5, 0.0);
+//        glColor3f(1.0,1.0,0.0);
+//        glVertex3f(0.5, 0.5, 0.0);
+//    }
+//    glEnd();
+//    glEnable(GL_CULL_FACE);
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
-    glBegin(GL_QUAD_STRIP);
-    {
-        glColor3f(1.0,0.0,0.0);
-        glVertex3f(-0.5, -0.5, 0.0);
-        glColor3f(0.0,1.0,0.0);
-        glVertex3f(-0.5, 0.5, 0.0);
-        glColor3f(0.0,0.0,1.0);
-        glVertex3f(0.5, -0.5, 0.0);
-        glColor3f(1.0,1.0,0.0);
-        glVertex3f(0.5, 0.5, 0.0);
-    }
-    glEnd();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    // z
+    glPushMatrix();
+    glColor3f(0, 0, 1);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glRotatef(180, 1, 0, 0);
+    glColor3f(0, 0, .3);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glPopMatrix();
+
+    // x
+    glPushMatrix();
+    glRotatef(90, 0, 1, 0);
+    glColor3f(1, 0, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+
+    glRotatef(180, 0, 1, 0);
+    glColor3f(.3, 0, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glPopMatrix();
+
+    // y
+    glPushMatrix();
+    glRotatef(-90, 1, 0, 0);
+    glColor3f(0, 1, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+
+    glRotatef(180, 1, 0, 0);
+    glColor3f(0, .3, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glPopMatrix();
+
+    glPopMatrix();
     glEnable(GL_CULL_FACE);
 #endif
 
