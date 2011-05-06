@@ -1,3 +1,6 @@
+#define BOX_MASS 200
+#define IMPULSE_SCALE 10000
+
 #include "DrawEngine.h"
 #include "ProjectorCamera.h"
 #include <QGLShaderProgram>
@@ -62,7 +65,7 @@ void DrawEngine::setupGL()
 
     // TODO: the following is for testing only. Remove when done
     btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
-    RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, 20, inertia, t);
+    RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, BOX_MASS, inertia, t);
     // add torque for fun
     rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(10,10,0));
 }
@@ -138,23 +141,11 @@ void DrawEngine::drawFrame(float time_elapsed)
 #endif
 }
 
-void DrawEngine::mouse_down(Vector2 &mouse_pos, MouseButton button)
-{
-    switch (button)
-    {
-    case MouseButtonCTRLLeft:
-        interact(mouse_pos);
-        break;
-    default:
-        break;
-    }
-}
-
-void DrawEngine::interact(Vector2 &mouse_pos)
+void DrawEngine::createWave(const Vector2 &mousePos)
 {
     Vector4 rayDir, intersect;
 
-    m_projectorcamera->getMouseRay(mouse_pos, rayDir);
+    m_projectorcamera->getMouseRay(mousePos, rayDir);
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
@@ -162,24 +153,33 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     }
 }
 
-void DrawEngine::mouse_scroll(REAL delta)
+void DrawEngine::throwBody(const Vector2 &mousePos, const RigidBodyType &type)
 {
-    m_projectorcamera->lookVectorTranslate(delta);
+    Vector4 rayDir;
+    m_projectorcamera->getMouseRay(mousePos, rayDir);
+
+    Vector4 eye = m_projectorcamera->getEye();
+
+    // TODO: the following is for testing only. Remove when done
+    btVector3 inertia;
+    btTransform t(btQuaternion(0, 0, 0, 1), btVector3(eye.x, eye.y, eye.z));
+    RigidBody *new_body = m_rigidbodysim->addRigidBody(type, BOX_MASS, inertia, t);
+
+    new_body->getInternalRigidBody()->applyTorqueImpulse(btVector3(10, 10, 0));
+    new_body->getInternalRigidBody()->applyCentralImpulse(btVector3(rayDir.x, rayDir.y, rayDir.z) * IMPULSE_SCALE);
 }
 
-void DrawEngine::mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button)
+void DrawEngine::turn(const Vector2 &delta)
 {
-    switch (button)
-    {
-    case MouseButtonLeft:
-        m_projectorcamera->lookVectorRotate(delta);
-        break;
-    case MouseButtonRight:
-        m_projectorcamera->filmPlaneTranslate(delta*1.5);
-        break;
-    case MouseButtonCTRLLeft:
-        this->mouse_down(new_mouse_pos, button);
-    default:
-        break;
-    }
+    m_projectorcamera->lookVectorRotate(delta);
+}
+
+void DrawEngine::pan(const Vector2 &delta)
+{
+    m_projectorcamera->filmPlaneTranslate(delta);
+}
+
+void DrawEngine::zoom(REAL delta)
+{
+    m_projectorcamera->lookVectorTranslate(delta);
 }

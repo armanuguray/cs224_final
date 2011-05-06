@@ -25,7 +25,7 @@ class SkyRenderer;
 typedef enum {
     MouseButtonLeft,
     MouseButtonRight,
-    MouseButtonCTRLLeft
+    MouseButtonCTRLLeft,
 } MouseButton;
 
 class DrawEngine
@@ -40,16 +40,13 @@ public:
     void resize(REAL width, REAL height);
 
     // === mouse interaction ===
-    // controls that interact with the water/objects
-    void mouse_down(Vector2 &mouse_pos, MouseButton button);
-
-    // controls that move the camera
-    void mouse_scroll(REAL delta);
-    void mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button);
+    void createWave(const Vector2 &mouse_pos);
+    void throwBody(const Vector2 &mouse_pos, const RigidBodyType &type);
+    void turn(const Vector2 &delta);
+    void pan(const Vector2 &delta);
+    void zoom(REAL delta);
 
 protected:
-    // causes interaction with the water surface
-    void interact(Vector2 &mouse_pos);
     // does initial OpenGL setup
     void setupGL();
     // loads shaders

@@ -35,7 +35,14 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
     load_fbos();
 
     // allocate utility buffers
-    m_lowres = new GLfloat[BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION];
+    m_lowres = new GLfloat[BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION*3];
+    // this is a floor for testing
+//    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),1);
+//    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
+//    btRigidBody::btRigidBodyConstructionInfo
+//            groundRigidBodyCI(0,groundMotionState,groundShape,btVector3(0,0,0));
+//    btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+//    m_dynamics_world->addRigidBody(groundRigidBody);
 }
 
 RigidBodySimulation::~RigidBodySimulation()
@@ -114,6 +121,7 @@ RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, 
 {
     void (*render_func)();
     btCollisionShape *cs;
+
     switch (type)
     {
     case RigidBodyTypeSphere:

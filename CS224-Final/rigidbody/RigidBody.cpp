@@ -71,10 +71,6 @@ void RigidBody::applyLiftAndDrag()
 
 btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer)
 {
-    // TODO: bind framebuffer
-    // TODO: render body using orthogonal projection in object space using a special shader (need a mapping to heightmap coordinates)
-    // TODO: loop through the buoyancy image to compute total volume and the buoyancy force, which will be used to apply the buoyancy force
-
     // enable texture2d
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
@@ -82,9 +78,11 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_CULL_FACE);
 
+    // bind offscreen framebuffer and shader
     framebuffer->bind();
     buoyancy_shader->bind();
 
+    // render the object directly from above
     glClear(GL_COLOR_BUFFER_BIT);
     btScalar m[16];
     btTransform t;
@@ -94,7 +92,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    // all objects have unit volume for simplicity
+    // all objects have 2x2x2 volume for simplicity
     glOrtho(-1.75,1.75,-1.75,1.75,0,3.5);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -109,7 +107,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
         for (int j = 0; j < 4; j++)
             ctm[i][j] = m[4*i + j];
     buoyancy_shader->setUniformValue("ctm", ctm);
-    buoyancy_shader->setUniformValue("max_abs_height", 20.0f);
+    buoyancy_shader->setUniformValue("max_abs_height", MAX_ABS_HEIGHT);
     glMultMatrixf(m);
     m_render_function();
     glPopMatrix();
@@ -119,6 +117,9 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
 
     // restore viewport
     glViewport(0,0,screen_width,screen_height);
+
+    // transfer the texture to the CPU
+    glReadPixels(0,0,BUOYANCY_IMAGE_RESOLUTION,BUOYANCY_IMAGE_RESOLUTION,GL_RGB,GL_FLOAT,lowres_buffer);
 
     buoyancy_shader->release();
     framebuffer->release();
@@ -145,5 +146,12 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     // reenable cubemap
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_CUBE_MAP);
-    return 0; // TODO: return real value
+
+    // compute volume
+    btScalar volume = 0;
+    for (unsigned i = 0; i < BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION*3; i += 3)
+        volume += ((btScalar)lowres_buffer[i]-(btScalar)lowres_buffer[i+1])*MAX_ABS_HEIGHT;
+    btScalar unit_area = 3.5/(btScalar)BUOYANCY_IMAGE_RESOLUTION; unit_area *= unit_area;
+    volume *= unit_area;
+    return volume;
 }
