@@ -1,4 +1,3 @@
-#define BOX_MASS 200
 #define IMPULSE_SCALE 10000
 
 #include "DrawEngine.h"
@@ -10,6 +9,7 @@
 #include "PoolIterator.h"
 #include "WaveConstants.h"
 #include "RigidBody.h"
+#include "RigidBodyConstants.h"
 
 //#define SHOW_ORIGIN
 #define PARTICLE_TEST
@@ -67,7 +67,7 @@ void DrawEngine::setupGL()
     btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
     RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, BOX_MASS, inertia, t);
     // add torque for fun
-    rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(10,10,0));
+    //rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(10,10,0));
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)

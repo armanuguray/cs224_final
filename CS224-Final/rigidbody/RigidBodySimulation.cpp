@@ -20,11 +20,11 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
     m_dispatcher = new btCollisionDispatcher(m_collision_configuration);
     m_solver = new btSequentialImpulseConstraintSolver();
     m_dynamics_world = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_collision_configuration);
-    m_dynamics_world->setGravity(btVector3(0, -10, 0));
+    m_dynamics_world->setGravity(btVector3(0, -GRAVITY, 0));
 
     // setup collision shapes
     m_sphere_collisionshape = new btSphereShape(1);
-    m_cube_collisionshape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
+    m_cube_collisionshape = new btBoxShape(btVector3(1.0, 1.0, 1.0));
 
     // intialize the rigid body pool
     for (unsigned i = 0; i < RIGIDBODY_MAX_COUNT; i++)
@@ -105,11 +105,12 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
 {
     // apply forces on all objects
     btScalar volume;
+    btVector3 out_centroid;
     foreach (RigidBody *rb, m_rigidbodies)
     {
-        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres) > 0)) { // TODO: pass the heightmap instead of 0
-            // TODO: apply buoyancy force if the object is floating (not applying unnecessary forces makes bullet run faster)
-        }
+        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
+            rb->applyBuoyancy(volume, out_centroid);
+
         // TODO: apply lift and drag
     }
 

@@ -59,9 +59,10 @@ void RigidBody::render()
     }
 }
 
-void RigidBody::applyBuoyancy(btScalar buoyancy, const btVector3 &volume_centroid)
+void RigidBody::applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid)
 {
-    // TODO: compute the submerged volume and use it to apply buoyancy
+    btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume;
+    m_internal_rigidbody->applyCentralForce(force); // TODO: use volume_centroid
 }
 
 void RigidBody::applyLiftAndDrag()
@@ -69,8 +70,10 @@ void RigidBody::applyLiftAndDrag()
     // TODO:
 }
 
-btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer)
+btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer, btVector3 &out_centroid)
 {
+    // TODO: output volume centroid
+
     // enable texture2d
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
