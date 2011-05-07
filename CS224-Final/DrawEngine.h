@@ -58,7 +58,7 @@ protected:
     std::map<string, QGLShaderProgram *> m_shaderprograms; // maps a shader program object to a given name.
 
     GLUquadric *m_quadric;
-    WaveParticleManager m_waveParticles;
+    WaveParticleManager m_waveparticles;
     RigidBodySimulation *m_rigidbodysim;
 };
 

@@ -17,5 +17,9 @@
         <file alias="crate">textures/crate-texture.jpg</file>
         <file alias="buoyancy.frag">shaders/buoyancy.frag</file>
         <file alias="buoyancy.vert">shaders/buoyancy.vert</file>
+        <file alias="wavegen.frag">shaders/wavegen.frag</file>
+        <file alias="wavegen.vert">shaders/wavegen.vert</file>
+        <file alias="waveeffect.frag">shaders/waveeffect.frag</file>
+        <file alias="waveeffect.vert">shaders/waveeffect.vert</file>
     </qresource>
 </RCC>

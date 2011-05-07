@@ -6,9 +6,12 @@
 #ifndef RIGIDBODY_H
 #define RIGIDBODY_H
 
+#include <map>
 #include "Poolable.h"
 #include <btBulletDynamicsCommon.h>
 #include "OpenGLInclude.h"
+
+#include "WaveParticleManager.h"
 
 class QGLShaderProgram;
 class QGLFramebufferObject;
@@ -44,6 +47,11 @@ public:
      */
     btScalar computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer, btVector3 &out_centroid);
 
+    void generateWaves(WaveParticleManager &manager,
+                       std::map<std::string, QGLShaderProgram*> &shaders,
+                       QMap<QString, QGLFramebufferObject *> &buffers,
+                       GLfloat *lowres, int screen_width, int screen_height);
+
     /* force computations */
     void applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid);
     void applyLiftAndDrag();
@@ -55,7 +63,6 @@ protected:
 
     // function that will be called for rendering.
     void (*m_render_function)();
-
 
     /* internal bullet representation for the rigid body simulation. Has to be reinitialized whenever a body is spawned. */
     btRigidBody *m_internal_rigidbody;

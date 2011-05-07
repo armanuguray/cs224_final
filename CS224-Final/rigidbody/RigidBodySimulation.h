@@ -10,7 +10,10 @@
 #include <QSet>
 #include <map>
 #include <string>
+#include <QString>
+#include <QMap>
 #include "OpenGLInclude.h"
+#include "WaveParticleManager.h"
 
 class QGLContext;
 class QGLFramebufferObject;
@@ -32,6 +35,9 @@ public:
 
     // steps the simulation
     void stepSimulation(float time_elapsed);
+
+    // generates waves
+    void generateWaves(WaveParticleManager &manager);
 
     // renders all rigid bodies that are currently alive
     void renderAll();
@@ -64,7 +70,7 @@ private:
 
     /* frame buffers */
     void load_fbos();
-    QGLFramebufferObject *m_lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
+    QMap<QString, QGLFramebufferObject *> m_buffers;
     GLfloat *m_lowres; // low resolution buffer to store the contents of m_lowresbuffer on the CPU
 
     // the current camera

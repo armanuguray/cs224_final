@@ -62,6 +62,7 @@ void RigidBody::render()
 void RigidBody::applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid)
 {
     btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume;
+//    btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume * .8;
     m_internal_rigidbody->applyCentralForce(force); // TODO: use volume_centroid
 }
 
@@ -143,4 +144,155 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     btScalar unit_area = OBJ_EXTENT/(btScalar)BUOYANCY_IMAGE_RESOLUTION; unit_area *= unit_area;
     volume *= unit_area;
     return volume;
+}
+
+void RigidBody::generateWaves(WaveParticleManager &manager,
+                              std::map<std::string, QGLShaderProgram*> &shaders,
+                              QMap<QString, QGLFramebufferObject *> &buffers,
+                              GLfloat *lowres_buffer, int screen_width, int screen_height)
+{
+    QGLShaderProgram *wavegen_shader = shaders["wavegen"];
+    QGLShaderProgram *waveeffect_shader = shaders["waveeffect"];
+    QGLFramebufferObject *lowres_fb = buffers["low-res"];
+    QGLFramebufferObject *lowres_fb2 = buffers["low-res2"];
+
+    static const float halfextent = OBJ_EXTENT / 2.0f;
+
+    static btScalar matrix[16];
+    static GLfloat ctm[4][4];
+    btTransform transform;
+    m_internal_defaultmotionstate->getWorldTransform(transform);
+    transform.getOpenGLMatrix(matrix);
+
+    // TODO get rid of this madness
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            ctm[i][j] = matrix[4*i + j];
+
+    btVector3 &center = transform.getOrigin();
+
+    glViewport(0, 0, BUOYANCY_IMAGE_RESOLUTION, BUOYANCY_IMAGE_RESOLUTION);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glOrtho(-halfextent, halfextent, -halfextent, halfextent, 0, OBJ_EXTENT);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    gluLookAt(center.x(), center.y() + halfextent, center.z(),
+              center.x(), center.y(), center.z(),
+              0, 0, 1);
+    glMultMatrixf(matrix);
+
+    // this is the initial depth pass
+    {
+        lowres_fb->bind();
+        wavegen_shader->bind();
+
+        wavegen_shader->setUniformValue("world_transform", ctm);
+        glClear(GL_COLOR_BUFFER_BIT);
+        m_render_function();
+
+        wavegen_shader->release();
+        lowres_fb->release();
+    }
+
+    // this is the wave effect pass WHAT THE SHIT DOES THIS DO
+    {
+        lowres_fb2->bind();
+        waveeffect_shader->bind();
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glDisable(GL_TEXTURE_CUBE_MAP);
+        glEnable(GL_TEXTURE_2D);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
+        waveeffect_shader->setUniformValue("overview", 0);
+        glActiveTexture(GL_TEXTURE1);
+
+        waveeffect_shader->setUniformValue("world_transform", ctm);
+        {
+            btVector3 velocity;
+            static float half_extent = SIDE_LENGTH / 2.0f;
+            glBegin(GL_POINTS);
+
+            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+                       m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, 0, half_extent));
+//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glNormal3f(0.0, 0.0, 1.0); glVertex3f(0, 0, half_extent);
+
+            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+                       m_internal_rigidbody->getVelocityInLocalPoint(btVector3(-half_extent, 0, 0));
+            logln(velocity.getX() <<" "<< velocity.getY() <<" "<< velocity.getZ());
+//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glNormal3f(-1.0, 0.0, 0.0); glVertex3f(-half_extent, 0, 0);
+
+            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+                       m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, 0, -half_extent));
+//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glNormal3f(0.0, 0.0, -1.0); glVertex3f(0, 0, -half_extent);
+
+            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+                       m_internal_rigidbody->getVelocityInLocalPoint(btVector3(half_extent, 0, 0));
+//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glNormal3f(1.0, 0.0, 0.0); glVertex3f(half_extent, 0, 0);
+
+            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+                       m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, -half_extent, 0));
+//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glNormal3f(0.0, -1.0, 0.0); glVertex3f(0, -half_extent, 0);
+
+            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+                       m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, half_extent, 0));
+//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glNormal3f(0.0, 1.0, 0.0); glVertex3f(0, half_extent, 0);
+
+            glEnd();
+        }
+
+        glActiveTexture(GL_TEXTURE0);
+        glDisable(GL_TEXTURE_CUBE_MAP);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_CUBE_MAP);
+
+        waveeffect_shader->release();
+        lowres_fb2->release();
+    }
+
+    glPopMatrix();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    //glReadPixels(0, 0, BUOYANCY_IMAGE_RESOLUTION, BUOYANCY_IMAGE_RESOLUTION, GL_RGB, GL_FLOAT, lowres_buffer);
+
+    // restore the viewport
+    glViewport(0, 0, screen_width, screen_height);
+
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
+    // THIS IS FOR TESTING
+    glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(8.5, 1.0, 8.5);
+    glTexCoord2f(1.0, 0.0); glVertex3f(8.5, 1.0, 10.5);
+    glTexCoord2f(1.0, 1.0); glVertex3f(10.5, 1.0, 10.5);
+    glTexCoord2f(0.0, 1.0); glVertex3f(10.5, 1.0, 8.5);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, lowres_fb2->texture());
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(10.5, 1.0, 10.5);
+    glTexCoord2f(1.0, 0.0); glVertex3f(10.5, 1.0, 12.5);
+    glTexCoord2f(1.0, 1.0); glVertex3f(12.5, 1.0, 12.5);
+    glTexCoord2f(0.0, 1.0); glVertex3f(12.5, 1.0, 10.5);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_CUBE_MAP);
 }

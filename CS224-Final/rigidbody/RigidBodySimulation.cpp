@@ -73,17 +73,29 @@ RigidBodySimulation::~RigidBodySimulation()
         delete it->second;
 
     // delete framebuffers
-    delete m_lowresbuffer;
+    foreach (QString key, m_buffers.keys()) {
+        delete m_buffers[key];
+    }
+    m_buffers.clear();
 
     delete[] m_lowres;
 }
 
 void RigidBodySimulation::load_fbos()
 {
-    m_lowresbuffer = new QGLFramebufferObject(BUOYANCY_IMAGE_RESOLUTION,
-                                              BUOYANCY_IMAGE_RESOLUTION,
-                                              QGLFramebufferObject::NoAttachment,
-                                              GL_TEXTURE_2D,GL_RGB16F_ARB);
+    QGLFramebufferObject *lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
+    lowresbuffer = new QGLFramebufferObject(BUOYANCY_IMAGE_RESOLUTION,
+                                            BUOYANCY_IMAGE_RESOLUTION,
+                                            QGLFramebufferObject::NoAttachment,
+                                            GL_TEXTURE_2D, GL_RGB16F_ARB);
+
+    m_buffers["low-res"] = lowresbuffer;
+
+    lowresbuffer = new QGLFramebufferObject(BUOYANCY_IMAGE_RESOLUTION,
+                                            BUOYANCY_IMAGE_RESOLUTION,
+                                            QGLFramebufferObject::NoAttachment,
+                                            GL_TEXTURE_2D, GL_RGB16F_ARB);
+    m_buffers["low-res2"] = lowresbuffer;
 }
 
 void RigidBodySimulation::load_shaders(const QGLContext *context)
@@ -99,6 +111,30 @@ void RigidBodySimulation::load_shaders(const QGLContext *context)
         exit(1);
     }
     m_shaders["buoyancy"] = shader;
+
+    // load wavegen
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/wavegen.vert")) {
+        std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/wavegen.frag")) {
+        std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
+        exit(1);
+    }
+    m_shaders["wavegen"] = shader;
+
+    // load waveeffect
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/waveeffect.vert")) {
+        std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/waveeffect.frag")) {
+        std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
+        exit(1);
+    }
+    m_shaders["waveeffect"] = shader;
 }
 
 void RigidBodySimulation::stepSimulation(float time_elapsed)
@@ -108,7 +144,7 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     btVector3 out_centroid;
     foreach (RigidBody *rb, m_rigidbodies)
     {
-        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
+        if ((volume = rb->computeSubmergedVolume(0, m_buffers["low-res"], m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
             rb->applyBuoyancy(volume, out_centroid);
 
         // TODO: apply lift and drag
@@ -155,5 +191,11 @@ void RigidBodySimulation::renderAll()
 {
     foreach (RigidBody *rb, m_rigidbodies) {
         rb->render();
+    }
+}
+
+void RigidBodySimulation::generateWaves(WaveParticleManager &manager) {
+    foreach (RigidBody *rb, m_rigidbodies) {
+        rb->generateWaves(manager, m_shaders, m_buffers, m_lowres, m_camera->getWidth(), m_camera->getHeight());
     }
 }
