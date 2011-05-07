@@ -46,7 +46,7 @@ public:
 
     /* force computations */
     void applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid);
-    void applyLiftAndDrag();
+    void applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *lift_drag_shader, int screen_width, int screen_height, GLfloat *lowres_buffer);
 protected:
 
     // Poolable methods

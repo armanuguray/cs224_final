@@ -109,9 +109,10 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     foreach (RigidBody *rb, m_rigidbodies)
     {
         if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
+        {
             rb->applyBuoyancy(volume, out_centroid);
-
-        // TODO: apply lift and drag
+            rb->applyLiftAndDrag(0, m_lowresbuffer, m_shaders["lift_drag"], m_camera->getWidth(), m_camera->getHeight(), m_lowres);
+        }
     }
 
     // step the bullet physics simulation
@@ -122,7 +123,7 @@ RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, 
 {
     void (*render_func)();
     btCollisionShape *cs;
-
+    /*
     switch (type)
     {
     case RigidBodyTypeSphere:
@@ -137,6 +138,11 @@ RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, 
     default:
         break;
     }
+    */
+
+    cs = m_cube_collisionshape;                   // Sorry, we only have boxes. Honestly, we don't care.
+    render_func = &RigidBodyRendering::renderBox; //
+
     RigidBody *rb = (RigidBody *)m_rigidbody_pool.alloc();
     rb->initialize(mass, inertia, initial_transform, cs, render_func);
     m_dynamics_world->addRigidBody(rb->getInternalRigidBody());

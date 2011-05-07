@@ -67,6 +67,8 @@ private:
     QGLFramebufferObject *m_lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
     GLfloat *m_lowres; // low resolution buffer to store the contents of m_lowresbuffer on the CPU
 
+    GLfloat per_face_buffer[6];
+
     // the current camera
     Camera *m_camera;
 };

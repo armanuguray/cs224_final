@@ -65,9 +65,75 @@ void RigidBody::applyBuoyancy(btScalar submerged_volume, const btVector3 &volume
     m_internal_rigidbody->applyCentralForce(force); // TODO: use volume_centroid
 }
 
-void RigidBody::applyLiftAndDrag()
+void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *lift_drag_shader, int screen_width, int screen_height, GLfloat *lowres_buffer)
 {
-    // TODO:
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
+
+    framebuffer->bind();
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, BUOYANCY_IMAGE_RESOLUTION, BUOYANCY_IMAGE_RESOLUTION);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // sorry, I'm hard-coding cube code here. Other shapes are overrated
+    // TODO: do shit
+    const float R = (float)BUOYANCY_IMAGE_RESOLUTION;
+    glBegin(GL_POINTS);
+    {
+        float xpos = -1.0 + 1.0/R, ypos = -1.0 + 1.0/R;
+        glColor3f(1.0,0.0,0.0);
+        glVertex2f(xpos, ypos);
+        glColor3f(1.0,1.0,0.0);
+        glVertex2f(xpos += 2.0/R, ypos);
+        glColor3f(1.0,0.0,1.0);
+        glVertex2f(xpos += 2.0/R, ypos);
+        glColor3f(0.0,1.0,1.0);
+        glVertex2f(xpos += 2.0/R, ypos);
+        glColor3f(0.0,0.0,1.0);
+        glVertex2f(xpos += 2.0/R, ypos);
+        glColor3f(1.0,1.0,1.0);
+        glVertex2f(xpos += 2.0/R, ypos);
+    }
+    glEnd();
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, screen_width, screen_height);
+
+    // read the first 6 pixels of the data back. Each will hold data that corresponds to a face
+    glReadPixels(0,0,6,1, GL_RGB, GL_FLOAT, lowres_buffer);
+
+    framebuffer->release();
+
+    for (int i = 0; i < 18; i += 3)
+        logln(lowres_buffer[i]);
+    logln("--");
+
+    //--- testing:
+    {
+        glBindTexture(GL_TEXTURE_2D, framebuffer->texture());
+        glBegin(GL_QUADS);
+        {
+            glTexCoord2f(0.0, 0.0); glVertex2f(-1.0, 0.0);
+            glTexCoord2f(1.0, 0.0); glVertex2f(1.0, 0.0);
+            glTexCoord2f(1.0, 1.0); glVertex2f(1.0, 2.0);
+            glTexCoord2f(0.0, 1.0); glVertex2f(-1.0, 2.0);
+        }
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    //---
+
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_CUBE_MAP);
 }
 
 btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer, btVector3 &out_centroid)
