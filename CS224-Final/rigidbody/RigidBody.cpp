@@ -272,6 +272,11 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         lowres_fb2->release();
     }
 
+    // pass 3: find boundary pixels and directions
+    {
+
+    }
+
     glPopMatrix();
 
     glMatrixMode(GL_PROJECTION);

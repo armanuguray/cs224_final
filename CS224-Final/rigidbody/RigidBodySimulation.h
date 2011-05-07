@@ -70,7 +70,8 @@ private:
     QMap<QString, QGLShaderProgram *> m_shaders;
 
     /* frame buffers */
-    void load_fbos();
+    void loadFramebufferObjects();
+    void loadFramebufferObject(int size, const QString &name);
     QMap<QString, QGLFramebufferObject *> m_buffers;
     GLfloat *m_lowres; // low resolution buffer to store the contents of m_lowresbuffer on the CPU
 

@@ -33,7 +33,7 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
 
     // load shaders
     loadShaders(context);
-    load_fbos();
+    loadFramebufferObjects();
 
     // allocate utility buffers
     m_lowres = new GLfloat[BUOYANCY_IMAGE_RESOLUTION*BUOYANCY_IMAGE_RESOLUTION*3];
@@ -84,21 +84,25 @@ RigidBodySimulation::~RigidBodySimulation()
     delete[] m_lowres;
 }
 
-void RigidBodySimulation::load_fbos()
+void RigidBodySimulation::loadFramebufferObject(int size, const QString &name)
 {
-    QGLFramebufferObject *lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
-    lowresbuffer = new QGLFramebufferObject(BUOYANCY_IMAGE_RESOLUTION,
-                                            BUOYANCY_IMAGE_RESOLUTION,
-                                            QGLFramebufferObject::NoAttachment,
-                                            GL_TEXTURE_2D, GL_RGB16F_ARB);
+    QGLFramebufferObject *buffer;
+    buffer = new QGLFramebufferObject(size, size,
+                                      QGLFramebufferObject::NoAttachment,
+                                      GL_TEXTURE_2D, GL_RGB16F_ARB);
 
-    m_buffers["low-res"] = lowresbuffer;
+    m_buffers[name] = buffer;
+}
 
-    lowresbuffer = new QGLFramebufferObject(BUOYANCY_IMAGE_RESOLUTION,
-                                            BUOYANCY_IMAGE_RESOLUTION,
-                                            QGLFramebufferObject::NoAttachment,
-                                            GL_TEXTURE_2D, GL_RGB16F_ARB);
-    m_buffers["low-res2"] = lowresbuffer;
+void RigidBodySimulation::loadFramebufferObjects()
+{
+    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res");
+    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res2");
+
+    loadFramebufferObject(8, "8x8");
+    loadFramebufferObject(4, "4x4");
+    loadFramebufferObject(2, "2x2");
+    loadFramebufferObject(1, "1x1");
 }
 
 void RigidBodySimulation::loadShader(const QGLContext *context, const QString &name)
