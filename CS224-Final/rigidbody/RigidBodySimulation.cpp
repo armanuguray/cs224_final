@@ -88,7 +88,7 @@ void RigidBodySimulation::load_fbos()
 
 void RigidBodySimulation::load_shaders(const QGLContext *context)
 {
-    // load buoyancy
+    // buoyancy shader
     QGLShaderProgram *shader = new QGLShaderProgram(context);
     if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/buoyancy.vert")) {
         std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
@@ -99,6 +99,18 @@ void RigidBodySimulation::load_shaders(const QGLContext *context)
         exit(1);
     }
     m_shaders["buoyancy"] = shader;
+
+    // liftdrag shader
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/liftdrag.vert")) {
+        std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/liftdrag.frag")) {
+        std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
+        exit(1);
+    }
+    m_shaders["liftdrag"] = shader;
 }
 
 void RigidBodySimulation::stepSimulation(float time_elapsed)
@@ -111,7 +123,7 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
         if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
         {
             rb->applyBuoyancy(volume, out_centroid);
-            rb->applyLiftAndDrag(0, m_lowresbuffer, m_shaders["lift_drag"], m_camera->getWidth(), m_camera->getHeight(), m_lowres);
+            rb->applyLiftAndDrag(0, m_lowresbuffer, m_shaders["liftdrag"], m_camera->getWidth(), m_camera->getHeight(), m_lowres);
         }
     }
 

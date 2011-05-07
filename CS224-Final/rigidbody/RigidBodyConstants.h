@@ -24,5 +24,7 @@ const float OBJ_EXTENT = sqrt((SIDE_LENGTH*SIDE_LENGTH)+(SIDE_LENGTH*SIDE_LENGTH
 // lift and drag coefficients
 const float LIFT_COEFFICIENT = 1.0;
 const float DRAG_COEFFICIENT = 1.0;
+// epsilon value that defines the dependency of face area on direction of motion. ([0, 1])
+const float LD_EPSILON = 1.0;
 
 #endif // RIGIDBODYCONSTANTS_H

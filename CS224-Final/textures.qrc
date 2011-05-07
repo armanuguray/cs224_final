@@ -17,5 +17,7 @@
         <file alias="crate">textures/crate-texture.jpg</file>
         <file alias="buoyancy.frag">shaders/buoyancy.frag</file>
         <file alias="buoyancy.vert">shaders/buoyancy.vert</file>
+        <file alias="liftdrag.frag">shaders/liftdrag.frag</file>
+        <file alias="liftdrag.vert">shaders/liftdrag.vert</file>
     </qresource>
 </RCC>
