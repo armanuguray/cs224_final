@@ -21,6 +21,7 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
     m_solver = new btSequentialImpulseConstraintSolver();
     m_dynamics_world = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_collision_configuration);
     m_dynamics_world->setGravity(btVector3(0, -GRAVITY, 0));
+//    m_dynamics_world->setGravity(btVector3(0, 0, 0));
 
     // setup collision shapes
     m_sphere_collisionshape = new btSphereShape(1);
@@ -145,7 +146,9 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     foreach (RigidBody *rb, m_rigidbodies)
     {
         if ((volume = rb->computeSubmergedVolume(0, m_buffers["low-res"], m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
+        {
             rb->applyBuoyancy(volume, out_centroid);
+        }
 
         // TODO: apply lift and drag
     }

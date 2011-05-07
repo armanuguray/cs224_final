@@ -37,6 +37,11 @@ void main(void)
 	gl_FragColor = vec4(0, 0, 1, 1);
     }
 
+    if (face_depth < 0) {
+        // Reject this sample
+	gl_FragColor = vec4(0, 0, 0, 1);
+    }
+
 //    gl_FragColor = vec4(direct / dt, indirect / dt, 0.0, 1.0);
 //    gl_FragColor = vec4(dot(vel, normal), 0.0, 0.0, 1.0);
 //    gl_FragColor = gl_Color;
