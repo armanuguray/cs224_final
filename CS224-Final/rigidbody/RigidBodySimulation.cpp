@@ -98,6 +98,7 @@ void RigidBodySimulation::loadFramebufferObjects()
 {
     loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res");
     loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res2");
+    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res3");
 
     loadFramebufferObject(8, "8x8");
     loadFramebufferObject(4, "4x4");
@@ -129,6 +130,7 @@ void RigidBodySimulation::loadShaders(const QGLContext *context)
     loadShader(context, "buoyancy");
     loadShader(context, "wavegen");
     loadShader(context, "waveeffect");
+    loadShader(context, "computedir");
 }
 
 void RigidBodySimulation::stepSimulation(float time_elapsed)

@@ -38,8 +38,8 @@ void main(void)
     }
 
     // TESTING ONLY
-    if (direct != 0) { direct = direct/2.0 + 0.5; }
-    if (indirect != 0) { indirect = indirect/2.0 + 0.5; }
+    // if (direct != 0.0) { direct = direct/2.0 + 0.5; }
+    // if (indirect != 0.0) { indirect = indirect/2.0 + 0.5; }
 
     gl_FragColor = vec4(direct, indirect, 0.0, 1.0);
 //    gl_FragColor = vec4(dot(vel, normal), 0.0, 0.0, 1.0);

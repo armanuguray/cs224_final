@@ -152,9 +152,11 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
                               GLfloat *lowres_buffer, int screen_width, int screen_height)
 {
     QGLShaderProgram *wavegen_shader = shaders["wavegen"];
-    QGLShaderProgram *waveeffect_shader = shaders["waveeffect"];
     QGLFramebufferObject *lowres_fb = buffers["low-res"];
+    QGLShaderProgram *waveeffect_shader = shaders["waveeffect"];
     QGLFramebufferObject *lowres_fb2 = buffers["low-res2"];
+    QGLShaderProgram *dir_shader = shaders["computedir"];
+    QGLFramebufferObject *dir_gather = buffers["low-res3"];
 
     static const float halfextent = OBJ_EXTENT / 2.0f;
 
@@ -215,7 +217,6 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
         waveeffect_shader->setUniformValue("overview", 0);
-        glActiveTexture(GL_TEXTURE1);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -261,9 +262,6 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
 
         glDisable(GL_BLEND);
 
-        glActiveTexture(GL_TEXTURE0);
-        glDisable(GL_TEXTURE_CUBE_MAP);
-        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_CUBE_MAP);
@@ -274,9 +272,48 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
 
     // pass 3: find boundary pixels and directions
     {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        gluLookAt(0, 1, 0, 0, 0, 0, 0, 0, 1);
 
+        dir_gather->bind();
+        dir_shader->bind();
+
+        glDisable(GL_TEXTURE_CUBE_MAP);
+        glEnable(GL_TEXTURE_2D);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, lowres_fb2->texture());
+
+        dir_shader->setUniformValue("silhouette", 0);
+        dir_shader->setUniformValue("effects", 1);
+
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
+        glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
+        glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
+        glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
+        glEnd();
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE0);
+
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_CUBE_MAP);
+
+        dir_shader->release();
+        dir_gather->release();
+
+        glPopMatrix();
     }
 
+    glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
     glMatrixMode(GL_PROJECTION);
@@ -311,6 +348,16 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
         glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
         glEnd();
+
+        startx += w + s;
+        glBindTexture(GL_TEXTURE_2D, dir_gather->texture());
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+        glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+        glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+        glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+        glEnd();
+
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_CUBE_MAP);
