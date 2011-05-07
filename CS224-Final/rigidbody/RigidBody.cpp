@@ -226,32 +226,32 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
             static float half_extent = SIDE_LENGTH / 2.0f;
             glBegin(GL_POINTS);
 
-            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+            velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, 0, half_extent));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, 0.0, 1.0); glVertex3f(0, 0, half_extent);
 
-            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+            velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(-half_extent, 0, 0));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(-1.0, 0.0, 0.0); glVertex3f(-half_extent, 0, 0);
 
-            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+            velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, 0, -half_extent));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, 0.0, -1.0); glVertex3f(0, 0, -half_extent);
 
-            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+            velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(half_extent, 0, 0));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(1.0, 0.0, 0.0); glVertex3f(half_extent, 0, 0);
 
-            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+            velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, -half_extent, 0));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, -1.0, 0.0); glVertex3f(0, -half_extent, 0);
 
-            velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
+            velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, half_extent, 0));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, 1.0, 0.0); glVertex3f(0, half_extent, 0);
