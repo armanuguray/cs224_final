@@ -67,7 +67,7 @@ private:
     /* Shader programs used in force calculations */
     void loadShaders(const QGLContext *context);
     void loadShader(const QGLContext *context, const QString &name);
-    std::map<std::string, QGLShaderProgram*> m_shaders;
+    QMap<QString, QGLShaderProgram *> m_shaders;
 
     /* frame buffers */
     void load_fbos();

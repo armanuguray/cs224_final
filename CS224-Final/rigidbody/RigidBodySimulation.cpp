@@ -70,8 +70,10 @@ RigidBodySimulation::~RigidBodySimulation()
     RigidBodyRendering::cleanup();
 
     // delete shaders
-    for (std::map<std::string, QGLShaderProgram*>::iterator it = m_shaders.begin(); it != m_shaders.end(); ++it)
-        delete it->second;
+    foreach (QString key, m_shaders.keys()) {
+        delete m_shaders[key];
+    }
+    m_shaders.clear();
 
     // delete framebuffers
     foreach (QString key, m_buffers.keys()) {
@@ -115,7 +117,7 @@ void RigidBodySimulation::loadShader(const QGLContext *context, const QString &n
         exit(EXIT_FAILURE);
     }
 
-    m_shaders[name.toStdString()] = shader;
+    m_shaders[name] = shader;
 }
 
 void RigidBodySimulation::loadShaders(const QGLContext *context)

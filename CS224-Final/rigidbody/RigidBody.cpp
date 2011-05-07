@@ -147,7 +147,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
 }
 
 void RigidBody::generateWaves(WaveParticleManager &manager,
-                              std::map<std::string, QGLShaderProgram*> &shaders,
+                              QMap<QString, QGLShaderProgram *> &shaders,
                               QMap<QString, QGLFramebufferObject *> &buffers,
                               GLfloat *lowres_buffer, int screen_width, int screen_height)
 {

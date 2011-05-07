@@ -48,7 +48,7 @@ public:
     btScalar computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer, btVector3 &out_centroid);
 
     void generateWaves(WaveParticleManager &manager,
-                       std::map<std::string, QGLShaderProgram*> &shaders,
+                       QMap<QString, QGLShaderProgram *> &shaders,
                        QMap<QString, QGLFramebufferObject *> &buffers,
                        GLfloat *lowres, int screen_width, int screen_height);
 
