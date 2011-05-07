@@ -277,7 +277,7 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
-    //glReadPixels(0, 0, BUOYANCY_IMAGE_RESOLUTION, BUOYANCY_IMAGE_RESOLUTION, GL_RGB, GL_FLOAT, lowres_buffer);
+
 
     // restore the viewport
     glViewport(0, 0, screen_width, screen_height);

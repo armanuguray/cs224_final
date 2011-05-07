@@ -65,7 +65,8 @@ private:
     btCollisionShape *m_cube_collisionshape;
 
     /* Shader programs used in force calculations */
-    void load_shaders(const QGLContext *context);
+    void loadShaders(const QGLContext *context);
+    void loadShader(const QGLContext *context, const QString &name);
     std::map<std::string, QGLShaderProgram*> m_shaders;
 
     /* frame buffers */

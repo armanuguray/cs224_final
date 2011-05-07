@@ -32,7 +32,7 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
         m_rigidbody_pool.add(new RigidBody());
 
     // load shaders
-    load_shaders(context);
+    loadShaders(context);
     load_fbos();
 
     // allocate utility buffers
@@ -99,43 +99,30 @@ void RigidBodySimulation::load_fbos()
     m_buffers["low-res2"] = lowresbuffer;
 }
 
-void RigidBodySimulation::load_shaders(const QGLContext *context)
+void RigidBodySimulation::loadShader(const QGLContext *context, const QString &name)
 {
-    // load buoyancy
+    QString vertex_name = ":/" + name + ".vert";
+    QString frag_name = ":/" + name + ".frag";
+
     QGLShaderProgram *shader = new QGLShaderProgram(context);
-    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/buoyancy.vert")) {
+    if (!shader->addShaderFromSourceFile(QGLShader::Vertex, vertex_name)) {
         std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/buoyancy.frag")) {
-        std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
-        exit(1);
-    }
-    m_shaders["buoyancy"] = shader;
 
-    // load wavegen
-    shader = new QGLShaderProgram(context);
-    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/wavegen.vert")) {
-        std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
-        exit(1);
-    }
-    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/wavegen.frag")) {
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, frag_name)) {
         std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-    m_shaders["wavegen"] = shader;
 
-    // load waveeffect
-    shader = new QGLShaderProgram(context);
-    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/waveeffect.vert")) {
-        std::cerr << "Vertex Shader:\n" << shader->log().data() << std::endl;
-        exit(1);
-    }
-    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/waveeffect.frag")) {
-        std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
-        exit(1);
-    }
-    m_shaders["waveeffect"] = shader;
+    m_shaders[name.toStdString()] = shader;
+}
+
+void RigidBodySimulation::loadShaders(const QGLContext *context)
+{
+    loadShader(context, "buoyancy");
+    loadShader(context, "wavegen");
+    loadShader(context, "waveeffect");
 }
 
 void RigidBodySimulation::stepSimulation(float time_elapsed)
