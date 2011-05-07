@@ -21,5 +21,8 @@ const float GRAVITY = 10.f;
 const float SIDE_LENGTH = 2.0f;
 // per object orthgonal view extent
 const float OBJ_EXTENT = sqrt((SIDE_LENGTH*SIDE_LENGTH)+(SIDE_LENGTH*SIDE_LENGTH)) + 0.5;
+// lift and drag coefficients
+const float LIFT_COEFFICIENT = 1.0;
+const float DRAG_COEFFICIENT = 1.0;
 
 #endif // RIGIDBODYCONSTANTS_H
