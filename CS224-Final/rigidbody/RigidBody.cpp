@@ -202,6 +202,9 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
 
     // this is the wave effect pass WHAT THE SHIT DOES THIS DO
     {
+        const static int vel_idx = 14;
+        glBindAttribLocation(waveeffect_shader->programId(), vel_idx, "velocity");
+
         lowres_fb2->bind();
         waveeffect_shader->bind();
         glClear(GL_COLOR_BUFFER_BIT);
@@ -214,6 +217,9 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         waveeffect_shader->setUniformValue("overview", 0);
         glActiveTexture(GL_TEXTURE1);
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+
         waveeffect_shader->setUniformValue("world_transform", ctm);
         {
             btVector3 velocity;
@@ -222,37 +228,38 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
 
             velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, 0, half_extent));
-//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, 0.0, 1.0); glVertex3f(0, 0, half_extent);
 
             velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(-half_extent, 0, 0));
-            logln(velocity.getX() <<" "<< velocity.getY() <<" "<< velocity.getZ());
-//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(-1.0, 0.0, 0.0); glVertex3f(-half_extent, 0, 0);
 
             velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, 0, -half_extent));
-//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, 0.0, -1.0); glVertex3f(0, 0, -half_extent);
 
             velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(half_extent, 0, 0));
-//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(1.0, 0.0, 0.0); glVertex3f(half_extent, 0, 0);
 
             velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, -half_extent, 0));
-//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, -1.0, 0.0); glVertex3f(0, -half_extent, 0);
 
             velocity = m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, half_extent, 0));
-//            glColor3f(velocity.getX(), velocity.getY(), velocity.getZ());
+            glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
             glNormal3f(0.0, 1.0, 0.0); glVertex3f(0, half_extent, 0);
 
             glEnd();
         }
+
+        glDisable(GL_BLEND);
 
         glActiveTexture(GL_TEXTURE0);
         glDisable(GL_TEXTURE_CUBE_MAP);

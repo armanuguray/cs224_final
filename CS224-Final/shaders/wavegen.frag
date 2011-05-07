@@ -1,3 +1,4 @@
+
 const float height = 0.0;
 
 varying vec3 normal;
@@ -10,7 +11,7 @@ void main(void)
 
     gl_FragColor = vec4(depth, n_z, 0, 1);
     
-    if (depth < 0) {
+    if (depth < 0.0) {
         // Reject this sample
         gl_FragColor = vec4(0, 0, 0, 1);
     }   
