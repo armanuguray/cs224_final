@@ -277,29 +277,37 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
-
-
     // restore the viewport
     glViewport(0, 0, screen_width, screen_height);
 
-    glDisable(GL_TEXTURE_CUBE_MAP);
-    glEnable(GL_TEXTURE_2D);
-    // THIS IS FOR TESTING
-    glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(8.5, 1.0, 8.5);
-    glTexCoord2f(1.0, 0.0); glVertex3f(8.5, 1.0, 10.5);
-    glTexCoord2f(1.0, 1.0); glVertex3f(10.5, 1.0, 10.5);
-    glTexCoord2f(0.0, 1.0); glVertex3f(10.5, 1.0, 8.5);
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, lowres_fb2->texture());
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(10.5, 1.0, 10.5);
-    glTexCoord2f(1.0, 0.0); glVertex3f(10.5, 1.0, 12.5);
-    glTexCoord2f(1.0, 1.0); glVertex3f(12.5, 1.0, 12.5);
-    glTexCoord2f(0.0, 1.0); glVertex3f(12.5, 1.0, 10.5);
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_CUBE_MAP);
+    {
+        // THIS IS FOR TESTING
+        const static float w = 2.0f;
+        const static float s = 1.0f;
+
+        glDisable(GL_TEXTURE_CUBE_MAP);
+        glEnable(GL_TEXTURE_2D);
+
+        float startx = 5.0;
+        float startz = 5.0;
+        glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+        glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+        glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+        glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+        glEnd();
+
+        startx += w + s;
+        glBindTexture(GL_TEXTURE_2D, lowres_fb2->texture());
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+        glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+        glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+        glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_CUBE_MAP);
+    }
 }
