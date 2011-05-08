@@ -41,7 +41,7 @@ public:
     // should be called when the window gets resized
     void resize(REAL width, REAL height);
 
-    // === mouse interaction ===
+    // === mouse i`nteraction ===
     // controls that interact with the water/objects
     void mouse_down(Vector2 &mouse_pos, MouseButton button);
 
@@ -54,26 +54,12 @@ protected:
     void interact(Vector2 &mouse_pos);
     // does initial OpenGL setup
     void setupGL();
-    // loads shaders
-    void loadShaders(const QGLContext *context);
-    // creates fbos
-    void createFbos();
-
-    void debugDrawHeightmap();
-
-    void computeWeights();
 
     SkyRenderer *m_skyrenderer; // handles the rendering of the sky, including the sun.
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
 
-    std::map<string, QGLShaderProgram *> m_shaderprograms; // maps a shader program object to a given name.
-    std::map<string, QGLFramebufferObject *> m_fbos;
-
     GLUquadric *m_quadric;
     WaveParticleManager m_waveParticles;
-
-    float _weightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _weightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
 };
 
 #endif // DRAWENGINE_H

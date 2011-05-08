@@ -17,7 +17,6 @@
 
 // When multiplied by the radius of a wave particle, yields the maximum distance (in world coordinates)
 // between neighboring wave particles (i.e. before subidivision occurs)
-// TODO: read the paper for the suggested value
 #define WAVE_SUBDIVISION_COEFFICIENT .5
 
 // The maximum number of wave particles to pre-allocate for the entire simulation
@@ -38,8 +37,8 @@
 // The radius of the convolution kernel (in heightmap pixels) during heightmap rendering
 // ceil(worldspace_to_heightmapspace(particle `radius)) =
 // ceil(WAVE_HEIGHTMAP_RESOLUTION / WAVE_HEIGHTMAP_WIDTH * WAVE_PARTICLE_RADIUS) =
-// ceil(1024 / 512 * 7) =
-// 14
+// ceil(1024 / 512 * 1) =
+// 2
 #define WAVE_CONVOLUTION_KERNEL_RADIUS 2
 
 // The number of heightmap pixels over which the particles are convolved during heightmap rendering
