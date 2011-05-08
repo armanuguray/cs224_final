@@ -1,7 +1,10 @@
-
 #include "Pool.h"
 
-Pool::Pool() {}
+#include <btBulletCollisionCommon.h>
+
+Pool::Pool()
+{
+}
 
 Pool::~Pool()
 {

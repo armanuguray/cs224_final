@@ -7,6 +7,8 @@
 
 #include "PoolIterator.h"
 #include "WaveConstants.h"
+#include "RigidBody.h"
+#include "RigidBodyConstants.h"
 
 #define SHOW_ORIGIN
 //#define PARTICLE_TEST
@@ -14,21 +16,24 @@
 
 DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
 {
-    setupGL();
-    m_waveParticles.load(context);
+    m_waveparticles.load(context);
 
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
+    m_rigidbodysim = new RigidBodySimulation(context, m_projectorcamera);
+
+    setupGL();
 
     m_quadric = gluNewQuadric();
 }
 
 DrawEngine::~DrawEngine()
 {
+    delete m_rigidbodysim;
     delete m_skyrenderer;
     delete m_projectorcamera;
 
-    m_waveParticles.unload();
+    m_waveparticles.unload();
 
     gluDeleteQuadric(m_quadric);
     m_quadric = 0;
@@ -56,6 +61,12 @@ void DrawEngine::setupGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
+
+    btVector3 inertia(0, 0, 0);
+
+    // TODO: the following is for testing only. Remove when done
+    btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
+    RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, BOX_MASS, inertia, t);
 }
 
 float clamp01(float x)
@@ -66,10 +77,10 @@ float clamp01(float x)
 void DrawEngine::drawFrame(float time_elapsed)
 {
 #ifdef DRAW_WATER
-    m_waveParticles.renderHeightmap();
-    m_waveParticles.blurHeightmap();
+    m_waveparticles.renderHeightmap();
+    m_waveparticles.blurHeightmap();
 #endif
-    m_waveParticles.update(time_elapsed);
+    m_waveparticles.update(time_elapsed);
 
     // render the world
     glViewport(0, 0, m_projectorcamera->getWidth(), m_projectorcamera->getHeight());
@@ -83,31 +94,77 @@ void DrawEngine::drawFrame(float time_elapsed)
 
     // render water
 #ifdef DRAW_WATER
-    m_waveParticles.renderWaves(m_projectorcamera, m_skyrenderer);
+    m_waveparticles.renderWaves(m_projectorcamera, m_skyrenderer);
 #endif
 
 #ifdef SHOW_ORIGIN
+    // render rigidbodies
+    m_rigidbodysim->stepSimulation(time_elapsed);
+    m_rigidbodysim->renderAll();
+
+    // generate waves
+    m_rigidbodysim->generateWaves(m_waveparticles);
+
     // mark the origin as a point of reference
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//    glDisable(GL_CULL_FACE);
+//    glBegin(GL_QUAD_STRIP);
+//    {
+//        glColor3f(1.0,0.0,0.0);
+//        glVertex3f(-0.5, -0.5, 0.0);
+//        glColor3f(0.0,1.0,0.0);
+//        glVertex3f(-0.5, 0.5, 0.0);
+//        glColor3f(0.0,0.0,1.0);
+//        glVertex3f(0.5, -0.5, 0.0);
+//        glColor3f(1.0,1.0,0.0);
+//        glVertex3f(0.5, 0.5, 0.0);
+//    }
+//    glEnd();
+//    glEnable(GL_CULL_FACE);
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);
-    glBegin(GL_QUAD_STRIP);
-    {
-        glColor3f(1.0,0.0,0.0);
-        glVertex3f(-0.5, -0.5, 0.0);
-        glColor3f(0.0,1.0,0.0);
-        glVertex3f(-0.5, 0.5, 0.0);
-        glColor3f(0.0,0.0,1.0);
-        glVertex3f(0.5, -0.5, 0.0);
-        glColor3f(1.0,1.0,0.0);
-        glVertex3f(0.5, 0.5, 0.0);
-    }
-    glEnd();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    // z
+    glPushMatrix();
+    glColor3f(0, 0, 1);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glRotatef(180, 1, 0, 0);
+    glColor3f(0, 0, .3);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glPopMatrix();
+
+    // x
+    glPushMatrix();
+    glRotatef(90, 0, 1, 0);
+    glColor3f(1, 0, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+
+    glRotatef(180, 0, 1, 0);
+    glColor3f(.3, 0, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glPopMatrix();
+
+    // y
+    glPushMatrix();
+    glRotatef(-90, 1, 0, 0);
+    glColor3f(0, 1, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+
+    glRotatef(180, 1, 0, 0);
+    glColor3f(0, .3, 0);
+    gluCylinder(m_quadric, 1, 1, 15, 20, 3);
+    glPopMatrix();
+
+    glPopMatrix();
     glEnable(GL_CULL_FACE);
 #endif
 
 #ifdef PARTICLE_TEST
-    m_waveParticles.update(time_elapsed);
-    m_waveParticles.drawParticlesAsSpheres(m_quadric);
+    m_waveparticles.update(time_elapsed);
+    m_waveparticles.drawParticlesAsSpheres(m_quadric);
 
     static int frame = 0;
     if (frame % 60 == 0)
@@ -115,55 +172,52 @@ void DrawEngine::drawFrame(float time_elapsed)
         int PARTICLES_PER_RING = 20;
         float TEST_AMPLITUDE = 1.f;
 
-        m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE);
+        m_waveparticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE);
     }
 
     ++frame;
 #endif
 }
 
-void DrawEngine::mouse_down(Vector2 &mouse_pos, MouseButton button)
-{
-    switch (button)
-    {
-    case MouseButtonCTRLLeft:
-        interact(mouse_pos);
-        break;
-    default:
-        break;
-    }
-}
-
-void DrawEngine::interact(Vector2 &mouse_pos)
+void DrawEngine::createWave(const Vector2 &mousePos)
 {
     Vector4 rayDir, intersect;
 
-    m_projectorcamera->getMouseRay(mouse_pos, rayDir);
+    m_projectorcamera->getMouseRay(mousePos, rayDir);
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), .125f);
+        m_waveparticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), .125f);
     }
 }
 
-void DrawEngine::mouse_scroll(REAL delta)
+void DrawEngine::throwBody(const Vector2 &mousePos, const RigidBodyType &type)
+{
+    Vector4 rayDir;
+    m_projectorcamera->getMouseRay(mousePos, rayDir);
+
+    Vector4 eye = m_projectorcamera->getEye();
+
+    // TODO: the following is for testing only. Remove when done
+    btVector3 inertia;
+    btTransform t(btQuaternion(0, 0, 0, 1), btVector3(eye.x, eye.y, eye.z));
+    RigidBody *new_body = m_rigidbodysim->addRigidBody(type, BOX_MASS, inertia, t);
+
+    new_body->getInternalRigidBody()->applyTorqueImpulse(btVector3(10, 10, 0));
+    new_body->getInternalRigidBody()->applyCentralImpulse(btVector3(rayDir.x, rayDir.y, rayDir.z) * IMPULSE_SCALE);
+}
+
+void DrawEngine::turn(const Vector2 &delta)
+{
+    m_projectorcamera->lookVectorRotate(delta);
+}
+
+void DrawEngine::pan(const Vector2 &delta)
+{
+    m_projectorcamera->filmPlaneTranslate(delta);
+}
+
+void DrawEngine::zoom(REAL delta)
 {
     m_projectorcamera->lookVectorTranslate(delta);
-}
-
-void DrawEngine::mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button)
-{
-    switch (button)
-    {
-    case MouseButtonLeft:
-        m_projectorcamera->lookVectorRotate(delta);
-        break;
-    case MouseButtonRight:
-        m_projectorcamera->filmPlaneTranslate(delta*1.5);
-        break;
-    case MouseButtonCTRLLeft:
-        this->mouse_down(new_mouse_pos, button);
-    default:
-        break;
-    }
 }

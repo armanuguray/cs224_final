@@ -23,6 +23,9 @@ public:
     inline Vector4 getV() const { return getU().cross(m_look).getNormalized(); }
     inline Vector4 getW() const { return -m_look.getNormalized(); }
 
+    inline int getWidth() { return m_width; }
+    inline int getHeight() { return m_height; }
+
     // getters to primary camera matrices
     inline Matrix4x4 getModelViewMatrix() const { return m_modelview; }
     inline Matrix4x4 getProjectionMatrix() const { return Matrix4x4((REAL*)m_projection_matrix).getTranspose(); }
@@ -37,9 +40,6 @@ public:
 
     // converts a screen space mouse position to a world space ray from the eye of the camera
     void getMouseRay(const Vector2 &mouse, Vector4 &out);
-
-    int getWidth() { return m_width; }
-    int getHeight() { return m_height; }
 
 protected:
 

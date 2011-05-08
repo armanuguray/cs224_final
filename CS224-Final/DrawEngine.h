@@ -9,6 +9,7 @@
 #include "Pool.h"
 #include "WaveParticle.h"
 #include "WaveParticleManager.h"
+#include "RigidBodySimulation.h"
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
@@ -27,7 +28,7 @@ class SkyRenderer;
 typedef enum {
     MouseButtonLeft,
     MouseButtonRight,
-    MouseButtonCTRLLeft
+    MouseButtonCTRLLeft,
 } MouseButton;
 
 class DrawEngine
@@ -49,9 +50,14 @@ public:
     void mouse_scroll(REAL delta);
     void mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button);
 
+    // === mouse interaction ===
+    void createWave(const Vector2 &mouse_pos);
+    void throwBody(const Vector2 &mouse_pos, const RigidBodyType &type);
+    void turn(const Vector2 &delta);
+    void pan(const Vector2 &delta);
+    void zoom(REAL delta);
+
 protected:
-    // causes interaction with the water surface
-    void interact(Vector2 &mouse_pos);
     // does initial OpenGL setup
     void setupGL();
 
@@ -59,7 +65,8 @@ protected:
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
 
     GLUquadric *m_quadric;
-    WaveParticleManager m_waveParticles;
+    WaveParticleManager m_waveparticles;
+    RigidBodySimulation *m_rigidbodysim;
 };
 
 #endif // DRAWENGINE_H

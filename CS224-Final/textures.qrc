@@ -22,5 +22,20 @@
         <file alias="hblur-heightmap.vert">shaders/hblur-heightmap.vert</file>
         <file alias="vblur-heightmap.frag">shaders/vblur-heightmap.frag</file>
         <file alias="vblur-heightmap.vert">shaders/vblur-heightmap.vert</file>
+        <file alias="crate">textures/crate-texture.jpg</file>
+        <file alias="buoyancy.frag">shaders/buoyancy.frag</file>
+        <file alias="buoyancy.vert">shaders/buoyancy.vert</file>
+        <file alias="liftdrag.frag">shaders/liftdrag.frag</file>
+        <file alias="liftdrag.vert">shaders/liftdrag.vert</file>
+        <file alias="wavegen.frag">shaders/wavegen.frag</file>
+        <file alias="wavegen.vert">shaders/wavegen.vert</file>
+        <file alias="waveeffect.frag">shaders/waveeffect.frag</file>
+        <file alias="waveeffect.vert">shaders/waveeffect.vert</file>
+        <file alias="computedir.frag">shaders/computedir.frag</file>
+        <file alias="computedir.vert">shaders/computedir.vert</file>
+        <file alias="downscale.frag">shaders/downscale.frag</file>
+        <file alias="downscale.vert">shaders/downscale.vert</file>
+        <file alias="upscale.frag">shaders/upscale.frag</file>
+        <file alias="upscale.vert">shaders/upscale.vert</file>
     </qresource>
 </RCC>

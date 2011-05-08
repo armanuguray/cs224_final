@@ -9,3 +9,9 @@ Controls:
 left-click drag to rotate the camera
 right-click drag to pan the camera
 ctrl + left-click to interact with water/objects in water (CMD + left-click on Mac)
+
+Arman TODO list:
+
+-- Compute submerged volume centroid and apply the buoyant force on the centroid
+-- Merge with Dave's code, use heightmap to lookup surface level of water
+-- Include heightmap in all computations: height of water, relative water velocity

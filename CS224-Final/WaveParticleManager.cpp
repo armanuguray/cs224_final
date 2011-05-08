@@ -18,15 +18,13 @@ WaveParticleManager::~WaveParticleManager()
 
 void WaveParticleManager::update(float time_elapsed)
 {
-    float dt = time_elapsed / 1000.f;   // ms -> s
-
     QSetIterator<WaveParticle *> it(m_liveParticles);
     while (it.hasNext())
     {
         WaveParticle *p = (WaveParticle *) it.next();
         assert(p->isAlive());
 
-        p->update(&m_liveParticles, &m_particleStore, dt);
+        p->update(&m_liveParticles, &m_particleStore, time_elapsed);
     }
 }
 
@@ -58,11 +56,16 @@ void WaveParticleManager::drawParticlesAsSpheres(GLUquadric *quadric)
         glPushMatrix();
         glTranslatef(p->position().x, 0.f, p->position().y);
 
-        float scaledAmp = p->amplitude() / 20;
-        float rlerp = .2f + (scaledAmp) * .2f;
-        float glerp = .4f + (scaledAmp) * .4f;
-        float blerp = .6f + (scaledAmp);
-        glColor3f(rlerp, glerp, blerp);
+        float scaledAmp = p->amplitude() / 10;
+//        float rlerp = .2f + (scaledAmp) * .2f;
+//        float glerp = .4f + (scaledAmp) * .4f;
+//        float blerp = .6f + (scaledAmp);
+//        glColor3f(rlerp, glerp, blerp);
+        if (scaledAmp < 0) {
+            glColor3f(scaledAmp, 0, 0);
+        } else {
+            glColor3f(0, 0, scaledAmp);
+        }
 
         gluSphere(quadric, WAVE_PARTICLE_RADIUS / 10.f, 3, 3);
 

@@ -30,7 +30,9 @@ SOURCES += main.cpp \
     SkyRenderer.cpp \
     convenience/GLFileLoader.cpp \
     WaveParticleManager.cpp \
-    rigidbody/RigidBody.cpp
+    rigidbody/RigidBody.cpp \
+    rigidbody/RigidBodySimulation.cpp \
+    rigidbody/RigidBodyRendering.cpp
 
 HEADERS  += MainWindow.h \
     CS224-Final_Prefix.pch \
@@ -51,16 +53,33 @@ HEADERS  += MainWindow.h \
     waveparticles/WaveConstants.h \
     convenience/GLFileLoader.h \
     WaveParticleManager.h \
-    rigidbody/RigidBody.h
+    rigidbody/RigidBody.h \
+    rigidbody/RigidBodySimulation.h \
+    rigidbody/RigidBodyConstants.h \
+    rigidbody/RigidBodyRendering.h
 
 FORMS    += MainWindow.ui
 
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg
 
-INCLUDEPATH += math camera waveparticles pool convenience
-DEPENDPATH += math camera waveparticles pool convenience
+INCLUDEPATH += math camera waveparticles pool convenience rigidbody ../bullet/include/bullet
+DEPENDPATH += math camera waveparticles pool convenience rigidbody
 
+unix:!mac {
+    LIBS += -L$$_PRO_FILE_PWD_/../bullet/lib
+}
+
+mac {
+    LIBS += -L$$_PRO_FILE_PWD_/../bullet-mac/lib
+}
+
+unix:LIBS += -L/usr/local/lib -lm \
+-lBulletMultiThreaded \
+-lBulletSoftBody \
+-lBulletDynamics \
+-lBulletCollision \
+-lLinearMath
 win32:LIBS += c:/mylibs/math.lib
 
 OTHER_FILES += \
@@ -75,7 +94,21 @@ OTHER_FILES += \
     shaders/hblur-heightmap.vert \
     shaders/hblur-heightmap.frag \
     shaders/plot-heightmap.vert \
-    shaders/plot-heightmap.frag
+    shaders/plot-heightmap.frag \
+    shaders/wavegen.vert \
+    shaders/wavegen.frag \
+    shaders/waveeffect.vert \
+    shaders/waveeffect.frag \
+    shaders/upscale.vert \
+    shaders/upscale.frag \
+    shaders/liftdrag.vert \
+    shaders/liftdrag.frag \
+    shaders/downscale.vert \
+    shaders/downscale.frag \
+    shaders/computedir.vert \
+    shaders/computedir.frag \
+    shaders/buoyancy.vert \
+    shaders/buoyancy.frag
 
 RESOURCES += \
     textures.qrc
