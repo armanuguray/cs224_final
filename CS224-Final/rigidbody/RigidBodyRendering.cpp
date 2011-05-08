@@ -78,6 +78,11 @@ void RigidBodyRendering::renderBox()
     glEnable(GL_TEXTURE_CUBE_MAP);
 }
 
+void RigidBodyRendering::boxPerFacePass()
+{
+
+}
+
 void RigidBodyRendering::renderSphere()
 {
 

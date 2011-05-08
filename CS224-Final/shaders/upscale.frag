@@ -22,5 +22,5 @@ void main(void)
     }
 
     gl_FragColor = vec4(downscale.x, indirect,
-                        (prev.z + downscale.z) / 2, (prev.w + downscale.w) / 2);
+                        (prev.z + downscale.z) / 2.0, (prev.w + downscale.w) / 2.0);
 }

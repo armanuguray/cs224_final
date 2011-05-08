@@ -47,12 +47,12 @@ SkyRenderer::SkyRenderer()
 
     // load skybox texture
     QString cube[6];
-    cube[0] = ":/posx";
-    cube[1] = ":/negx";
-    cube[2] = ":/posy";
-    cube[3] = ":/negy";
-    cube[4] = ":/posz";
-    cube[5] = ":/negz";
+    cube[0] = ":/mountain-posx";
+    cube[1] = ":/mountain-negx";
+    cube[2] = ":/mountain-posy";
+    cube[3] = ":/mountain-negy";
+    cube[4] = ":/mountain-posz";
+    cube[5] = ":/mountain-negz";
 
     if (!GLFileLoader::loadCubeMap(cube, skytexture))
         skytexture = 0;

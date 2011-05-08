@@ -14,4 +14,4 @@ Arman TODO list:
 
 -- Compute submerged volume centroid and apply the buoyant force on the centroid
 -- Merge with Dave's code, use heightmap to lookup surface level of water
--- Do lift and drag
+-- Include heightmap in all computations: height of water, relative water velocity

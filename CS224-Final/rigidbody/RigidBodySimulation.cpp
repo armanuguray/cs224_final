@@ -134,7 +134,6 @@ void RigidBodySimulation::loadShader(const QGLContext *context, const QString &n
         std::cerr << "Fragment Shader:\n" << shader->log().data() << std::endl;
         exit(EXIT_FAILURE);
     }
-
     m_shaders[name] = shader;
 }
 
@@ -146,6 +145,7 @@ void RigidBodySimulation::loadShaders(const QGLContext *context)
     loadShader(context, "computedir");
     loadShader(context, "downscale");
     loadShader(context, "upscale");
+    loadShader(context, "liftdrag");
 }
 
 void RigidBodySimulation::stepSimulation(float time_elapsed)
@@ -155,23 +155,22 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     btVector3 out_centroid;
     foreach (RigidBody *rb, m_rigidbodies)
     {
-        if ((volume = rb->computeSubmergedVolume(0, m_buffers["low-res"], m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
+        if ((volume = rb->computeSubmergedVolume(0, m_buffers["low-res"], m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid)) > 0)
         {
             rb->applyBuoyancy(volume, out_centroid);
+            rb->applyLiftAndDrag(0, m_buffers["low-res"], m_shaders["liftdrag"], m_camera->getWidth(), m_camera->getHeight(), m_lowres);
         }
-
-        // TODO: apply lift and drag
     }
 
     // step the bullet physics simulation
-    m_dynamics_world->stepSimulation(time_elapsed, 10);
+    m_dynamics_world->stepSimulation(time_elapsed, MAX_SUBSTEPS);
 }
 
 RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform)
 {
     void (*render_func)();
     btCollisionShape *cs;
-
+    /*
     switch (type)
     {
     case RigidBodyTypeSphere:
@@ -186,6 +185,11 @@ RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, 
     default:
         break;
     }
+    */
+
+    cs = m_cube_collisionshape;                   // Sorry, we only have boxes. Honestly, we don't care.
+    render_func = &RigidBodyRendering::renderBox; //
+
     RigidBody *rb = (RigidBody *)m_rigidbody_pool.alloc();
     rb->initialize(mass, inertia, initial_transform, cs, render_func);
     m_dynamics_world->addRigidBody(rb->getInternalRigidBody());

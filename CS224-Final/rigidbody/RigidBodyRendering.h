@@ -14,7 +14,12 @@ namespace RigidBodyRendering
     void initialize();
     void cleanup();
 
+    /* box */
+    // renders a texture mapped box, dowloading texture coordinates, normals and vertex data to the GPU
     void renderBox();
+    // renders each face as a point primitive. Normal and vertex data are passed in as vertex attributes.
+    void boxPerFacePass();
+
     void renderSphere();
     void renderBoat();
 };

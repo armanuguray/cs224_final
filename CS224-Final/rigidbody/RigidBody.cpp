@@ -62,13 +62,190 @@ void RigidBody::render()
 void RigidBody::applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid)
 {
     btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume;
-//    btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume * .8;
     m_internal_rigidbody->applyCentralForce(force); // TODO: use volume_centroid
 }
 
-void RigidBody::applyLiftAndDrag()
+void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *liftdrag_shader, int screen_width, int screen_height, GLfloat *lowres_buffer)
 {
-    // TODO:
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glEnable(GL_TEXTURE_2D);
+    // set uniforms
+    framebuffer->bind();
+    liftdrag_shader->bind();
+    btScalar m[16];
+    btTransform t;
+    m_internal_rigidbody->getMotionState()->getWorldTransform(t);
+    t.getOpenGLMatrix(m);
+    GLfloat ctm[4][4];
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            ctm[i][j] = m[4*i + j];
+    liftdrag_shader->setUniformValue("ctm", ctm);
+    liftdrag_shader->setUniformValue("Cd", DRAG_COEFFICIENT);
+    liftdrag_shader->setUniformValue("Cl", LIFT_COEFFICIENT);
+    liftdrag_shader->setUniformValue("ro", WATER_DENSITY);
+    liftdrag_shader->setUniformValue("Atotal", SIDE_LENGTH*SIDE_LENGTH/2.0f);
+    liftdrag_shader->setUniformValue("epsilon", LD_EPSILON);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, BUOYANCY_IMAGE_RESOLUTION, BUOYANCY_IMAGE_RESOLUTION);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Send triangle faces to the gpu. (sorry, I'm hard-coding cube code here. Other shapes are overrated)
+    const float extent = SIDE_LENGTH / 2.0f;
+    const float R = (float)BUOYANCY_IMAGE_RESOLUTION;
+    float xpos = -1.0 + 1.0/R, ypos = -1.0 + 1.0/R;
+    btVector3 centroids[12];
+    glBegin(GL_POINTS);
+    {
+        // -x
+        // 1.
+        glNormal3f(-1.0, 0.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, -extent, -extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2, -extent,  extent,  extent);
+        centroids[0] = btVector3(-extent, -extent/3.0, extent/3.0);
+        btVector3 velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[0]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos, ypos); // pixel
+        // 2.
+        glNormal3f(-1.0, 0.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, -extent,  extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2, -extent,  extent, -extent);
+        centroids[1] = btVector3(-extent, extent/3.0, -extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[1]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+
+        // +x
+        // 1.
+        glNormal3f(1.0, 0.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, extent, -extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2, extent,  extent,  extent);
+        centroids[2] = btVector3(extent, -extent/3.0, extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[2]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+        // 2.
+        glNormal3f(1.0, 0.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, extent,  extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2, extent,  extent, -extent);
+        centroids[3] = btVector3(extent, extent/3.0, -extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[3]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+
+        // -y
+        // 1.
+        glNormal3f(0.0, -1.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, -extent, -extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent,  extent);
+        centroids[4] = btVector3(-extent/3.0, -extent, extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[4]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+        // 2.
+        glNormal3f(0.0, -1.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1,  extent, -extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent, -extent);
+        centroids[5] = btVector3(extent/3.0, -extent, -extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[5]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+
+        // +y
+        // 1.
+        glNormal3f(0.0, 1.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, -extent, extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent, extent,  extent);
+        centroids[6] = btVector3(-extent/3.0, extent, extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[6]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+        // 2.
+        glNormal3f(0.0, 1.0, 0.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1,  extent, extent,  extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent, extent, -extent);
+        centroids[7] = btVector3(extent/3.0, extent, -extent/3.0);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[7]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+
+        // -z
+        // 1.
+        glNormal3f(0.0, 0.0, -1.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, -extent,  extent, -extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent,  extent, -extent);
+        centroids[8] = btVector3(-extent/3.0, extent/3.0, -extent);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[8]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+        // 2.
+        glNormal3f(0.0, 0.0, -1.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1,  extent,  extent, -extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent, -extent);
+        centroids[9] = btVector3(extent/3.0, -extent/3.0, -extent);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[9]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+
+        // +z
+        // 1.
+        glNormal3f(0.0, 0.0, 1.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1, -extent,  extent, extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent,  extent, extent);
+        centroids[10] = btVector3(-extent/3.0, extent/3.0, extent);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[10]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+        // 2.
+        glNormal3f(0.0, 0.0, 1.0); // normal
+        glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, extent); // corners
+        glMultiTexCoord3f(GL_TEXTURE1,  extent,  extent, extent);
+        glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent, extent);
+        centroids[11] = btVector3(extent/3.0, -extent/3.0, extent);
+        velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[11]); // face velocity
+        glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
+        glVertex2f(xpos += 2.0/R, ypos); // pixel
+    }
+    glEnd();
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, screen_width, screen_height);
+
+    // read the first 12 pixels of the data back. Each will hold data that corresponds to a triangle
+    glReadPixels(0,0,12,1, GL_RGB, GL_FLOAT, lowres_buffer);
+
+    liftdrag_shader->release();
+    framebuffer->release();
+    btVector3 force;
+    int cindex = 0;
+    for (int i = 0; i < 36; i += 3) {
+        force = btVector3(lowres_buffer[i], lowres_buffer[i+1], lowres_buffer[i+2]);
+        if (force.length2() > 0.0)
+            m_internal_rigidbody->applyForce(force, centroids[cindex]);
+        cindex++;
+    }
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_CUBE_MAP);
 }
 
 btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObject *framebuffer, QGLShaderProgram *buoyancy_shader, int screen_width, int screen_height, GLfloat *lowres_buffer, btVector3 &out_centroid)
@@ -143,6 +320,7 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
         volume += lowres_buffer[i];
     btScalar unit_area = OBJ_EXTENT/(btScalar)BUOYANCY_IMAGE_RESOLUTION; unit_area *= unit_area;
     volume *= unit_area;
+
     return volume;
 }
 

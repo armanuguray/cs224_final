@@ -64,8 +64,6 @@ void DrawEngine::setupGL()
     // TODO: the following is for testing only. Remove when done
     btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
     RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, BOX_MASS, inertia, t);
-    // add torque for fun
-    rb->getInternalRigidBody()->applyTorqueImpulse(btVector3(50,50,0));
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)
