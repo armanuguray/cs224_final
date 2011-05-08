@@ -56,11 +56,16 @@ void WaveParticleManager::drawParticles(GLUquadric *quadric)
         glPushMatrix();
         glTranslatef(p->position().x, 0.f, p->position().y);
 
-        float scaledAmp = p->amplitude() / 20;
-        float rlerp = .2f + (scaledAmp) * .2f;
-        float glerp = .4f + (scaledAmp) * .4f;
-        float blerp = .6f + (scaledAmp);
-        glColor3f(rlerp, glerp, blerp);
+        float scaledAmp = p->amplitude() / 10;
+//        float rlerp = .2f + (scaledAmp) * .2f;
+//        float glerp = .4f + (scaledAmp) * .4f;
+//        float blerp = .6f + (scaledAmp);
+//        glColor3f(rlerp, glerp, blerp);
+        if (scaledAmp < 0) {
+            glColor3f(scaledAmp, 0, 0);
+        } else {
+            glColor3f(0, 0, scaledAmp);
+        }
 
         gluSphere(quadric, p->radius() / 10.f, 3, 3);
 

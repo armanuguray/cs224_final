@@ -10,7 +10,10 @@
 #include <QSet>
 #include <map>
 #include <string>
+#include <QString>
+#include <QMap>
 #include "OpenGLInclude.h"
+#include "WaveParticleManager.h"
 
 class QGLContext;
 class QGLFramebufferObject;
@@ -32,6 +35,9 @@ public:
 
     // steps the simulation
     void stepSimulation(float time_elapsed);
+
+    // generates waves
+    void generateWaves(WaveParticleManager &manager);
 
     // renders all rigid bodies that are currently alive
     void renderAll();
@@ -59,12 +65,14 @@ private:
     btCollisionShape *m_cube_collisionshape;
 
     /* Shader programs used in force calculations */
-    void load_shaders(const QGLContext *context);
-    std::map<std::string, QGLShaderProgram*> m_shaders;
+    void loadShaders(const QGLContext *context);
+    void loadShader(const QGLContext *context, const QString &name);
+    QMap<QString, QGLShaderProgram *> m_shaders;
 
     /* frame buffers */
-    void load_fbos();
-    QGLFramebufferObject *m_lowresbuffer; // the resolution of this buffer is BUOYANCY_IMAGE_RESOLUTION
+    void loadFramebufferObjects();
+    void loadFramebufferObject(int size, const QString &name);
+    QMap<QString, QGLFramebufferObject *> m_buffers;
     GLfloat *m_lowres; // low resolution buffer to store the contents of m_lowresbuffer on the CPU
 
     GLfloat per_face_buffer[6];

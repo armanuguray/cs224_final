@@ -62,10 +62,8 @@ void DrawEngine::setupGL()
     btVector3 inertia(0, 0, 0);
 
     // TODO: the following is for testing only. Remove when done
-    btTransform t(btQuaternion(0,0,0,1), btVector3(0,10,0));
+    btTransform t(btQuaternion(0,0,0,1), btVector3(0,20,0));
     RigidBody *rb = m_rigidbodysim->addRigidBody(RigidBodyTypeCube, BOX_MASS, inertia, t);
-    // add torque for fun
-    //rb->getInternalRigidBody()->applyTorque(btVector3(0,10,0));
 }
 
 void DrawEngine::loadShaders(const QGLContext *context)
@@ -102,6 +100,9 @@ void DrawEngine::drawFrame(float time_elapsed)
     // render rigidbodies
     m_rigidbodysim->stepSimulation(time_elapsed);
     m_rigidbodysim->renderAll();
+
+    // generate waves
+    m_rigidbodysim->generateWaves(m_waveparticles);
 
     // mark the origin as a point of reference
 #ifdef SHOW_ORIGIN
@@ -162,8 +163,8 @@ void DrawEngine::drawFrame(float time_elapsed)
 #endif
 
 #ifdef PARTICLE_TEST
-    m_waveParticles.update(time_elapsed);
-    m_waveParticles.drawParticles(m_quadric);
+    m_waveparticles.update(time_elapsed);
+    m_waveparticles.drawParticles(m_quadric);
 
     static int frame = 0;
     if (frame % 60 == 0)
@@ -171,7 +172,7 @@ void DrawEngine::drawFrame(float time_elapsed)
         int PARTICLES_PER_RING = 20;
         float TEST_AMPLITUDE = 15.f;
 
-        m_waveParticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 10.f);
+        m_waveparticles.generateUniformWave(PARTICLES_PER_RING, Vector2(0.f, 0.f), TEST_AMPLITUDE, 10.f);
     }
 
     ++frame;
@@ -186,7 +187,7 @@ void DrawEngine::createWave(const Vector2 &mousePos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 10.f);
+        m_waveparticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), 10, 10.f);
     }
 }
 
