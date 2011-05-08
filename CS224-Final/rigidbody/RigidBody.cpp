@@ -12,6 +12,20 @@ RigidBody::RigidBody()
     m_internal_collisionshape = NULL;
     m_internal_defaultmotionstate = NULL;
     m_render_function = NULL;
+
+    const float extent = SIDE_LENGTH / 2.0f;
+    centroids[0] = btVector3(-extent, -extent/3.0, extent/3.0);
+    centroids[1] = btVector3(-extent, extent/3.0, -extent/3.0);
+    centroids[2] = btVector3(extent, -extent/3.0, extent/3.0);
+    centroids[3] = btVector3(extent, extent/3.0, -extent/3.0);
+    centroids[4] = btVector3(-extent/3.0, -extent, extent/3.0);
+    centroids[5] = btVector3(extent/3.0, -extent, -extent/3.0);
+    centroids[6] = btVector3(-extent/3.0, extent, extent/3.0);
+    centroids[7] = btVector3(extent/3.0, extent, -extent/3.0);
+    centroids[8] = btVector3(-extent/3.0, extent/3.0, -extent);
+    centroids[9] = btVector3(extent/3.0, -extent/3.0, -extent);
+    centroids[10] = btVector3(-extent/3.0, extent/3.0, extent);
+    centroids[11] = btVector3(extent/3.0, -extent/3.0, extent);
 }
 
 RigidBody::~RigidBody()
@@ -100,7 +114,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
     const float extent = SIDE_LENGTH / 2.0f;
     const float R = (float)BUOYANCY_IMAGE_RESOLUTION;
     float xpos = -1.0 + 1.0/R, ypos = -1.0 + 1.0/R;
-    btVector3 centroids[12];
     glBegin(GL_POINTS);
     {
         // -x
@@ -109,7 +122,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, -extent, -extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2, -extent,  extent,  extent);
-        centroids[0] = btVector3(-extent, -extent/3.0, extent/3.0);
         btVector3 velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[0]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos, ypos); // pixel
@@ -118,7 +130,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, -extent,  extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2, -extent,  extent, -extent);
-        centroids[1] = btVector3(-extent, extent/3.0, -extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[1]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -129,7 +140,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, extent, -extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2, extent,  extent,  extent);
-        centroids[2] = btVector3(extent, -extent/3.0, extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[2]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -138,7 +148,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, extent,  extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2, extent,  extent, -extent);
-        centroids[3] = btVector3(extent, extent/3.0, -extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[3]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -149,7 +158,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, -extent, -extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent,  extent);
-        centroids[4] = btVector3(-extent/3.0, -extent, extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[4]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -158,7 +166,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1,  extent, -extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent, -extent);
-        centroids[5] = btVector3(extent/3.0, -extent, -extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[5]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -169,7 +176,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, -extent, extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent, extent,  extent);
-        centroids[6] = btVector3(-extent/3.0, extent, extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[6]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -178,7 +184,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1,  extent, extent,  extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent, extent, -extent);
-        centroids[7] = btVector3(extent/3.0, extent, -extent/3.0);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[7]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -189,7 +194,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, -extent,  extent, -extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent,  extent, -extent);
-        centroids[8] = btVector3(-extent/3.0, extent/3.0, -extent);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[8]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -198,7 +202,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, -extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1,  extent,  extent, -extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent, -extent);
-        centroids[9] = btVector3(extent/3.0, -extent/3.0, -extent);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[9]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -209,7 +212,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1, -extent,  extent, extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent,  extent, extent);
-        centroids[10] = btVector3(-extent/3.0, extent/3.0, extent);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[10]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel
@@ -218,7 +220,6 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
         glMultiTexCoord3f(GL_TEXTURE0, -extent, -extent, extent); // corners
         glMultiTexCoord3f(GL_TEXTURE1,  extent,  extent, extent);
         glMultiTexCoord3f(GL_TEXTURE2,  extent, -extent, extent);
-        centroids[11] = btVector3(extent/3.0, -extent/3.0, extent);
         velocity = m_internal_rigidbody->getVelocityInLocalPoint(centroids[11]); // face velocity
         glMultiTexCoord3f(GL_TEXTURE3, velocity.x(), velocity.y(), velocity.z());
         glVertex2f(xpos += 2.0/R, ypos); // pixel

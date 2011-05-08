@@ -76,6 +76,8 @@ protected:
      * default motion state, which will be set when initialize is called on this object
      */
     btDefaultMotionState *m_internal_defaultmotionstate;
+
+    btVector3 centroids[12];
 };
 
 #endif // RIGIDBODY_H
