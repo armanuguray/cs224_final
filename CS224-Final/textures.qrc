@@ -23,5 +23,9 @@
         <file alias="waveeffect.vert">shaders/waveeffect.vert</file>
         <file alias="computedir.frag">shaders/computedir.frag</file>
         <file alias="computedir.vert">shaders/computedir.vert</file>
+        <file alias="downscale.frag">shaders/downscale.frag</file>
+        <file alias="downscale.vert">shaders/downscale.vert</file>
+        <file alias="upscale.frag">shaders/upscale.frag</file>
+        <file alias="upscale.vert">shaders/upscale.vert</file>
     </qresource>
 </RCC>

@@ -52,10 +52,18 @@ void main(void)
 
 //    gl_FragColor = vec4(coords.x, coords.y, 0, 1);
 //    gl_FragColor = vec4(boundary_dir.x, boundary_dir.y, 0, 1);
-        gl_FragColor = vec4(curr_pos.x, curr_pos.y, boundary_dir.x, boundary_dir.y);
+      gl_FragColor = vec4(0, 0, boundary_dir.x, boundary_dir.y);
 
     } else {
         // This is not a boundary point!
 	gl_FragColor = vec4(0, 0, 0, 0);
     }
+
+    gl_FragColor.x = effects_data.x;
+    gl_FragColor.y = effects_data.y;
+
+    // x: direct
+    // y: indirect
+    // z: x-dir
+    // w: y-dir
 }

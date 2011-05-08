@@ -104,6 +104,11 @@ void RigidBodySimulation::loadFramebufferObjects()
     loadFramebufferObject(4, "4x4");
     loadFramebufferObject(2, "2x2");
     loadFramebufferObject(1, "1x1");
+
+    loadFramebufferObject(8, "8x8 2");
+    loadFramebufferObject(4, "4x4 2");
+    loadFramebufferObject(2, "2x2 2");
+    loadFramebufferObject(1, "1x1 2");
 }
 
 void RigidBodySimulation::loadShader(const QGLContext *context, const QString &name)
@@ -131,6 +136,8 @@ void RigidBodySimulation::loadShaders(const QGLContext *context)
     loadShader(context, "wavegen");
     loadShader(context, "waveeffect");
     loadShader(context, "computedir");
+    loadShader(context, "downscale");
+    loadShader(context, "upscale");
 }
 
 void RigidBodySimulation::stepSimulation(float time_elapsed)
