@@ -148,7 +148,7 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     }
 
     // step the bullet physics simulation
-    m_dynamics_world->stepSimulation(time_elapsed,2);
+    m_dynamics_world->stepSimulation(time_elapsed, MAX_SUBSTEPS);
 }
 
 RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform)

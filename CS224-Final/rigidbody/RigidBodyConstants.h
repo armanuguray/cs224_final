@@ -7,16 +7,18 @@
 
 // The maximum number of rigid bodies to pre-allocate for the entire simulation
 const unsigned RIGIDBODY_MAX_COUNT = 1000;
+// internal number of substep for each step of the physics simulation
+const int MAX_SUBSTEPS = 5;
 // resolution of the buoyancy image. this should be relatively low for performance reasons
 const unsigned BUOYANCY_IMAGE_RESOLUTION = 16;
 // impulse scale factor shooting boxes
-const float IMPULSE_SCALE = 10000.0f;
+const float IMPULSE_SCALE = 100000.0f;
 // water density (kg/m^2)
 const float WATER_DENSITY = 1000.0f;
 // clip height (unused)
 const float MAX_ABS_HEIGHT = 1000.0f;
 // mass of a crate (kg)
-const float BOX_MASS = 1000.f;
+const float BOX_MASS = 5200.f;
 // gravitational acceleration (m/s^2)
 const float GRAVITY = 9.8f;
 // length of one side of an object bounding box

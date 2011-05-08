@@ -66,7 +66,7 @@ void main(void)
     
     float Af = Atotal * fraction_in_water(surface, v0.y, v1.y, v2.y);
 
-    if(Af == 0.0 || length(U) < 1e-1) {                                                    // if not submerged, then the forces are 0
+    if(Af < 1e-6 || length(U) < 1e-6) {                                                    // if not submerged, then the forces are 0
         F_lift = F_drag = vec3(0.0, 0.0, 0.0);
     } else {
         float dot_ = dot(N,normalize(U));

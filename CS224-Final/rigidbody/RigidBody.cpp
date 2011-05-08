@@ -62,7 +62,6 @@ void RigidBody::render()
 void RigidBody::applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid)
 {
     btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume;
-//    btVector3 force = btVector3(0.0, GRAVITY, 0.0) * WATER_DENSITY * submerged_volume * .8;
     m_internal_rigidbody->applyCentralForce(force); // TODO: use volume_centroid
 }
 
