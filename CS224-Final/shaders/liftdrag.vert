@@ -59,25 +59,25 @@ void main(void)
     vec3 v0 = (ctm * vec4(gl_MultiTexCoord0.xyz, 1.0)).xyz;
     vec3 v1 = (ctm * vec4(gl_MultiTexCoord1.xyz, 1.0)).xyz;
     vec3 v2 = (ctm * vec4(gl_MultiTexCoord2.xyz, 1.0)).xyz;
-    // store the normal in world space
+    // get the normal in world space
     vec3 N = normalize((ctm * vec4(gl_Normal.xyz, 0.0)).xyz);
-    // store the velocity
+    // get the velocity
     vec3 U = gl_MultiTexCoord3.xyz; // TODO: - local water velocity
     
-    float Af = Atotal;//* fraction_in_water(surface, v0.y, v1.y, v2.y);
-    if (Af == 0.0) {                                                    // if not submerged, then the forces are 0
+    float Af = Atotal * fraction_in_water(surface, v0.y, v1.y, v2.y);
+
+    if(Af == 0.0 || length(U) < 1e-1) {                                                    // if not submerged, then the forces are 0
         F_lift = F_drag = vec3(0.0, 0.0, 0.0);
     } else {
-        float A = (dot(N, U)/length(U)*epsilon + 1.0 - epsilon)*Af;     // effective area
+        float dot_ = dot(N,normalize(U));
+        float A = (dot_ * epsilon + 1.0 - epsilon)*Af;     // effective area
         float factor = -0.5 * ro * A * length(U);
         F_drag = factor * Cd * U;
         // if the direction of motion is aligned with the surface normal, then there is no lift
-        float dot = dot(N,normalize(U));
-        if (abs(dot - 1.0) < 1e-4 || abs(dot + 1.0) < 1e-4)
+        if (abs(dot_ - 1.0) < 1e-4 || abs(dot_ + 1.0) < 1e-4)
             F_lift = vec3(0.0, 0.0, 0.0);
         else {
-            vec3 crossNU = cross(N, U); 
-            F_lift = factor * Cl * cross(U, crossNU/length(crossNU));
+            F_lift = factor * Cl * cross(U, normalize(cross(N, U)));
         }
     }
 }

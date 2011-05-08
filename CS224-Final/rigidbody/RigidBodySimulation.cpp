@@ -120,7 +120,7 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     btVector3 out_centroid;
     foreach (RigidBody *rb, m_rigidbodies)
     {
-        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid) > 0))
+        if ((volume = rb->computeSubmergedVolume(0, m_lowresbuffer, m_shaders["buoyancy"], m_camera->getWidth(), m_camera->getHeight(), m_lowres, out_centroid)) > 0)
         {
             rb->applyBuoyancy(volume, out_centroid);
             rb->applyLiftAndDrag(0, m_lowresbuffer, m_shaders["liftdrag"], m_camera->getWidth(), m_camera->getHeight(), m_lowres);
@@ -128,7 +128,7 @@ void RigidBodySimulation::stepSimulation(float time_elapsed)
     }
 
     // step the bullet physics simulation
-    m_dynamics_world->stepSimulation(time_elapsed, 10);
+    m_dynamics_world->stepSimulation(time_elapsed,2);
 }
 
 RigidBody* RigidBodySimulation::addRigidBody(RigidBodyType type, btScalar mass, btVector3 &inertia, btTransform &initial_transform)
