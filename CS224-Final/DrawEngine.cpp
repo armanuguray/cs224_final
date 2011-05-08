@@ -236,12 +236,14 @@ void DrawEngine::drawFrame(float time_elapsed)
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_TEXTURE_2D);
 
+    glEnable(GL_MULTISAMPLE);
+
     bool flip = true;
-    float plotwidth = 1.f / WAVE_HEIGHTMAP_RESOLUTION;
+    float plotwidth = 2.f / WAVE_HEIGHTMAP_RESOLUTION;
 
     foreach (WaveParticle *particle, m_waveParticles.liveParticles())
     {
-        glColor3f(clamp01(particle->amplitude() / (float)WAVE_MAX_AMPLITUDE), clamp01(-particle->amplitude() / (float)WAVE_MAX_AMPLITUDE), 0.f);
+        glColor3f(clamp01(particle->amplitude() / (float)WAVE_MAX_AMPLITUDE * .25f), clamp01(-particle->amplitude() / (float)WAVE_MAX_AMPLITUDE * .25f), 0.f);
         glPushMatrix();
 
         float x = (particle->position().x + .5 * w) / WAVE_HEIGHTMAP_WIDTH;
@@ -447,7 +449,7 @@ void DrawEngine::interact(Vector2 &mouse_pos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), -.125f);
+        m_waveParticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), .125f);
     }
 }
 

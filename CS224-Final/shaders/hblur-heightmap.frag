@@ -1,5 +1,5 @@
 
-const int RADIUS = 14; // Must match WaveConstants.h
+const int RADIUS = 2; // Must match WaveConstants.h
 const int WIDTH  = RADIUS + 1;
 
 uniform vec3 weights[WIDTH];

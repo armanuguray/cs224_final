@@ -73,7 +73,9 @@ OTHER_FILES += \
     shaders/vblur-heightmap.vert \
     shaders/vblur-heightmap.frag \
     shaders/hblur-heightmap.vert \
-    shaders/hblur-heightmap.frag
+    shaders/hblur-heightmap.frag \
+    shaders/plot-heightmap.vert \
+    shaders/plot-heightmap.frag
 
 RESOURCES += \
     textures.qrc
