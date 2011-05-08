@@ -66,4 +66,6 @@ void main(void)
     // y: indirect
     // z: x-dir
     // w: y-dir
+
+    // gl_FragColor = vec4(boundary_dir.x, boundary_dir.y, 0, 1);
 }

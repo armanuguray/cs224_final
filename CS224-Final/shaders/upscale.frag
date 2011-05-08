@@ -1,18 +1,26 @@
+uniform sampler2D prev_texture;
+uniform sampler2D downscale_texture;
+uniform float new_size;
 
-const float height = 0.0;
+const float old_halfunit = 0.5 / new_size;
+const float EPS = 0.0001;
 
-varying vec3 normal;
-varying vec4 pos;
+bool isBoundary(vec4 data) {
+    return abs(data.z) > 0.0 || abs(data.w) > 0.0;
+}
 
 void main(void)
 {
-    float depth = height - pos.y; 
-    float n_z = dot(vec3(0, 1, 0), normal);
+    vec2 loc = vec2((gl_FragCoord.x) / new_size,
+                    (gl_FragCoord.y) / new_size);
+    vec4 prev = texture2D(prev_texture, loc);
+    vec4 downscale = texture2D(downscale_texture, loc);
 
-    gl_FragColor = vec4(depth, n_z, 0, 1);
-    
-    if (depth < 0.0) {
-        // Reject this sample
-        gl_FragColor = vec4(0, 0, 0, 1);
-    }   
+    float indirect = 0.0;
+    if (isBoundary(downscale)) {
+        indirect = (prev.y + downscale.y) / downscale.x;
+    }
+
+    gl_FragColor = vec4(downscale.x, indirect,
+                        (prev.z + downscale.z) / 2, (prev.w + downscale.w) / 2);
 }

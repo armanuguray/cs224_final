@@ -168,7 +168,7 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     downscale_map[1] = buffers["1x1"];
 
     QMap<GLint, QGLFramebufferObject *> upscale_map;
-    upscale_map[16] = lowres_fb;
+    upscale_map[16] = lowres_fb2;
     upscale_map[8] = buffers["8x8 2"];
     upscale_map[4] = buffers["4x4 2"];
     upscale_map[2] = buffers["2x2 2"];
@@ -300,6 +300,8 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
             dir_gather->bind();
             dir_shader->bind();
 
+            glClear(GL_COLOR_BUFFER_BIT);
+
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
             glActiveTexture(GL_TEXTURE1);
@@ -360,41 +362,46 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
             glViewport(0, 0, old_size, old_size);
         }
 
-        //         pass 5: upscale
-        //        {
-        //            GLint max_size = BUOYANCY_IMAGE_RESOLUTION;
+        // pass 5: upscale
+        {
+            GLint max_size = BUOYANCY_IMAGE_RESOLUTION;
 
-        //            upscale->bind();
+            upscale->bind();
 
-        //            for (GLint new_size = 2; new_size <= max_size; new_size *= 2)
-        //            {
-        //                glViewport(0, 0, new_size, new_size);
-        //                upscale_map[new_size]->bind();
+            for (GLint new_size = 2; new_size <= max_size; new_size *= 2)
+            {
+                glViewport(0, 0, new_size, new_size);
+                upscale_map[new_size]->bind();
 
-        //                glActiveTexture(GL_TEXTURE0);
-        //                glBindTexture(GL_TEXTURE_2D, upscale_map[new_size / 2]->texture());
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, upscale_map[new_size / 2]->texture());
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, downscale_map[new_size]->texture());
 
-        //                upscale->setUniformValue("prev_texture", 0);
-        //                upscale->setUniformValue("new_size", (GLfloat) new_size);
+                upscale->setUniformValue("prev_texture", 0);
+                upscale->setUniformValue("downscale_texture", 1);
+                upscale->setUniformValue("new_size", (GLfloat) new_size);
 
-        //                glClear(GL_COLOR_BUFFER_BIT);
-        //                glBegin(GL_QUADS);
-        //                glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
-        //                glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
-        //                glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
-        //                glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
-        //                glEnd();
+                glClear(GL_COLOR_BUFFER_BIT);
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
+                glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
+                glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
+                glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
+                glEnd();
 
-        //                glActiveTexture(GL_TEXTURE0);
-        //                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
 
-        //                upscale_map[new_size]->release();
-        //            }
+                upscale_map[new_size]->release();
+            }
 
-        //            upscale->release();
+            upscale->release();
 
-        //            glViewport(0, 0, max_size, max_size);
-        //        }
+            glViewport(0, 0, max_size, max_size);
+        }
 
         glDisable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_CUBE_MAP);

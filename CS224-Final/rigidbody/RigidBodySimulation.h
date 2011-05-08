@@ -71,7 +71,7 @@ private:
 
     /* frame buffers */
     void loadFramebufferObjects();
-    void loadFramebufferObject(int size, const QString &name);
+    void loadFramebufferObject(int size, const QString &name, bool alpha = false);
     QMap<QString, QGLFramebufferObject *> m_buffers;
     GLfloat *m_lowres; // low resolution buffer to store the contents of m_lowresbuffer on the CPU
 
