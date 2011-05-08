@@ -71,8 +71,14 @@ void main(void)
         float A = (dot(N, U)/length(U)*epsilon + 1.0 - epsilon)*Af;     // effective area
         float factor = -0.5 * ro * A * length(U);
         F_drag = factor * Cd * U;
-        vec3 crossNU = cross(N, U);
-        F_lift = factor * Cl * cross(U, crossNU/length(crossNU));
+        // if the direction of motion is aligned with the surface normal, then there is no lift
+        float dot = dot(N,normalize(U));
+        if (abs(dot - 1.0) < 1e-4 || abs(dot + 1.0) < 1e-4)
+            F_lift = vec3(0.0, 0.0, 0.0);
+        else {
+            vec3 crossNU = cross(N, U); 
+            F_lift = factor * Cl * cross(U, crossNU/length(crossNU));
+        }
     }
 }
 

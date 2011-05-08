@@ -238,8 +238,9 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
     liftdrag_shader->release();
     framebuffer->release();
 
-    for (int i = 0; i < 36; i += 3)
-        logln(lowres_buffer[i]);
+    for (int i = 0; i < 36; i += 3) {
+        logln(lowres_buffer[i+1]);
+    }
     logln("--");
 
     //--- testing:
