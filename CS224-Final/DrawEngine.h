@@ -17,8 +17,11 @@
 #include <GL/glu.h>
 #endif
 
+#include "WaveConstants.h"
+
 class QGLContext;
 class QGLShaderProgram;
+class QGLFramebufferObject;
 class ProjectorCamera;
 class SkyRenderer;
 
@@ -39,6 +42,14 @@ public:
     // should be called when the window gets resized
     void resize(REAL width, REAL height);
 
+    // === mouse i`nteraction ===
+    // controls that interact with the water/objects
+    void mouse_down(Vector2 &mouse_pos, MouseButton button);
+
+    // controls that move the camera
+    void mouse_scroll(REAL delta);
+    void mouse_dragged(Vector2 &new_mouse_pos, Vector2 &delta, MouseButton button);
+
     // === mouse interaction ===
     void createWave(const Vector2 &mouse_pos);
     void throwBody(const Vector2 &mouse_pos, const RigidBodyType &type);
@@ -49,13 +60,9 @@ public:
 protected:
     // does initial OpenGL setup
     void setupGL();
-    // loads shaders
-    void loadShaders(const QGLContext *context);
 
     SkyRenderer *m_skyrenderer; // handles the rendering of the sky, including the sun.
     ProjectorCamera *m_projectorcamera; // represents the OpenGL camera. Also used for rendering the projected grid
-
-    std::map<string, QGLShaderProgram *> m_shaderprograms; // maps a shader program object to a given name.
 
     GLUquadric *m_quadric;
     WaveParticleManager m_waveparticles;

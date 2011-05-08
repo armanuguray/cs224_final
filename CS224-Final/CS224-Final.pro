@@ -82,7 +82,33 @@ unix:LIBS += -L/usr/local/lib -lm \
 -lLinearMath
 win32:LIBS += c:/mylibs/math.lib
 
-OTHER_FILES +=
+OTHER_FILES += \
+    shaders/fresnel.vert \
+    shaders/fresnel.frag \
+    shaders/wavetest.vert \
+    shaders/wavetest.frag \
+    shaders/heightmap.vert \
+    shaders/heightmap.frag \
+    shaders/vblur-heightmap.vert \
+    shaders/vblur-heightmap.frag \
+    shaders/hblur-heightmap.vert \
+    shaders/hblur-heightmap.frag \
+    shaders/plot-heightmap.vert \
+    shaders/plot-heightmap.frag \
+    shaders/wavegen.vert \
+    shaders/wavegen.frag \
+    shaders/waveeffect.vert \
+    shaders/waveeffect.frag \
+    shaders/upscale.vert \
+    shaders/upscale.frag \
+    shaders/liftdrag.vert \
+    shaders/liftdrag.frag \
+    shaders/downscale.vert \
+    shaders/downscale.frag \
+    shaders/computedir.vert \
+    shaders/computedir.frag \
+    shaders/buoyancy.vert \
+    shaders/buoyancy.frag
 
 RESOURCES += \
     textures.qrc

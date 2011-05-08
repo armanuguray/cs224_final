@@ -45,6 +45,7 @@ bool ProjectorCamera::intersectRayPlane(const Vector4 &src, const Vector4 &dir, 
 ProjectorCamera::ProjectorCamera(int width, int height) : Camera(width, height)
 {
     left_points = right_points = NULL;
+    depths = NULL;
     ProjectorCamera::loadMatrices();
 }
 
@@ -52,6 +53,7 @@ ProjectorCamera::~ProjectorCamera()
 {
     delete[] left_points;
     delete[] right_points;
+    delete[] depths;
 }
 
 void ProjectorCamera::loadMatrices()
@@ -224,6 +226,8 @@ void ProjectorCamera::loadMatrices()
     left_points = new Vector4[settings.grid_resolution + 1];
     delete[] right_points;
     right_points = new Vector4[settings.grid_resolution + 1];
+    delete[] depths;
+    depths = new float[settings.grid_resolution + 1];
 
     Vector4 screen_left = viewproj * ul;
     screen_left.homogenize();
@@ -245,14 +249,19 @@ void ProjectorCamera::loadMatrices()
     right_points[settings.grid_resolution] = lr;
     screen_left += left_dir;
     screen_right += right_dir;
+    depths[0] = 1;
+    depths[settings.grid_resolution] = 0;
 
     Vector4 near, far;
+    float OPTIMIZED_BIOTCH = (ul - ll).getMagnitude();
     for (unsigned  i = 1; i < settings.grid_resolution; i++) {
         far = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 1, 1)).homogenize();
         near = (inv_viewproj * Vector4(screen_left.x, screen_left.y, 0, 1)).homogenize();
         intersectSegmentPlane(near, far, 0, v);
         left_points[i] = v;
         screen_left += left_dir;
+
+        depths[i] = (v - ll).getMagnitude() / OPTIMIZED_BIOTCH;
 
         far = (inv_viewproj * Vector4(screen_right.x, screen_right.y, 1, 1)).homogenize();
         near = (inv_viewproj * Vector4(screen_right.x, screen_right.y, 0, 1)).homogenize();
@@ -290,9 +299,10 @@ void ProjectorCamera::renderProjectedGrid()
         glColor3f(0, 1, 1);
         glNormal3f(0.0, 1.0, 0.0);
 
-    //    if (settings.line_mode)
-    //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-     //   else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        if (settings.line_mode)
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         Vector2 v0curr, v1curr, v0next, v1next;
         Vector2 xdircurr, xdirnext;
         Vector2 vcurr, vnext;
@@ -308,8 +318,10 @@ void ProjectorCamera::renderProjectedGrid()
             xdirnext = v1next - v0next;
             xdirnext = xdirnext.getNormalized() * (xdirnext.getMagnitude()/static_cast<REAL>(settings.grid_resolution));
             glBegin(GL_QUAD_STRIP);
-            for (unsigned i = 0; i <= settings.grid_resolution; i++) {
+            for (unsigned j = 0; j <= settings.grid_resolution; j++) {
+                glTexCoord2f((float)j / (float)settings.grid_resolution, depths[i]);
                 glVertex3f(vcurr.x, 0, vcurr.y);
+                glTexCoord2f((float)j / (float)settings.grid_resolution, depths[i + 1]);
                 glVertex3f(vnext.x, 0, vnext.y);
                 vcurr += xdircurr;
                 vnext += xdirnext;

@@ -18,12 +18,13 @@ public:
     // intersects a ray with a plane that's perpendicular to the y-axis
     static bool intersectRayPlane(const Vector4 &src, const Vector4 &dir, REAL y, Vector4 &out);
 
+    Vector4 ll,lr,ul,ur; // corner points of the grid
+
 private:
 
     virtual void loadMatrices();
 
-    Vector4 ll,lr,ul,ur; // corner points of the grid
-
+    float *depths;          // Linearized depths, for texcoords
     Vector4 *left_points;
     Vector4 *right_points;
 

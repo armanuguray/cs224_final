@@ -1,0 +1,18 @@
+- Optimization: put all the particles in a glGenBuffer and use 
+  attributes. Avoids lots of shader binding/unbding when rendering
+  wave particles. Need per-particle attributes for enabling/disabling
+  the rendering of a particle (e.g. don't render dead particles).
+  - Actually this optimization causes the program to always draw all
+    the particles, which sucks. Forget that!
+
+So it looks like the problem with the normal is because the particles
+are individual particles, and not wavefronts. My understanding is that
+'wavefronts' are actually groups of particles that can't get more
+than (small number * radius) away from each other.
+
+TODO
+- Rewrite what we currently have to
+	- Draw wave particles as single pixels in textures
+	- Separated convoluation filters for generating the heights
+- Look at the dissertation, investigate projected heightmap for
+  infinite ocean rendering

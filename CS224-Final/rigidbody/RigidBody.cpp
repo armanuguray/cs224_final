@@ -61,8 +61,8 @@ void RigidBody::render()
 {
     if (m_render_function != NULL)
     {
-        btScalar m[15];
-        btTransform t;
+        static btScalar m[16];
+        static btTransform t;
         m_internal_rigidbody->getMotionState()->getWorldTransform(t);
         t.getOpenGLMatrix(m);
         glMatrixMode(GL_MODELVIEW);
@@ -337,6 +337,22 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     QGLShaderProgram *dir_shader = shaders["computedir"];
     QGLFramebufferObject *dir_gather = buffers["low-res3"];
 
+    QGLShaderProgram *downscale = shaders["downscale"];
+    QGLShaderProgram *upscale = shaders["upscale"];
+    QMap<GLint, QGLFramebufferObject *> downscale_map;
+    downscale_map[16] = dir_gather;
+    downscale_map[8] = buffers["8x8"];
+    downscale_map[4] = buffers["4x4"];
+    downscale_map[2] = buffers["2x2"];
+    downscale_map[1] = buffers["1x1"];
+
+    QMap<GLint, QGLFramebufferObject *> upscale_map;
+    upscale_map[16] = lowres_fb2;
+    upscale_map[8] = buffers["8x8 2"];
+    upscale_map[4] = buffers["4x4 2"];
+    upscale_map[2] = buffers["2x2 2"];
+    upscale_map[1] = buffers["1x1"];
+
     static const float halfextent = OBJ_EXTENT / 2.0f;
 
     static btScalar matrix[16];
@@ -424,7 +440,7 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
             velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(half_extent, 0, 0));
             glVertexAttrib3f(vel_idx, velocity.getX(), velocity.getY(), velocity.getZ());
-            glNormal3f(1.0, 0.0, 0.0); glVertex3f(half_extent, 0, 0);
+            glNormal3f(1.0, 0.0, 0.0); glVertex3f(half_extent, 0, 0); buffers["1x1 2"];
 
             velocity = //m_internal_rigidbody->getWorldTransform().getBasis().transpose() *
                        m_internal_rigidbody->getVelocityInLocalPoint(btVector3(0, -half_extent, 0));
@@ -449,45 +465,125 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         lowres_fb2->release();
     }
 
-    // pass 3: find boundary pixels and directions
     {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
         gluLookAt(0, 1, 0, 0, 0, 0, 0, 0, 1);
 
-        dir_gather->bind();
-        dir_shader->bind();
-
         glDisable(GL_TEXTURE_CUBE_MAP);
         glEnable(GL_TEXTURE_2D);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, lowres_fb2->texture());
+        // pass 3: find boundary pixels and directions
+        {
+            dir_gather->bind();
+            dir_shader->bind();
 
-        dir_shader->setUniformValue("silhouette", 0);
-        dir_shader->setUniformValue("effects", 1);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
-        glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
-        glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
-        glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
-        glEnd();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, lowres_fb->texture());
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, lowres_fb2->texture());
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glActiveTexture(GL_TEXTURE0);
+            dir_shader->setUniformValue("silhouette", 0);
+            dir_shader->setUniformValue("effects", 1);
+
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
+            glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
+            glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
+            glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
+            glEnd();
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            dir_shader->release();
+            dir_gather->release();
+        }
+
+        // pass 4: downscale
+        {
+            GLint old_size = BUOYANCY_IMAGE_RESOLUTION;
+
+            downscale->bind();
+
+            for (GLint new_size = old_size / 2; new_size > 0; new_size /= 2)
+            {
+                glViewport(0, 0, new_size, new_size);
+                downscale_map[new_size]->bind();
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, downscale_map[2 * new_size]->texture());
+
+                downscale->setUniformValue("prev_texture", 0);
+                downscale->setUniformValue("new_size", (GLfloat) new_size);
+
+                glClear(GL_COLOR_BUFFER_BIT);
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
+                glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
+                glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
+                glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
+                glEnd();
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+                downscale_map[new_size]->release();
+            }
+
+            downscale->release();
+
+            glViewport(0, 0, old_size, old_size);
+        }
+
+        // pass 5: upscale
+        {
+            GLint max_size = BUOYANCY_IMAGE_RESOLUTION;
+
+            upscale->bind();
+
+            for (GLint new_size = 2; new_size <= max_size; new_size *= 2)
+            {
+                glViewport(0, 0, new_size, new_size);
+                upscale_map[new_size]->bind();
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, upscale_map[new_size / 2]->texture());
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, downscale_map[new_size]->texture());
+
+                upscale->setUniformValue("prev_texture", 0);
+                upscale->setUniformValue("downscale_texture", 1);
+                upscale->setUniformValue("new_size", (GLfloat) new_size);
+
+                glClear(GL_COLOR_BUFFER_BIT);
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 0.0); glVertex3f(-halfextent, 0.0, -halfextent);
+                glTexCoord2f(1.0, 0.0); glVertex3f(-halfextent, 0.0, halfextent);
+                glTexCoord2f(1.0, 1.0); glVertex3f(halfextent, 0.0, halfextent);
+                glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
+                glEnd();
+
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+                upscale_map[new_size]->release();
+            }
+
+            upscale->release();
+
+            glViewport(0, 0, max_size, max_size);
+        }
 
         glDisable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_CUBE_MAP);
-
-        dir_shader->release();
-        dir_gather->release();
 
         glPopMatrix();
     }
@@ -536,6 +632,82 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
         glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
         glEnd();
+
+        {
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, downscale_map[8]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, downscale_map[4]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, downscale_map[2]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, downscale_map[1]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+        }
+
+        {
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, upscale_map[1]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, upscale_map[2]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, upscale_map[4]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+
+            startx += w + s;
+            glBindTexture(GL_TEXTURE_2D, upscale_map[8]->texture());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(startx, 1.0, startz);
+            glTexCoord2f(1.0, 0.0); glVertex3f(startx, 1.0, startz + w);
+            glTexCoord2f(1.0, 1.0); glVertex3f(startx + w, 1.0, startz + w);
+            glTexCoord2f(0.0, 1.0); glVertex3f(startx + w, 1.0, startz);
+            glEnd();
+        }
 
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_TEXTURE_2D);

@@ -84,12 +84,20 @@ RigidBodySimulation::~RigidBodySimulation()
     delete[] m_lowres;
 }
 
-void RigidBodySimulation::loadFramebufferObject(int size, const QString &name)
+void RigidBodySimulation::loadFramebufferObject(int size, const QString &name, bool alpha)
 {
     QGLFramebufferObject *buffer;
-    buffer = new QGLFramebufferObject(size, size,
-                                      QGLFramebufferObject::NoAttachment,
-                                      GL_TEXTURE_2D, GL_RGB16F_ARB);
+
+    if (!alpha) {
+        buffer = new QGLFramebufferObject(size, size,
+                                          QGLFramebufferObject::NoAttachment,
+                                          GL_TEXTURE_2D, GL_RGB16F_ARB);
+    } else {
+        buffer = new QGLFramebufferObject(size, size,
+                                          QGLFramebufferObject::NoAttachment,
+                                          GL_TEXTURE_2D, GL_RGBA16F_ARB);
+    }
+
 
     m_buffers[name] = buffer;
 }
@@ -97,13 +105,18 @@ void RigidBodySimulation::loadFramebufferObject(int size, const QString &name)
 void RigidBodySimulation::loadFramebufferObjects()
 {
     loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res");
-    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res2");
-    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res3");
+    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res2", true);
+    loadFramebufferObject(BUOYANCY_IMAGE_RESOLUTION, "low-res3", true);
 
-    loadFramebufferObject(8, "8x8");
-    loadFramebufferObject(4, "4x4");
-    loadFramebufferObject(2, "2x2");
-    loadFramebufferObject(1, "1x1");
+    loadFramebufferObject(8, "8x8", true);
+    loadFramebufferObject(4, "4x4", true);
+    loadFramebufferObject(2, "2x2", true);
+    loadFramebufferObject(1, "1x1", true);
+
+    loadFramebufferObject(8, "8x8 2", true);
+    loadFramebufferObject(4, "4x4 2", true);
+    loadFramebufferObject(2, "2x2 2", true);
+    loadFramebufferObject(1, "1x1 2", true);
 }
 
 void RigidBodySimulation::loadShader(const QGLContext *context, const QString &name)
@@ -126,10 +139,19 @@ void RigidBodySimulation::loadShader(const QGLContext *context, const QString &n
 
 void RigidBodySimulation::loadShaders(const QGLContext *context)
 {
+    logln("buoyancy");
     loadShader(context, "buoyancy");
+    logln("wavegen");
     loadShader(context, "wavegen");
+    logln("waveeffect");
     loadShader(context, "waveeffect");
+    logln("computedir");
     loadShader(context, "computedir");
+    logln("downscale");
+    loadShader(context, "downscale");
+    logln("upscale");
+    loadShader(context, "upscale");
+    logln("liftdrag");
     loadShader(context, "liftdrag");
 }
 

@@ -15,7 +15,7 @@ void main(void)
 
     vec4 curr_pos = texture2D(silhouette, coords);
 
-    vec2 boundary_dir = vec2(0, 0);
+    vec2 boundary_dir = vec2(0.0, 0.0);
     int ct = 0;
     // This is a boundary point! Compute some directions
     vec4 left_color = texture2D(silhouette, vec2(coords.x - unit, coords.y));
@@ -52,10 +52,20 @@ void main(void)
 
 //    gl_FragColor = vec4(coords.x, coords.y, 0, 1);
 //    gl_FragColor = vec4(boundary_dir.x, boundary_dir.y, 0, 1);
-        gl_FragColor = vec4(curr_pos.x, curr_pos.y, boundary_dir.x, boundary_dir.y);
+      gl_FragColor = vec4(0.0, 0.0, boundary_dir.x, boundary_dir.y);
 
     } else {
         // This is not a boundary point!
-	gl_FragColor = vec4(0, 0, 0, 0);
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }
+
+    gl_FragColor.x = effects_data.x;
+    gl_FragColor.y = effects_data.y;
+
+    // x: direct
+    // y: indirect
+    // z: x-dir
+    // w: y-dir
+
+    // gl_FragColor = vec4(boundary_dir.x, boundary_dir.y, 0.0, 1.0);
 }
