@@ -10,7 +10,7 @@
 #include "RigidBody.h"
 #include "RigidBodyConstants.h"
 
-#define SHOW_ORIGIN
+//#define SHOW_ORIGIN
 //#define PARTICLE_TEST
 #define DRAW_WATER
 
@@ -97,13 +97,14 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_waveparticles.renderWaves(m_projectorcamera, m_skyrenderer);
 #endif
 
-#ifdef SHOW_ORIGIN
     // render rigidbodies
     m_rigidbodysim->stepSimulation(time_elapsed);
     m_rigidbodysim->renderAll();
 
     // generate waves
     m_rigidbodysim->generateWaves(m_waveparticles);
+
+#ifdef SHOW_ORIGIN
 
     // mark the origin as a point of reference
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
