@@ -176,7 +176,7 @@ void WaveParticleManager::computeWeights()
         _heightWeightsX[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
         _heightWeightsX[3 * i + 2] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
 
-        _velocityWeightsX[2 * i + 0] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR)) * piVOverR;
+        _velocityWeightsX[2 * i + 0] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR));// * piVOverR;
         _velocityWeightsX[2 * i + 1] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
 
         dist = (float)i * WAVE_HEIGHTMAP_HEIGHT / WAVE_HEIGHTMAP_RESOLUTION;
@@ -188,7 +188,7 @@ void WaveParticleManager::computeWeights()
         _heightWeightsZ[3 * i + 2] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
 
         _velocityWeightsZ[2 * i + 0] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
-        _velocityWeightsZ[2 * i + 1] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR)) * piVOverR;
+        _velocityWeightsZ[2 * i + 1] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR));// * piVOverR;
     }
 }
 

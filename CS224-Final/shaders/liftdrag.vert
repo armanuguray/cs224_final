@@ -90,7 +90,7 @@ void main(void)
     // get the normal in world space
     vec3 N = normalize((ctm * vec4(gl_Normal.xyz, 0.0)).xyz);
     // get the velocity
-    vec3 U = gl_MultiTexCoord3.xyz - (3.0 * water_velocity);
+    vec3 U = gl_MultiTexCoord3.xyz + water_velocity;
     
     float Af = Atotal * fraction_in_water(surface, v0.y, v1.y, v2.y);
 
