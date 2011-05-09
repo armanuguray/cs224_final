@@ -37,10 +37,20 @@ void main()
         tmp = samp.xy;
         float signflag = samp.z * 4.0;
 
-        if (signflag == 1.0 || signflag == 3.0)
-            tmp.x *= -1.0;
-        if (signflag == 2.0)
-            tmp.y *= -1.0;
+        if (signflag > 2.0)
+        {
+            samp.x *= -1.0;
+            samp.y *= -1.0;
+        }
+        else if (signflag > 1.0)
+        {
+            samp.y *= -1.0;
+        }
+        else if (signflag > 0.0)
+        {
+            samp.x *= -1.0;
+        }
+
         v += vw * tmp;
 
         samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rgb;
@@ -61,10 +71,6 @@ void main()
             samp.x *= -1.0;
         }
 
-        if (signflag == 1.0 || signflag == 3.0)
-            tmp.x *= -1.0;
-        if (signflag == 2.0)
-            tmp.y *= -1.0;
         v += vw * tmp;
     }
 
