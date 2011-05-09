@@ -9,6 +9,7 @@ uniform float wp_max_amplitude;
 uniform float heightmap_resolution;
 
 uniform sampler2D texture;
+uniform sampler2D velocity;
 
 void main()
 {
@@ -22,17 +23,21 @@ void main()
     {
         vec3 hw = heightWeights[i];
         vec2 vw = velocityWeights[i];
-
         float r = float(i);
+
         vec2 tmp = texture2D(texture, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).rg;
         float amp = tmp.r - tmp.g;
         h += hw * amp;
-        v += vw * amp;
+
+        tmp = 2.0 * texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).rg - vec2(1.0);
+        v += vw * tmp;
 
         tmp = texture2D(texture, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg;
         amp = tmp.r - tmp.g;
         h += hw * amp;
-        v += vw * amp;
+
+        tmp = 2.0 * texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg - vec2(1.0);
+        v += vw * tmp;
     }
 
     gl_FragData[0] = vec4(vec3(.5) + .5 * h, 0.0);

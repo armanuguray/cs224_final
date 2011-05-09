@@ -19,9 +19,9 @@ public:
     WaveParticleManager();
     virtual ~WaveParticleManager();
 
-    void update(float time_elapsed);
+    void update(float time, float time_elapsed);
 
-    void generateUniformWave(int numParticles, const Vector2 &origin, float amplitude);
+    void generateUniformWave(int numParticles, const Vector2 &origin, float amplitude, float time);
 
     /**
      * Renders all particles onto the screen as spheres. This is pretty much just for testing.
@@ -35,13 +35,13 @@ public:
 
     void moveHeightmap(ProjectorCamera *camera);
 
-    void renderHeightmap();
+    void renderHeightmap(float t);
     void blurHeightmap();
     void renderWaves(ProjectorCamera* camera, SkyRenderer *sky);
 
     void debugDrawHeightmap();
 
-    void draw(ProjectorCamera* camera, SkyRenderer *sky);
+    void draw(ProjectorCamera* camera, SkyRenderer *sky, float t);
 
     GLuint heightTexture()   { return m_heightVelocityTargets[0]; }    // G = height
     GLuint velocityTexture() { return m_heightVelocityTargets[1]; }    // R = x, G = y

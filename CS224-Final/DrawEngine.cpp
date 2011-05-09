@@ -25,6 +25,8 @@ DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
     setupGL();
 
     m_quadric = gluNewQuadric();
+
+    m_time = 0.f;
 }
 
 DrawEngine::~DrawEngine()
@@ -76,12 +78,14 @@ float clamp01(float x)
 
 void DrawEngine::drawFrame(float time_elapsed)
 {
+    m_time += time_elapsed;
+
 #ifdef DRAW_WATER
     m_waveparticles.moveHeightmap(m_projectorcamera);
-    m_waveparticles.renderHeightmap();
+    m_waveparticles.renderHeightmap(m_time);
     m_waveparticles.blurHeightmap();
 #endif
-    m_waveparticles.update(time_elapsed);
+    m_waveparticles.update(m_time, time_elapsed);
 
     // render the world
     glViewport(0, 0, m_projectorcamera->getWidth(), m_projectorcamera->getHeight());
@@ -189,7 +193,7 @@ void DrawEngine::createWave(const Vector2 &mousePos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveparticles.generateUniformWave(5, Vector2(intersect.x, intersect.z), .125f);
+        m_waveparticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), .125f, m_time);
     }
 }
 
