@@ -29,14 +29,28 @@ void main()
         float amp = tmp.r - tmp.g;
         h += hw * amp;
 
-        tmp = 2.0 * texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).rg - vec2(1.0);
-        v += vw * tmp;
-
         tmp = texture2D(texture, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg;
         amp = tmp.r - tmp.g;
         h += hw * amp;
 
-        tmp = 2.0 * texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg - vec2(1.0);
+        vec3 samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx *  r, 0.0)).rgb;
+        tmp = samp.xy;
+        float signflag = samp.z;
+
+        if (signflag == 1.0 || signflag == 3.0)
+            tmp.x *= -1.0;
+        if (signflag == 2.0)
+            tmp.y *= -1.0;
+        v += vw * tmp;
+
+        samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rgb;
+        tmp = samp.xy;
+        signflag = samp.z;
+
+        if (signflag == 1.0 || signflag == 3.0)
+            tmp.x *= -1.0;
+        if (signflag == 2.0)
+            tmp.y *= -1.0;
         v += vw * tmp;
     }
 
