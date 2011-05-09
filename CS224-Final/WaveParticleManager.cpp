@@ -9,6 +9,9 @@ WaveParticleManager::WaveParticleManager()
     for (int i = 0; i < WAVE_PARTICLE_COUNT; ++i) {
         m_particleStore.add(new WaveParticle());
     }
+
+    m_heightmapX = 0.f;
+    m_heightmapZ = 0.f;
 }
 
 WaveParticleManager::~WaveParticleManager()
@@ -256,8 +259,8 @@ void WaveParticleManager::renderHeightmap()
         glColor3f(particle->amplitude() / (float)WAVE_MAX_AMPLITUDE * .25f, -particle->amplitude() / (float)WAVE_MAX_AMPLITUDE * .25f, 0.f);
         glPushMatrix();
 
-        float x = (particle->position().x + .5 * w) / WAVE_HEIGHTMAP_WIDTH;
-        float y = 1.f - (particle->position().y + .5 * h) / WAVE_HEIGHTMAP_HEIGHT;
+        float x = (particle->position().x - m_heightmapX + .5 * w) / WAVE_HEIGHTMAP_WIDTH;
+        float y = 1.f - (particle->position().y - m_heightmapZ + .5 * h) / WAVE_HEIGHTMAP_HEIGHT;
         glTranslatef(x, y, 0.f);
 
         glBegin(GL_QUADS);
@@ -357,10 +360,10 @@ void WaveParticleManager::renderWaves(ProjectorCamera *camera, SkyRenderer *sky)
     m_shaderprograms["wavetest"]->bind();
     m_shaderprograms["wavetest"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["wavetest"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
-    m_shaderprograms["wavetest"]->setUniformValue("htl", QVector3D(-w * .5, 0, -h * .5));
-    m_shaderprograms["wavetest"]->setUniformValue("htr", QVector3D( w * .5, 0, -h * .5));
-    m_shaderprograms["wavetest"]->setUniformValue("hbl", QVector3D(-w * .5, 0,  h * .5));
-    m_shaderprograms["wavetest"]->setUniformValue("hbr", QVector3D( w * .5, 0,  h * .5));
+    m_shaderprograms["wavetest"]->setUniformValue("htl", QVector3D(-w * .5 + m_heightmapX, 0, -h * .5 + m_heightmapZ));
+    m_shaderprograms["wavetest"]->setUniformValue("htr", QVector3D( w * .5 + m_heightmapX, 0, -h * .5 + m_heightmapZ));
+    m_shaderprograms["wavetest"]->setUniformValue("hbl", QVector3D(-w * .5 + m_heightmapX, 0,  h * .5 + m_heightmapZ));
+    m_shaderprograms["wavetest"]->setUniformValue("hbr", QVector3D( w * .5 + m_heightmapX, 0,  h * .5 + m_heightmapZ));
     m_shaderprograms["wavetest"]->setUniformValue("tl", QVector3D(camera->ul.x / camera->ul.w, camera->ul.y / camera->ul.w, camera->ul.z / camera->ul.w));
     m_shaderprograms["wavetest"]->setUniformValue("tr", QVector3D(camera->ur.x / camera->ur.w, camera->ur.y / camera->ur.w, camera->ur.z / camera->ur.w));
     m_shaderprograms["wavetest"]->setUniformValue("bl", QVector3D(camera->ll.x / camera->ll.w, camera->ll.y / camera->ll.w, camera->ll.z / camera->ll.w));
@@ -390,4 +393,43 @@ void WaveParticleManager::draw(ProjectorCamera* camera, SkyRenderer *sky)
     renderHeightmap();
     blurHeightmap();
     renderWaves(camera, sky);
+}
+
+void WaveParticleManager::moveHeightmap(ProjectorCamera *camera)
+{
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    Vector2 screenleft (        0.0, camera->getEye().z > 0.0 ? viewport[3] : 0.0);
+    Vector2 screenright(viewport[2], camera->getEye().z > 0.0 ? viewport[3] : 0.0);
+
+    Vector4 leftray, rightray;
+    camera->getMouseRay(screenleft, leftray);
+    camera->getMouseRay(screenright, rightray);
+
+    Vector4 left, right;
+    assert(ProjectorCamera::intersectRayPlane(camera->getEye(), leftray, 0.0, left));
+    assert(ProjectorCamera::intersectRayPlane(camera->getEye(), rightray, 0.0, right));
+
+    Vector4 test = right - left;
+    if (test.x > 0.0 && test.z > 0.0)
+    {
+        m_heightmapX =  left.x + .4 * WAVE_HEIGHTMAP_WIDTH;
+        m_heightmapZ = right.z - .4 * WAVE_HEIGHTMAP_HEIGHT;
+    }
+    else if (test.x < 0.0 && test.z > 0.0)
+    {
+        m_heightmapX = right.x + .4 * WAVE_HEIGHTMAP_WIDTH;
+        m_heightmapZ =  left.z + .4 * WAVE_HEIGHTMAP_HEIGHT;
+    }
+    else if (test.x < 0.0 && test.z < 0.0)
+    {
+        m_heightmapX =  left.x - .4 * WAVE_HEIGHTMAP_WIDTH;
+        m_heightmapZ = right.z + .4 * WAVE_HEIGHTMAP_HEIGHT;
+    }
+    else if (test.x > 0.0 && test.z < 0.0)
+    {
+        m_heightmapX = right.x - .4 * WAVE_HEIGHTMAP_WIDTH;
+        m_heightmapZ =  left.z - .4 * WAVE_HEIGHTMAP_HEIGHT;
+    }
 }

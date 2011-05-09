@@ -122,7 +122,7 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
     m_amplitude += WAVE_AMPLITUDE_FALLOFF * dt * -sign(m_amplitude);
 
     // Die if the amplitude is too low
-    if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE || fabs(m_position.x) > .5 * WAVE_HEIGHTMAP_WIDTH || fabs(m_position.y) > .5 * WAVE_HEIGHTMAP_HEIGHT)
+    if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE)// || fabs(m_position.x) > .5 * WAVE_HEIGHTMAP_WIDTH || fabs(m_position.y) > .5 * WAVE_HEIGHTMAP_HEIGHT)
     {
         liveParticles->remove(this);
         particles->free(this);

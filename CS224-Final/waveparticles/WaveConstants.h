@@ -6,7 +6,7 @@
 
 // The minimum amplitude of each particle, in world coordinates (distance from projection grid plane).
 // When a particle's amplitude is less than WAVE_MIN_AMPLITUDE, it dies
-#define WAVE_MIN_AMPLITUDE .00125
+#define WAVE_MIN_AMPLITUDE .000625
 
 // The maximum amplitude any particle may have. For rendering purposes.
 #define WAVE_MAX_AMPLITUDE 5

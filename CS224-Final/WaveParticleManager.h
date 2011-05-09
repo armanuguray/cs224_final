@@ -33,6 +33,8 @@ public:
     void load(const QGLContext *context);
     void unload();
 
+    void moveHeightmap(ProjectorCamera *camera);
+
     void renderHeightmap();
     void blurHeightmap();
     void renderWaves(ProjectorCamera* camera, SkyRenderer *sky);
@@ -51,6 +53,8 @@ private:
 
     std::map<string, QGLShaderProgram *> m_shaderprograms;
     std::map<string, QGLFramebufferObject *> m_fbos;
+
+    float m_heightmapX, m_heightmapZ;
 
     float _weightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
     float _weightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];

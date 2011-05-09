@@ -77,6 +77,7 @@ float clamp01(float x)
 void DrawEngine::drawFrame(float time_elapsed)
 {
 #ifdef DRAW_WATER
+    m_waveparticles.moveHeightmap(m_projectorcamera);
     m_waveparticles.renderHeightmap();
     m_waveparticles.blurHeightmap();
 #endif
