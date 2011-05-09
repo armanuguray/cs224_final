@@ -35,7 +35,7 @@ void main()
 
         vec3 samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx *  r, 0.0)).rgb;
         tmp = samp.xy;
-        float signflag = samp.z;
+        float signflag = samp.z * 4.0;
 
         if (signflag == 1.0 || signflag == 3.0)
             tmp.x *= -1.0;
@@ -45,7 +45,7 @@ void main()
 
         samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rgb;
         tmp = samp.xy;
-        signflag = samp.z;
+        signflag = samp.z * 4.0;
 
         if (signflag == 1.0 || signflag == 3.0)
             tmp.x *= -1.0;
