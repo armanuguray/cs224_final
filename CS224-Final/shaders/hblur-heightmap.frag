@@ -33,10 +33,10 @@ void main()
         amp = tmp.r - tmp.g;
         h += hw * amp;
 
-        vec4 tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0));\
+        vec4 tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0));
         v += vw * (tmp2.rg - tmp2.ba);
 
-        tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0));\
+        tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0));
         v += vw * (tmp2.rg - tmp2.ba);
     }
 
