@@ -2,39 +2,16 @@
 #include "WaveConstants.h"
 #include "WaveParticle.h"
 
-WaveParticle::WaveParticle() : m_position(0, 0),
-                               m_velocity(0, 0),
-                               m_amplitude(0),
-                               m_dispersionOrigin(0, 0),
-                               m_dispersionAngle(0)
-{
-}
-
-WaveParticle::WaveParticle(const Vector2 &position, const Vector2 &velocity, REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle)
-                         : m_position(position),
-                           m_velocity(velocity),
-                           m_amplitude(amplitude),
-                           m_dispersionOrigin(dispersionOrigin),
-                           m_dispersionAngle(dispersionAngle)
-{
-}
-
-WaveParticle::WaveParticle(REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle, REAL movementAngle)
-                         : m_position(dispersionOrigin),
-                           m_velocity(WAVE_SPEED * cos(movementAngle), WAVE_SPEED * sin(movementAngle)),
-                           m_amplitude(amplitude),
-                           m_dispersionOrigin(dispersionOrigin),
-                           m_dispersionAngle(dispersionAngle)
+WaveParticle::WaveParticle() : m_amplitude(0.0),
+                               m_dispersionOrigin(0.0, 0.0),
+                               m_dispersionAngle(0.0),
+                               m_direction(0.0, 0.0),
+                               m_time(0.0f)
 {
 }
 
 WaveParticle::~WaveParticle()
 {
-}
-
-REAL WaveParticle::sign(REAL a)
-{
-    return a < 0 ? -1.0 : 1.0;
 }
 
 void WaveParticle::onAlloc()
@@ -45,42 +22,23 @@ void WaveParticle::onFree()
 {
 }
 
-void WaveParticle::spawn(const Vector2 &position, const Vector2 &velocity, REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle)
+void WaveParticle::spawn(const Vector2& direction, REAL amplitude, float time ,const Vector2& dispersionOrigin, REAL dispersionAngle)
 {
-    m_position = position;
-    m_velocity = velocity;
+    m_direction = direction;
     m_amplitude = amplitude;
+    m_time = time;
     m_dispersionOrigin = dispersionOrigin;
     m_dispersionAngle = dispersionAngle;
 }
 
-void WaveParticle::spawn(REAL amplitude, const Vector2 &dispersionOrigin, REAL dispersionAngle, REAL movementAngle)
+void WaveParticle::spawn(REAL amplitude, const Vector2& dispersionOrigin, REAL dispersionAngle, REAL movementAngle, float time)
 {
-    m_position = dispersionOrigin;
-    m_velocity = Vector2(WAVE_SPEED * cos(movementAngle), WAVE_SPEED * sin(movementAngle));
     m_amplitude = amplitude;
     m_dispersionOrigin = dispersionOrigin;
     m_dispersionAngle = dispersionAngle;
-}
-
-Vector2& WaveParticle::position()
-{
-    return m_position;
-}
-
-void WaveParticle::setPosition(const Vector2 &position)
-{
-    m_position = position;
-}
-
-Vector2& WaveParticle::velocity()
-{
-    return m_velocity;
-}
-
-void WaveParticle::setVelocity(const Vector2 &velocity)
-{
-    m_velocity = velocity;
+    m_direction.x = cos(movementAngle);
+    m_direction.y = sin(movementAngle);
+    m_time = time;
 }
 
 REAL WaveParticle::amplitude()
@@ -113,30 +71,35 @@ void WaveParticle::setDispersionAngle(REAL r)
     m_dispersionAngle = r;
 }
 
-void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, REAL dt)
+Vector2& WaveParticle::direction()
 {
-    // Move
-    m_position += m_velocity * dt;
+    return m_direction;
+}
 
-    // Decrease this particle's amplitude
-    m_amplitude += WAVE_AMPLITUDE_FALLOFF * dt * -sign(m_amplitude);
+void WaveParticle::setDirection(const Vector2 &d)
+{
+    m_direction = d;
+}
 
-    // Die if the amplitude is too low
-    if (fabs(m_amplitude) < WAVE_MIN_AMPLITUDE)// || fabs(m_position.x) > .5 * WAVE_HEIGHTMAP_WIDTH || fabs(m_position.y) > .5 * WAVE_HEIGHTMAP_HEIGHT)
-    {
-        liveParticles->remove(this);
-        particles->free(this);
-    }
+float WaveParticle::time()
+{
+    return m_time;
+}
 
+void WaveParticle::setTime(float t)
+{
+    m_time = t;
+}
+
+void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, float t, float dt)
+{
     // Subdivide if necessary
     REAL maxDist = WAVE_PARTICLE_RADIUS * WAVE_SUBDIVISION_COEFFICIENT;
-    Vector2 fromCenter = m_position - m_dispersionOrigin;
-//    REAL dist = fromCenter.getMagnitude() * m_dispersionAngle;
-    REAL dist = 2.0 * fromCenter.getMagnitude() * tan(m_dispersionAngle * .5);
+    REAL dist = 2.0 * (WAVE_SPEED * (t - m_time)) * tan(m_dispersionAngle * .5);
     if (dist > maxDist)
     {
         // Find the current angle from the origin
-        float theta = atan2(fromCenter.y, fromCenter.x);
+        float theta = atan2(m_direction.y, m_direction.x);
 
         // Use the bisections between this and neighboring particles to find their angles
         float thetaLeft  = theta - .3333 * m_dispersionAngle;
@@ -161,24 +124,14 @@ void WaveParticle::update(QSet<WaveParticle *> *liveParticles, Pool *particles, 
         left->setAmplitude(m_amplitude);
         left->setDispersionAngle(m_dispersionAngle);
         left->setDispersionOrigin(m_dispersionOrigin);
-
-        Vector2 off = m_position - m_dispersionOrigin;
-        float dist = off.getMagnitude();
-
-        theta = thetaLeft;
-        Vector2 dir(cos(theta), sin(theta));
-        left->setPosition(m_dispersionOrigin + dir * dist);
-        left->setVelocity(dir * m_velocity.getMagnitude());
+        left->setDirection(Vector2(cos(thetaLeft), sin(thetaLeft)));
+        left->setTime(m_time);
 
         right->setAmplitude(m_amplitude);
         right->setDispersionAngle(m_dispersionAngle);
         right->setDispersionOrigin(m_dispersionOrigin);
-
-        theta = thetaRight;
-        dir.x = cos(theta);
-        dir.y = sin(theta);
-        right->setPosition(m_dispersionOrigin + dir * dist);
-        right->setVelocity(dir * m_velocity.getMagnitude());
+        right->setDirection(Vector2(cos(thetaRight), sin(thetaRight)));
+        right->setTime(m_time);
 
         liveParticles->insert(left);
         liveParticles->insert(right);

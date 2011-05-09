@@ -67,6 +67,8 @@ protected:
     GLUquadric *m_quadric;
     WaveParticleManager m_waveparticles;
     RigidBodySimulation *m_rigidbodysim;
+
+    float m_time;
 };
 
 #endif // DRAWENGINE_H

@@ -1,8 +1,8 @@
 
-uniform float amplitude;
-uniform float wp_max_amplitude;
+uniform float wp_amplitude;
+uniform float max_amplitude;
 
 void main()
 {
-    gl_FragColor = vec4(amplitude, -amplitude, 0.0, 1.0);
+    gl_FragColor = vec4(wp_amplitude / max_amplitude, -wp_amplitude / max_amplitude, 0.0, 1.0);
 }

@@ -19,7 +19,7 @@ WaveParticleManager::~WaveParticleManager()
     m_particleStore.clear();
 }
 
-void WaveParticleManager::update(float time_elapsed)
+void WaveParticleManager::update(float time, float time_elapsed)
 {
     QSetIterator<WaveParticle *> it(m_liveParticles);
     while (it.hasNext())
@@ -27,11 +27,11 @@ void WaveParticleManager::update(float time_elapsed)
         WaveParticle *p = (WaveParticle *) it.next();
         assert(p->isAlive());
 
-        p->update(&m_liveParticles, &m_particleStore, time_elapsed);
+        p->update(&m_liveParticles, &m_particleStore, time, time_elapsed);
     }
 }
 
-void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &origin, float amplitude)
+void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &origin, float amplitude, float time)
 {
     float dispersionAngle = 2 * M_PI / numParticles;
 
@@ -42,7 +42,7 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
         WaveParticle *p = (WaveParticle*) m_particleStore.alloc();
         if (p == NULL) return;
 
-        p->spawn(amplitude, origin, dispersionAngle, theta);
+        p->spawn(amplitude, origin, dispersionAngle, theta, time);
         m_liveParticles.insert(p);
     }
 }
@@ -57,7 +57,7 @@ void WaveParticleManager::drawParticlesAsSpheres(GLUquadric *quadric)
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        glTranslatef(p->position().x, 0.f, p->position().y);
+//        glTranslatef(p->position().x, 0.f, p->position().y);
 
         float scaledAmp = p->amplitude() / 10;
 //        float rlerp = .2f + (scaledAmp) * .2f;
@@ -123,6 +123,17 @@ void WaveParticleManager::loadShaders(const QGLContext *context)
         exit(1);
     }
     m_shaderprograms["hblur-heightmap"] = shader;
+
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/plot-heightmap.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/plot-heightmap.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["plot-heightmap"] = shader;
 }
 
 void WaveParticleManager::createFbos()
@@ -247,7 +258,7 @@ void WaveParticleManager::debugDrawHeightmap()
     glPopMatrix();
 }
 
-void WaveParticleManager::renderHeightmap()
+void WaveParticleManager::renderHeightmap(float t)
 {
     int r = WAVE_HEIGHTMAP_RESOLUTION,
         w = WAVE_HEIGHTMAP_WIDTH,
@@ -278,14 +289,32 @@ void WaveParticleManager::renderHeightmap()
 
     float plotwidth = 2.f / WAVE_HEIGHTMAP_RESOLUTION;
 
+    m_shaderprograms["plot-heightmap"]->bind();
+    m_shaderprograms["plot-heightmap"]->setUniformValue("max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    m_shaderprograms["plot-heightmap"]->setUniformValue("heightmap_center", QVector2D(m_heightmapX, m_heightmapZ));
+    m_shaderprograms["plot-heightmap"]->setUniformValue("heightmap_size", QVector2D(w, h));
+    m_shaderprograms["plot-heightmap"]->setUniformValue("time", (GLfloat)t);
+    m_shaderprograms["plot-heightmap"]->setUniformValue("velocity", (GLfloat)WAVE_SPEED);
+
+    QVector2D pos, dir;
+
     foreach (WaveParticle *particle, liveParticles())
     {
-        glColor3f(particle->amplitude() / (float)WAVE_MAX_AMPLITUDE * .25f, -particle->amplitude() / (float)WAVE_MAX_AMPLITUDE * .25f, 0.f);
-        glPushMatrix();
+        if (particle->amplitude() < WAVE_MIN_AMPLITUDE)
+        {
+            m_liveParticles.remove(particle);
+            m_particleStore.free(particle);
+        }
 
-        float x = (particle->position().x - m_heightmapX + .5 * w) / WAVE_HEIGHTMAP_WIDTH;
-        float y = 1.f - (particle->position().y - m_heightmapZ + .5 * h) / WAVE_HEIGHTMAP_HEIGHT;
-        glTranslatef(x, y, 0.f);
+        pos.setX(particle->dispersionOrigin().x);
+        pos.setY(particle->dispersionOrigin().y);
+        dir.setX(particle->direction().x);
+        dir.setY(particle->direction().y);
+
+        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude() * .25f);
+        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_spawn_point", pos);
+        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_time", (GLfloat)particle->time());
+        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_direction", dir);
 
         glBegin(GL_QUADS);
         glVertex2f(0.0f, 0.0f);
@@ -293,9 +322,9 @@ void WaveParticleManager::renderHeightmap()
         glVertex2f(plotwidth, plotwidth);
         glVertex2f(0.0f, plotwidth);
         glEnd();
-
-        glPopMatrix();
     }
+
+    m_shaderprograms["plot-heightmap"]->release();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDrawBuffer(GL_BACK);
@@ -429,9 +458,9 @@ void WaveParticleManager::renderWaves(ProjectorCamera *camera, SkyRenderer *sky)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void WaveParticleManager::draw(ProjectorCamera* camera, SkyRenderer *sky)
+void WaveParticleManager::draw(ProjectorCamera* camera, SkyRenderer *sky, float t)
 {
-    renderHeightmap();
+    renderHeightmap(t);
     blurHeightmap();
     renderWaves(camera, sky);
 }

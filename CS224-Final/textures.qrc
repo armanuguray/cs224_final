@@ -37,5 +37,7 @@
         <file alias="downscale.vert">shaders/downscale.vert</file>
         <file alias="upscale.frag">shaders/upscale.frag</file>
         <file alias="upscale.vert">shaders/upscale.vert</file>
+        <file alias="plot-heightmap.frag">shaders/plot-heightmap.frag</file>
+        <file alias="plot-heightmap.vert">shaders/plot-heightmap.vert</file>
     </qresource>
 </RCC>
