@@ -127,16 +127,29 @@ void WaveParticleManager::loadShaders(const QGLContext *context)
 
 void WaveParticleManager::createFbos()
 {
-    m_fbos["heightmap"] = new QGLFramebufferObject(WAVE_HEIGHTMAP_RESOLUTION,
-                                                   WAVE_HEIGHTMAP_RESOLUTION,
-                                                   QGLFramebufferObject::NoAttachment,
-                                                   GL_TEXTURE_2D,
-                                                   GL_RGB32F_ARB);
-    m_fbos["convolve"] = new QGLFramebufferObject(WAVE_HEIGHTMAP_RESOLUTION,
-                                                  WAVE_HEIGHTMAP_RESOLUTION,
-                                                  QGLFramebufferObject::NoAttachment,
-                                                  GL_TEXTURE_2D,
-                                                  GL_RGB32F_ARB);
+    // Heightmap / Velocity
+    glGenFramebuffers(1, &m_heightVelocityFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_heightVelocityFBO);
+    glGenTextures(2, m_heightVelocityTargets);
+    glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGB, GL_FLOAT, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_heightVelocityTargets[0], 0);
+    glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RG, GL_UNSIGNED_BYTE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_heightVelocityTargets[1], 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Convolution
+    glGenFramebuffers(1, &m_convolutionFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_convolutionFBO);
+    glGenTextures(2, m_convolutionTargets);
+    glBindTexture(GL_TEXTURE_2D, m_convolutionTargets[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGB, GL_FLOAT, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_convolutionTargets[0], 0);
+    glBindTexture(GL_TEXTURE_2D, m_convolutionTargets[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RG, GL_UNSIGNED_BYTE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_convolutionTargets[1], 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void WaveParticleManager::computeWeights()
@@ -144,20 +157,27 @@ void WaveParticleManager::computeWeights()
     for (int i = 0; i <= WAVE_CONVOLUTION_KERNEL_RADIUS; ++i)
     {
         float dist = (float)i * WAVE_HEIGHTMAP_WIDTH / WAVE_HEIGHTMAP_RESOLUTION;
+        float piVOverR = M_PI * WAVE_SPEED / WAVE_PARTICLE_RADIUS;
         float piDistOverR = M_PI * dist / WAVE_PARTICLE_RADIUS;
         float boxFactor = dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f;
 
-        _weightsX[3 * i + 0] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
-        _weightsX[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
-        _weightsX[3 * i + 2] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+        _heightWeightsX[3 * i + 0] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+        _heightWeightsX[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
+        _heightWeightsX[3 * i + 2] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+
+        _velocityWeightsX[2 * i + 0] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR)) * piVOverR;
+        _velocityWeightsX[2 * i + 1] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
 
         dist = (float)i * WAVE_HEIGHTMAP_HEIGHT / WAVE_HEIGHTMAP_RESOLUTION;
         piDistOverR = M_PI * dist / WAVE_PARTICLE_RADIUS;
         boxFactor = dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f;
 
-        _weightsZ[3 * i + 0] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
-        _weightsZ[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
-        _weightsZ[3 * i + 2] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+        _heightWeightsZ[3 * i + 0] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+        _heightWeightsZ[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
+        _heightWeightsZ[3 * i + 2] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+
+        _velocityWeightsZ[2 * i + 0] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
+        _velocityWeightsZ[2 * i + 1] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR)) * piVOverR;
     }
 }
 
@@ -174,9 +194,10 @@ void WaveParticleManager::unload()
         delete it->second;
     }
 
-    for (std::map<string, QGLFramebufferObject *>::iterator it = m_fbos.begin(); it != m_fbos.end(); ++it) {
-        delete it->second;
-    }
+    glDeleteFramebuffers(1, &m_heightVelocityFBO);
+    glDeleteFramebuffers(1, &m_convolutionFBO);
+    glDeleteTextures(2, m_heightVelocityTargets);
+    glDeleteTextures(2, m_convolutionTargets);
 }
 
 void WaveParticleManager::debugDrawHeightmap()
@@ -202,8 +223,9 @@ void WaveParticleManager::debugDrawHeightmap()
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
-//    glBindTexture(GL_TEXTURE_2D, m_fbos["convolve"]->texture());
+    glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[0]);
+//    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+//    glBindTexture(GL_TEXTURE_2D, m_fbos["heightConvolve"]->texture());
 
     bool flip = false;
     glBegin(GL_QUADS);
@@ -231,8 +253,10 @@ void WaveParticleManager::renderHeightmap()
         w = WAVE_HEIGHTMAP_WIDTH,
         h = WAVE_HEIGHTMAP_HEIGHT;
 
-    // Plot the particles (convolve later)
-    m_fbos["heightmap"]->bind();
+    // Plot the particles (heightConvolve later)
+    glBindFramebuffer(GL_FRAMEBUFFER, m_heightVelocityFBO);
+    GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, buffers);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
@@ -273,13 +297,17 @@ void WaveParticleManager::renderHeightmap()
         glPopMatrix();
     }
 
-    m_fbos["heightmap"]->release();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDrawBuffer(GL_BACK);
 }
 
 void WaveParticleManager::blurHeightmap()
 {
-    // Blur horizontally
-    m_fbos["convolve"]->bind();
+    // Blur horizontally    
+    glBindFramebuffer(GL_FRAMEBUFFER, m_convolutionFBO);
+    GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, buffers);
+
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -287,12 +315,15 @@ void WaveParticleManager::blurHeightmap()
     glColor3f(1.f, 1.f, 1.f);
 
     m_shaderprograms["hblur-heightmap"]->bind();
-    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("weights", (GLfloat*)_weightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("heightWeights", (GLfloat*)_heightWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("velocityWeights", (GLfloat*)_velocityWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 2);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+    glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[0]);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("texture", 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[1]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -310,17 +341,25 @@ void WaveParticleManager::blurHeightmap()
     glEnd();
 
     m_shaderprograms["hblur-heightmap"]->release();
-    m_fbos["convolve"]->release();
 
     // Blur vertically
-    m_fbos["heightmap"]->bind();
+    glBindFramebuffer(GL_FRAMEBUFFER, m_heightVelocityFBO);
     glClear(GL_COLOR_BUFFER_BIT);
     m_shaderprograms["vblur-heightmap"]->bind();
-    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("weights", (GLfloat*)_weightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("heightWeights", (GLfloat*)_heightWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("velocityWeights", (GLfloat*)_velocityWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 2);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
-    glBindTexture(GL_TEXTURE_2D, m_fbos["convolve"]->texture());
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_convolutionTargets[0]);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("texture", 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_convolutionTargets[1]);
+    m_shaderprograms["vblur-heightmap"]->setUniformValue("velocity", 1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -338,7 +377,10 @@ void WaveParticleManager::blurHeightmap()
     glEnd();
 
     m_shaderprograms["vblur-heightmap"]->release();
-    m_fbos["heightmap"]->release();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDrawBuffer(GL_BACK);
+    glActiveTexture(GL_TEXTURE0);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -353,8 +395,7 @@ void WaveParticleManager::blurHeightmap()
 
 void WaveParticleManager::renderWaves(ProjectorCamera *camera, SkyRenderer *sky)
 {
-    int r = WAVE_HEIGHTMAP_RESOLUTION,
-        w = WAVE_HEIGHTMAP_WIDTH,
+    int w = WAVE_HEIGHTMAP_WIDTH,
         h = WAVE_HEIGHTMAP_HEIGHT;
 
     m_shaderprograms["wavetest"]->bind();
@@ -369,7 +410,7 @@ void WaveParticleManager::renderWaves(ProjectorCamera *camera, SkyRenderer *sky)
     m_shaderprograms["wavetest"]->setUniformValue("bl", QVector3D(camera->ll.x / camera->ll.w, camera->ll.y / camera->ll.w, camera->ll.z / camera->ll.w));
     m_shaderprograms["wavetest"]->setUniformValue("br", QVector3D(camera->lr.x / camera->lr.w, camera->lr.y / camera->lr.w, camera->lr.z / camera->lr.w));
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_fbos["heightmap"]->texture());
+    glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[0]);
     m_shaderprograms["wavetest"]->setUniformValue("texture", 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -408,8 +449,8 @@ void WaveParticleManager::moveHeightmap(ProjectorCamera *camera)
     camera->getMouseRay(screenright, rightray);
 
     Vector4 left, right;
-    assert(ProjectorCamera::intersectRayPlane(camera->getEye(), leftray, 0.0, left));
-    assert(ProjectorCamera::intersectRayPlane(camera->getEye(), rightray, 0.0, right));
+    (ProjectorCamera::intersectRayPlane(camera->getEye(), leftray, 0.0, left));
+    (ProjectorCamera::intersectRayPlane(camera->getEye(), rightray, 0.0, right));
 
     Vector4 test = right - left;
     if (test.x > 0.0 && test.z > 0.0)

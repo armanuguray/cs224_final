@@ -48,17 +48,4 @@ void main(void)
     specular = pow(specular, SPECULAR_EXP) * SPECULAR_COEFF;
 
     gl_FragColor += vec4(specular, specular, specular, 1.0);
-
-
-/*
-    vec3 world = mix(mix(tl, tr, gl_TexCoord[0].x),
-                     mix(bl, br, gl_TexCoord[0].x),
-                     1.0 - gl_TexCoord[0].y);
-
-    vec2 lookup = vec2((world.x - htl.x) / (htr.x - htl.x),
-                       (world.z - htr.z) / (hbr.z - htr.z));
-
-
-    if (lookup.x >= 0.0 && lookup.x <= 1.0 && lookup.y >= 0.0 && lookup.y <= 1.0)
-        gl_FragColor.rgb -= 0.1;*/
 }

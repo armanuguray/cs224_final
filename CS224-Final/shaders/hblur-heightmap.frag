@@ -2,7 +2,8 @@
 const int RADIUS = 2; // Must match WaveConstants.h
 const int WIDTH  = RADIUS + 1;
 
-uniform vec3 weights[WIDTH];
+uniform vec3 heightWeights[WIDTH];
+uniform vec2 velocityWeights[WIDTH];
 
 uniform float wp_max_amplitude;
 uniform float heightmap_resolution;
@@ -11,24 +12,29 @@ uniform sampler2D texture;
 
 void main()
 {
-    gl_FragColor = vec4(0.0);
+    gl_FragData[0] = vec4(0.0);
     float dx = 1.0 / heightmap_resolution;
-    vec3 c = vec3(0.0);
+    vec3 h = vec3(0.0);
+    vec2 v = vec2(0.0);
 
     int middle = RADIUS;
     for (int i = 0; i <= RADIUS; ++i)
     {
-        vec3 w = weights[i];
+        vec3 hw = heightWeights[i];
+        vec2 vw = velocityWeights[i];
 
         float r = float(i);
         vec2 tmp = texture2D(texture, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).rg;
         float amp = tmp.r - tmp.g;
-        c += w * amp;
+        h += hw * amp;
+        v += vw * amp;
 
         tmp = texture2D(texture, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg;
         amp = tmp.r - tmp.g;
-        c += w * amp;
+        h += hw * amp;
+        v += vw * amp;
     }
 
-    gl_FragColor = vec4(vec3(.5) + .5 * c, 0.0);
+    gl_FragData[0] = vec4(vec3(.5) + .5 * h, 0.0);
+    gl_FragData[1].xy = vec2(.5) + .5 * v;
 }

@@ -52,13 +52,18 @@ private:
     QSet<WaveParticle *> m_liveParticles;
 
     std::map<string, QGLShaderProgram *> m_shaderprograms;
-    std::map<string, QGLFramebufferObject *> m_fbos;
+
+    GLuint m_heightVelocityFBO;
+    GLuint m_heightVelocityTargets[2]; // [0] is 3D heightmap (RGB32), [1] is 2D velocity (RG16)
+    GLuint m_convolutionFBO;
+    GLuint m_convolutionTargets[2];
 
     float m_heightmapX, m_heightmapZ;
 
-    float _weightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _weightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
-
+    float _heightWeightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float _heightWeightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float _velocityWeightsX[2 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float _velocityWeightsZ[2 * WAVE_CONVOLUTION_KERNEL_WIDTH];
 };
 
 #endif // WAVEPARTICLEMANAGER_H
