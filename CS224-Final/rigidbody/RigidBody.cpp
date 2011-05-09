@@ -105,10 +105,10 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
 /*
      glBindTexture(GL_TEXTURE_2D, m_wpmanager->velocityTexture());
      glBegin(GL_QUADS);
-     glTexCoord2f(0.0, 0.0); glVertex3f(-50.0, 10.0, -50.0);
-     glTexCoord2f(1.0, 0.0); glVertex3f(-50.0, 10.0, 50.0);
-     glTexCoord2f(1.0, 1.0); glVertex3f(50.0, 10.0, 50.0);
-     glTexCoord2f(0.0, 1.0); glVertex3f(50.0, 10.0, -50.0);
+     glTexCoord2f(0.0, 0.0); glVertex3f(-100.0, 10.0, -100.0);
+     glTexCoord2f(1.0, 0.0); glVertex3f(-100.0, 10.0, 100.0);
+     glTexCoord2f(1.0, 1.0); glVertex3f(100.0, 10.0, 100.0);
+     glTexCoord2f(0.0, 1.0); glVertex3f(100.0, 10.0, -100.0);
      glEnd();
 */
     // set uniforms
@@ -130,6 +130,7 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
           originZ = m_wpmanager->heightmapOriginZ();
 
     liftdrag_shader->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    liftdrag_shader->setUniformValue("wave_speed", WAVE_SPEED);
     liftdrag_shader->setUniformValue("htl", QVector3D(-w * .5 + originX, 0, -h * .5 + originZ));
     liftdrag_shader->setUniformValue("htr", QVector3D( w * .5 + originX, 0, -h * .5 + originZ));
     liftdrag_shader->setUniformValue("hbl", QVector3D(-w * .5 + originX, 0,  h * .5 + originZ));

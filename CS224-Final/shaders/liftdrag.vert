@@ -2,6 +2,7 @@ uniform sampler2D heightmap;
 uniform sampler2D velocitymap;
 
 uniform float wp_max_amplitude;
+uniform float wave_speed;
 
 // Corners of the projected grid
 uniform vec3 tl;
@@ -82,16 +83,16 @@ void main(void)
     vec3 water_velocity = vec3(0.0);
     if (lookup.x >= 0.0 && lookup.x <= 1.0 && lookup.y >= 0.0 && lookup.y <= 1.0) {
         surface = wp_max_amplitude * (2.0 * texture2D(heightmap, lookup).y - 1.0);
-        vec2 v = (2.0 * texture2D(velocitymap, lookup).xy) - vec2(1.0);
+        vec2 v = wave_speed * (2.0 * texture2D(velocitymap, lookup).xy) - vec2(1.0);
         water_velocity = vec3(v.x, 0.0, v.y);
     }
 
-//    water_velocity = vec3(0.06, 0.0, 0.06);
+ //   water_velocity = vec3(0.06, 0.0, 0.06);
     
     // get the normal in world space
     vec3 N = normalize((ctm * vec4(gl_Normal.xyz, 0.0)).xyz);
     // get the velocity
-    vec3 U = gl_MultiTexCoord3.xyz - (50.0 * water_velocity);
+    vec3 U = gl_MultiTexCoord3.xyz - (9.0 * water_velocity);
     
     float Af = Atotal * fraction_in_water(surface, v0.y, v1.y, v2.y);
 
