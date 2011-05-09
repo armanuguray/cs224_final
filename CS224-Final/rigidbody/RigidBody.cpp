@@ -5,9 +5,14 @@
 #include <QGLShaderProgram>
 #include "RigidBodyConstants.h"
 #include <QDebug>
+#include "Camera.h"
+#include "WaveParticleManager.h"
 
-RigidBody::RigidBody()
+RigidBody::RigidBody(Camera *camera, WaveParticleManager *waveparticlemanager)
 {
+    m_camera = camera;
+    m_wpmanager = waveparticlemanager;
+
     m_internal_rigidbody = NULL;
     m_internal_collisionshape = NULL;
     m_internal_defaultmotionstate = NULL;

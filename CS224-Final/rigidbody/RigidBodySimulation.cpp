@@ -7,7 +7,7 @@
 #include <iostream>
 #include "Camera.h"
 
-RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *camera)
+RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *camera, WaveParticleManager *waveparticlemanager)
 {
     m_camera = camera;
 
@@ -29,7 +29,7 @@ RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *came
 
     // intialize the rigid body pool
     for (unsigned i = 0; i < RIGIDBODY_MAX_COUNT; i++)
-        m_rigidbody_pool.add(new RigidBody());
+        m_rigidbody_pool.add(new RigidBody(m_camera, waveparticlemanager));
 
     // load shaders
     loadShaders(context);

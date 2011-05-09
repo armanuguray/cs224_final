@@ -30,7 +30,7 @@ typedef enum {
 class RigidBodySimulation
 {
 public:
-    RigidBodySimulation(const QGLContext *context, Camera *camera);
+    RigidBodySimulation(const QGLContext *context, Camera *camera, WaveParticleManager *waveparticlemanager);
     ~RigidBodySimulation();
 
     // steps the simulation

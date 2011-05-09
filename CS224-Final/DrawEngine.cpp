@@ -20,7 +20,7 @@ DrawEngine::DrawEngine(const QGLContext *context, int width, int height)
 
     m_skyrenderer = new SkyRenderer();
     m_projectorcamera = new ProjectorCamera(width, height);
-    m_rigidbodysim = new RigidBodySimulation(context, m_projectorcamera);
+    m_rigidbodysim = new RigidBodySimulation(context, m_projectorcamera, &m_waveparticles);
 
     setupGL();
 

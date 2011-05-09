@@ -15,11 +15,13 @@
 
 class QGLShaderProgram;
 class QGLFramebufferObject;
+class Camera;
+class WaveParticleManager;
 
 class RigidBody : public Poolable
 {
 public:
-    RigidBody();
+    RigidBody(Camera *camera, WaveParticleManager *waveparticlemanager);
     ~RigidBody();
 
     /* Initialization and rendering */
@@ -78,6 +80,10 @@ protected:
     btDefaultMotionState *m_internal_defaultmotionstate;
 
     btVector3 centroids[12];
+
+    /* values for relative velocity computation and heightmap lookups */
+    Camera *m_camera;
+    WaveParticleManager *m_wpmanager;
 };
 
 #endif // RIGIDBODY_H
