@@ -47,6 +47,20 @@ void main()
         tmp = samp.xy;
         signflag = samp.z * 4.0;
 
+        if (signflag > 2.0)
+        {
+            samp.x *= -1.0;
+            samp.y *= -1.0;
+        }
+        else if (signflag > 1.0)
+        {
+            samp.y *= -1.0;
+        }
+        else if (signflag > 0.0)
+        {
+            samp.x *= -1.0;
+        }
+
         if (signflag == 1.0 || signflag == 3.0)
             tmp.x *= -1.0;
         if (signflag == 2.0)
