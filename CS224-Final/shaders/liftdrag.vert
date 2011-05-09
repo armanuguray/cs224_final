@@ -86,8 +86,6 @@ void main(void)
         vec2 v = wave_speed * (2.0 * texture2D(velocitymap, lookup).xy) - vec2(1.0);
         water_velocity = vec3(v.x, 0.0, v.y);
     }
-
- //   water_velocity = vec3(0.06, 0.0, 0.06);
     
     // get the normal in world space
     vec3 N = normalize((ctm * vec4(gl_Normal.xyz, 0.0)).xyz);
