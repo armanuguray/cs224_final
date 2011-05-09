@@ -15,13 +15,13 @@
 
 class QGLShaderProgram;
 class QGLFramebufferObject;
-class Camera;
+class ProjectorCamera;
 class WaveParticleManager;
 
 class RigidBody : public Poolable
 {
 public:
-    RigidBody(Camera *camera, WaveParticleManager *waveparticlemanager);
+    RigidBody(ProjectorCamera *camera, WaveParticleManager *waveparticlemanager);
     ~RigidBody();
 
     /* Initialization and rendering */
@@ -82,7 +82,7 @@ protected:
     btVector3 centroids[12];
 
     /* values for relative velocity computation and heightmap lookups */
-    Camera *m_camera;
+    ProjectorCamera *m_camera;
     WaveParticleManager *m_wpmanager;
 };
 

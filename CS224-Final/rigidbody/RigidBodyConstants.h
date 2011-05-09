@@ -18,7 +18,7 @@ const float WATER_DENSITY = 1000.0f;
 // clip height (unused)
 const float MAX_ABS_HEIGHT = 1000.0f;
 // mass of a crate (kg)
-const float BOX_MASS = 5200.f;
+const float BOX_MASS = 6000.f;
 // gravitational acceleration (m/s^2)
 const float GRAVITY = 9.8f;
 // length of one side of an object bounding box
@@ -26,8 +26,8 @@ const float SIDE_LENGTH = 2.0f;
 // per object orthgonal view extent
 const float OBJ_EXTENT = sqrt((SIDE_LENGTH*SIDE_LENGTH)+(SIDE_LENGTH*SIDE_LENGTH)) + 0.5;
 // lift and drag coefficients
-const float LIFT_COEFFICIENT = 0.5;
-const float DRAG_COEFFICIENT = 0.5;
+const float LIFT_COEFFICIENT = 1.3;
+const float DRAG_COEFFICIENT = 2.1;
 // epsilon value that defines the dependency of face area on direction of motion. ([0, 1])
 const float LD_EPSILON = 0.5;
 

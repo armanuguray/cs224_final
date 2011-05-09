@@ -12,7 +12,6 @@ Camera::Camera(int width, int height)
     m_width = width;
     m_height = height;
 
-//    m_eye.x = -3.0f, m_eye.y = 1.0f, m_eye.z = -3.0f, m_eye.w = 1;
     m_eye.init(15, 15, 15, 1);
     m_look = -m_eye, m_look.w = 0, m_look.normalize();
     m_up.x = 0.0f, m_up.y = 1.0f, m_up.z = 0.0f, m_up.w = 0;

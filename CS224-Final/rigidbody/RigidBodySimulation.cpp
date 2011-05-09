@@ -5,9 +5,9 @@
 #include <QGLShaderProgram>
 #include <QGLFramebufferObject>
 #include <iostream>
-#include "Camera.h"
+#include "ProjectorCamera.h"
 
-RigidBodySimulation::RigidBodySimulation(const QGLContext *context, Camera *camera, WaveParticleManager *waveparticlemanager)
+RigidBodySimulation::RigidBodySimulation(const QGLContext *context, ProjectorCamera *camera, WaveParticleManager *waveparticlemanager)
 {
     m_camera = camera;
 

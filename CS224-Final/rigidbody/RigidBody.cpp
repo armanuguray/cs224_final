@@ -5,10 +5,11 @@
 #include <QGLShaderProgram>
 #include "RigidBodyConstants.h"
 #include <QDebug>
-#include "Camera.h"
+#include "ProjectorCamera.h"
 #include "WaveParticleManager.h"
+#include "WaveConstants.h"
 
-RigidBody::RigidBody(Camera *camera, WaveParticleManager *waveparticlemanager)
+RigidBody::RigidBody(ProjectorCamera *camera, WaveParticleManager *waveparticlemanager)
 {
     m_camera = camera;
     m_wpmanager = waveparticlemanager;
@@ -31,6 +32,18 @@ RigidBody::RigidBody(Camera *camera, WaveParticleManager *waveparticlemanager)
     centroids[9] = btVector3(extent/3.0, -extent/3.0, -extent);
     centroids[10] = btVector3(-extent/3.0, extent/3.0, extent);
     centroids[11] = btVector3(extent/3.0, -extent/3.0, extent);
+//    centroids[0] = btVector3(0.0, 0.0, 0.0);
+//    centroids[1] = btVector3(0.0, 0.0, 0.0);
+//    centroids[2] = btVector3(0.0,  0.0, 0.0);
+//    centroids[3] = btVector3(0.0,  0.0, 0.0);
+//    centroids[4] = btVector3(0.0, 0.0, 0.0);
+//    centroids[5] = btVector3(0.0, 0.0, 0.0);
+//    centroids[6] = btVector3(0.0, 0.0, 0.0);
+//    centroids[7] = btVector3(0.0, 0.0, 0.0);
+//    centroids[8] = btVector3(0.0, 0.0, 0.0);
+//    centroids[9] = btVector3(0.0, 0.0, 0.0);
+//    centroids[10] = btVector3(0.0, 0.0, 0.0);
+//    centroids[11] = btVector3(0.0, 0.0, 0.0);
 }
 
 RigidBody::~RigidBody()
@@ -60,6 +73,7 @@ void RigidBody::initialize(btScalar mass, btVector3 &inertia, const btTransform 
     btRigidBody::btRigidBodyConstructionInfo ci(mass, m_internal_defaultmotionstate, collision_shape, inertia);
     m_internal_rigidbody = new btRigidBody(ci);
     m_render_function = render_function;
+    m_internal_rigidbody->setActivationState(DISABLE_DEACTIVATION);
 }
 
 void RigidBody::render()
@@ -88,6 +102,15 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
 {
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
+/*
+     glBindTexture(GL_TEXTURE_2D, m_wpmanager->velocityTexture());
+     glBegin(GL_QUADS);
+     glTexCoord2f(0.0, 0.0); glVertex3f(-50.0, 10.0, -50.0);
+     glTexCoord2f(1.0, 0.0); glVertex3f(-50.0, 10.0, 50.0);
+     glTexCoord2f(1.0, 1.0); glVertex3f(50.0, 10.0, 50.0);
+     glTexCoord2f(0.0, 1.0); glVertex3f(50.0, 10.0, -50.0);
+     glEnd();
+*/
     // set uniforms
     framebuffer->bind();
     liftdrag_shader->bind();
@@ -99,6 +122,29 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             ctm[i][j] = m[4*i + j];
+
+    int w = WAVE_HEIGHTMAP_WIDTH,
+        h = WAVE_HEIGHTMAP_HEIGHT;
+
+    float originX = m_wpmanager->heightmapOriginX(),
+          originZ = m_wpmanager->heightmapOriginZ();
+
+    liftdrag_shader->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    liftdrag_shader->setUniformValue("htl", QVector3D(-w * .5 + originX, 0, -h * .5 + originZ));
+    liftdrag_shader->setUniformValue("htr", QVector3D( w * .5 + originX, 0, -h * .5 + originZ));
+    liftdrag_shader->setUniformValue("hbl", QVector3D(-w * .5 + originX, 0,  h * .5 + originZ));
+    liftdrag_shader->setUniformValue("hbr", QVector3D( w * .5 + originX, 0,  h * .5 + originZ));
+    liftdrag_shader->setUniformValue("tl", QVector3D(m_camera->ul.x / m_camera->ul.w, m_camera->ul.y / m_camera->ul.w, m_camera->ul.z / m_camera->ul.w));
+    liftdrag_shader->setUniformValue("tr", QVector3D(m_camera->ur.x / m_camera->ur.w, m_camera->ur.y / m_camera->ur.w, m_camera->ur.z / m_camera->ur.w));
+    liftdrag_shader->setUniformValue("bl", QVector3D(m_camera->ll.x / m_camera->ll.w, m_camera->ll.y / m_camera->ll.w, m_camera->ll.z / m_camera->ll.w));
+    liftdrag_shader->setUniformValue("br", QVector3D(m_camera->lr.x / m_camera->lr.w, m_camera->lr.y / m_camera->lr.w, m_camera->lr.z / m_camera->lr.w));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_wpmanager->heightTexture());
+    liftdrag_shader->setUniformValue("heightmap", 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_wpmanager->velocityTexture());
+    liftdrag_shader->setUniformValue("velocitymap", 1);
+
     liftdrag_shader->setUniformValue("ctm", ctm);
     liftdrag_shader->setUniformValue("Cd", DRAG_COEFFICIENT);
     liftdrag_shader->setUniformValue("Cl", LIFT_COEFFICIENT);
@@ -240,6 +286,10 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
     // read the first 12 pixels of the data back. Each will hold data that corresponds to a triangle
     glReadPixels(0,0,12,1, GL_RGB, GL_FLOAT, lowres_buffer);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     liftdrag_shader->release();
     framebuffer->release();
     btVector3 force;
@@ -265,9 +315,29 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_CULL_FACE);
 
+
     // bind offscreen framebuffer and shader
     framebuffer->bind();
     buoyancy_shader->bind();
+
+    int w = WAVE_HEIGHTMAP_WIDTH,
+        h = WAVE_HEIGHTMAP_HEIGHT;
+
+    float originX = m_wpmanager->heightmapOriginX(),
+          originZ = m_wpmanager->heightmapOriginZ();
+
+    buoyancy_shader->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+    buoyancy_shader->setUniformValue("htl", QVector3D(-w * .5 + originX, 0, -h * .5 + originZ));
+    buoyancy_shader->setUniformValue("htr", QVector3D( w * .5 + originX, 0, -h * .5 + originZ));
+    buoyancy_shader->setUniformValue("hbl", QVector3D(-w * .5 + originX, 0,  h * .5 + originZ));
+    buoyancy_shader->setUniformValue("hbr", QVector3D( w * .5 + originX, 0,  h * .5 + originZ));
+    buoyancy_shader->setUniformValue("tl", QVector3D(m_camera->ul.x / m_camera->ul.w, m_camera->ul.y / m_camera->ul.w, m_camera->ul.z / m_camera->ul.w));
+    buoyancy_shader->setUniformValue("tr", QVector3D(m_camera->ur.x / m_camera->ur.w, m_camera->ur.y / m_camera->ur.w, m_camera->ur.z / m_camera->ur.w));
+    buoyancy_shader->setUniformValue("bl", QVector3D(m_camera->ll.x / m_camera->ll.w, m_camera->ll.y / m_camera->ll.w, m_camera->ll.z / m_camera->ll.w));
+    buoyancy_shader->setUniformValue("br", QVector3D(m_camera->lr.x / m_camera->lr.w, m_camera->lr.y / m_camera->lr.w, m_camera->lr.z / m_camera->lr.w));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_wpmanager->heightTexture());
+    buoyancy_shader->setUniformValue("heightmap", 0);
 
     // render the object as seen from a top orthogonal view
     glClear(GL_COLOR_BUFFER_BIT);
@@ -307,6 +377,8 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
 
     // transfer the texture to the CPU
     glReadPixels(0,0,BUOYANCY_IMAGE_RESOLUTION,BUOYANCY_IMAGE_RESOLUTION,GL_RGB,GL_FLOAT,lowres_buffer);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     buoyancy_shader->release();
     framebuffer->release();

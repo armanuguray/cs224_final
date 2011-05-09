@@ -19,7 +19,7 @@ class QGLContext;
 class QGLFramebufferObject;
 class QGLShaderProgram;
 class RigidBody;
-class Camera;
+class ProjectorCamera;
 
 typedef enum {
     RigidBodyTypeSphere,
@@ -30,7 +30,7 @@ typedef enum {
 class RigidBodySimulation
 {
 public:
-    RigidBodySimulation(const QGLContext *context, Camera *camera, WaveParticleManager *waveparticlemanager);
+    RigidBodySimulation(const QGLContext *context, ProjectorCamera *camera, WaveParticleManager *waveparticlemanager);
     ~RigidBodySimulation();
 
     // steps the simulation
@@ -78,7 +78,7 @@ private:
     GLfloat per_face_buffer[6];
 
     // the current camera
-    Camera *m_camera;
+    ProjectorCamera *m_camera;
 };
 
 #endif // RIGIDBODYSIMULATION_H
