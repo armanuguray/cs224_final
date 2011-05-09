@@ -103,6 +103,8 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
     glDisable(GL_TEXTURE_CUBE_MAP);
     glEnable(GL_TEXTURE_2D);
 
+//#define DIARRHEA
+#ifdef DIARRHEA
      glBindTexture(GL_TEXTURE_2D, m_wpmanager->velocityTexture());
      glBegin(GL_QUADS);
      glTexCoord2f(0.0, 0.0); glVertex3f(-100.0, 10.0, -100.0);
@@ -110,6 +112,7 @@ void RigidBody::applyLiftAndDrag(GLuint heightmap, QGLFramebufferObject *framebu
      glTexCoord2f(1.0, 1.0); glVertex3f(100.0, 10.0, 100.0);
      glTexCoord2f(0.0, 1.0); glVertex3f(100.0, 10.0, -100.0);
      glEnd();
+#endif
 
     // set uniforms
     framebuffer->bind();

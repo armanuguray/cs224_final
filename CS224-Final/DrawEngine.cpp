@@ -193,7 +193,7 @@ void DrawEngine::createWave(const Vector2 &mousePos)
     bool intersects = ProjectorCamera::intersectRayPlane(m_projectorcamera->getEye(), rayDir, 0, intersect);
 
     if (intersects) {
-        m_waveparticles.generateUniformWave(10, Vector2(intersect.x, intersect.z), .0625f, m_time);
+        m_waveparticles.generateUniformWave(7, Vector2(intersect.x, intersect.z), .025f, m_time);
     }
 }
 
