@@ -18,7 +18,7 @@ const float WATER_DENSITY = 1000.0f;
 // clip height (unused)
 const float MAX_ABS_HEIGHT = 1000.0f;
 // mass of a crate (kg)
-const float BOX_MASS = 6000.f;
+const float BOX_MASS = 5300.f;
 // gravitational acceleration (m/s^2)
 const float GRAVITY = 9.8f;
 // length of one side of an object bounding box

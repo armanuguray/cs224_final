@@ -33,43 +33,11 @@ void main()
         amp = tmp.r - tmp.g;
         h += hw * amp;
 
-        tmp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).rg;
-        float signflag = 4.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).b;
+        vec4 tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0));\
+        v += vw * (tmp2.rg - tmp2.ba);
 
-        if (signflag > 2.0)
-        {
-            tmp.x *= -1.0;
-            tmp.y *= -1.0;
-        }
-        else if (signflag > 1.0)
-        {
-            tmp.y *= -1.0;
-        }
-        else if (signflag > 0.0)
-        {
-            tmp.x *= -1.0;
-        }
-
-        v += vw * tmp;
-
-        tmp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg;
-        signflag = 4.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).b;
-
-        if (signflag > 2.0)
-        {
-            tmp.x *= -1.0;
-            tmp.y *= -1.0;
-        }
-        else if (signflag > 1.0)
-        {
-            tmp.y *= -1.0;
-        }
-        else if (signflag > 0.0)
-        {
-            tmp.x *= -1.0;
-        }
-
-        v += vw * tmp;
+        tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0));\
+        v += vw * (tmp2.rg - tmp2.ba);
     }
 
     gl_FragData[0] = vec4(vec3(.5) + .5 * h, 0.0);

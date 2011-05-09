@@ -143,11 +143,10 @@ void WaveParticleManager::createFbos()
     glBindFramebuffer(GL_FRAMEBUFFER, m_heightVelocityFBO);
     glGenTextures(2, m_heightVelocityTargets);
     glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGB, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGBA, GL_FLOAT, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_heightVelocityTargets[0], 0);
     glBindTexture(GL_TEXTURE_2D, m_heightVelocityTargets[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGB, GL_FLOAT, 0);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RG, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGBA, GL_FLOAT, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_heightVelocityTargets[1], 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -156,11 +155,10 @@ void WaveParticleManager::createFbos()
     glBindFramebuffer(GL_FRAMEBUFFER, m_convolutionFBO);
     glGenTextures(2, m_convolutionTargets);
     glBindTexture(GL_TEXTURE_2D, m_convolutionTargets[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGB, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGBA, GL_FLOAT, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_convolutionTargets[0], 0);
     glBindTexture(GL_TEXTURE_2D, m_convolutionTargets[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGB, GL_FLOAT, 0);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RG, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WAVE_HEIGHTMAP_RESOLUTION, WAVE_HEIGHTMAP_RESOLUTION, 0, GL_RGBA, GL_FLOAT, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_convolutionTargets[1], 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -287,7 +285,7 @@ void WaveParticleManager::renderHeightmap(float t)
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_TEXTURE_2D);
 
-    glEnable(GL_MULTISAMPLE);
+//    glEnable(GL_MULTISAMPLE);
 
     float plotwidth = 2.f / WAVE_HEIGHTMAP_RESOLUTION;
 
@@ -313,7 +311,7 @@ void WaveParticleManager::renderHeightmap(float t)
         dir.setX(particle->direction().x);
         dir.setY(particle->direction().y);
 
-        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude() * .25f);
+        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude());
         m_shaderprograms["plot-heightmap"]->setUniformValue("wp_spawn_point", pos);
         m_shaderprograms["plot-heightmap"]->setUniformValue("wp_time", (GLfloat)particle->time());
         m_shaderprograms["plot-heightmap"]->setUniformValue("wp_direction", dir);
