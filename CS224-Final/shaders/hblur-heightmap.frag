@@ -33,13 +33,11 @@ void main()
         amp = tmp.r - tmp.g;
         h += hw * amp;
 
-        vec4 tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0));
-        tmp = tmp2.rg - tmp2.ba;
-        v += vw * tmp;
+        vec4 tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0));\
+        v += vw * (tmp2.rg - tmp2.ba);
 
-        tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0));
-        tmp = tmp2.rg - tmp2.ba;
-        v += vw * tmp;
+        tmp2 = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0));\
+        v += vw * (tmp2.rg - tmp2.ba);
     }
 
     gl_FragData[0] = vec4(vec3(.5) + .5 * h, 0.0);

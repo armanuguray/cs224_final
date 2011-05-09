@@ -285,7 +285,7 @@ void WaveParticleManager::renderHeightmap(float t)
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_TEXTURE_2D);
 
-    glEnable(GL_MULTISAMPLE);
+//    glEnable(GL_MULTISAMPLE);
 
     float plotwidth = 2.f / WAVE_HEIGHTMAP_RESOLUTION;
 
@@ -311,7 +311,7 @@ void WaveParticleManager::renderHeightmap(float t)
         dir.setX(particle->direction().x);
         dir.setY(particle->direction().y);
 
-        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude() * .25f);
+        m_shaderprograms["plot-heightmap"]->setUniformValue("wp_amplitude", (GLfloat)particle->amplitude());
         m_shaderprograms["plot-heightmap"]->setUniformValue("wp_spawn_point", pos);
         m_shaderprograms["plot-heightmap"]->setUniformValue("wp_time", (GLfloat)particle->time());
         m_shaderprograms["plot-heightmap"]->setUniformValue("wp_direction", dir);
