@@ -43,6 +43,12 @@ public:
 
     void draw(ProjectorCamera* camera, SkyRenderer *sky);
 
+    int heightTexture()   { return m_heightVelocityTargets[0]; }    // G = height
+    int velocityTexture() { return m_heightVelocityTargets[1]; }    // R = x, G = y
+
+    float heightmapOriginX() { return m_heightmapX; }
+    float heightmapOriginZ() { return m_heightmapZ; }
+
 private:
     void loadShaders(const QGLContext *context);
     void createFbos();
