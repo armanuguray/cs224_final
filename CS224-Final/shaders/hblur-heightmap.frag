@@ -33,42 +33,40 @@ void main()
         amp = tmp.r - tmp.g;
         h += hw * amp;
 
-        vec3 samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx *  r, 0.0)).rgb;
-        tmp = samp.xy;
-        float signflag = samp.z * 4.0;
+        tmp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).rg;
+        float signflag = 4.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(dx * r, 0.0)).b;
 
         if (signflag > 2.0)
         {
-            samp.x *= -1.0;
-            samp.y *= -1.0;
+            tmp.x *= -1.0;
+            tmp.y *= -1.0;
         }
         else if (signflag > 1.0)
         {
-            samp.y *= -1.0;
+            tmp.y *= -1.0;
         }
         else if (signflag > 0.0)
         {
-            samp.x *= -1.0;
+            tmp.x *= -1.0;
         }
 
         v += vw * tmp;
 
-        samp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rgb;
-        tmp = samp.xy;
-        signflag = samp.z * 4.0;
+        tmp = texture2D(velocity, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).rg;
+        signflag = 4.0 * texture2D(texture, gl_TexCoord[0].xy + vec2(dx * -r, 0.0)).b;
 
         if (signflag > 2.0)
         {
-            samp.x *= -1.0;
-            samp.y *= -1.0;
+            tmp.x *= -1.0;
+            tmp.y *= -1.0;
         }
         else if (signflag > 1.0)
         {
-            samp.y *= -1.0;
+            tmp.y *= -1.0;
         }
         else if (signflag > 0.0)
         {
-            samp.x *= -1.0;
+            tmp.x *= -1.0;
         }
 
         v += vw * tmp;
