@@ -34,8 +34,8 @@ void main(void)
     }
 
     vec3 reflected = reflect(view, nNormal);
-    vec4 reflectColor = textureCube(cube, reflected);
-    vec4 refractColor = textureCube(cube, refract(view, nNormal, eta));
+    vec4 reflectColor = vec4(textureCube(cube, reflected).rgb, 0.5);
+    vec4 refractColor = vec4(textureCube(cube, refract(view, nNormal, eta)).rgb, 0.5);
 
     const float R_0 = 0.4;
     float fresnel = R_0 + (1.0 - R_0) * pow((1.0 - dot(-view, nNormal)), 5.0);
@@ -47,5 +47,5 @@ void main(void)
     float specular = max(dot(reflected, vec3(0.0, 1.0, 0.0)), 0.0);
     specular = pow(specular, SPECULAR_EXP) * SPECULAR_COEFF;
 
-    gl_FragColor += vec4(specular, specular, specular, 1.0);
+    gl_FragColor += vec4(specular, specular, specular, 0.3);
 }

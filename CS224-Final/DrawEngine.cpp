@@ -97,14 +97,18 @@ void DrawEngine::drawFrame(float time_elapsed)
     // render sky
     m_skyrenderer->renderSkyBox(m_projectorcamera);
 
-    // render water
-#ifdef DRAW_WATER
-    m_waveparticles.renderWaves(m_projectorcamera, m_skyrenderer);
-#endif
-
     // render rigidbodies
     m_rigidbodysim->stepSimulation(time_elapsed);
     m_rigidbodysim->renderAll();
+
+    // render water
+//#undef DRAW_WATER
+#ifdef DRAW_WATER
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    m_waveparticles.renderWaves(m_projectorcamera, m_skyrenderer);
+    glDisable(GL_BLEND);
+#endif
 
     // generate waves
     m_rigidbodysim->generateWaves(m_waveparticles);
