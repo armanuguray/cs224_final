@@ -31,6 +31,8 @@ struct Settings
     QString overlay_text;
 
     bool render_overlay;
+
+    bool ambient_waves;
 };
 
 extern Settings settings;

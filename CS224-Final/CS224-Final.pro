@@ -108,7 +108,9 @@ OTHER_FILES += \
     shaders/computedir.vert \
     shaders/computedir.frag \
     shaders/buoyancy.vert \
-    shaders/buoyancy.frag
+    shaders/buoyancy.frag \
+    shaders/plot-ambient.vert \
+    shaders/plot-ambient.frag
 
 RESOURCES += \
     textures.qrc

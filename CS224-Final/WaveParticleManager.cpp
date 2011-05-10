@@ -4,6 +4,8 @@
 #include "WaveParticle.h"
 #include "WaveParticleManager.h"
 
+#include "Settings.h"
+
 WaveParticleManager::WaveParticleManager()
 {
     for (int i = 0; i < WAVE_PARTICLE_COUNT; ++i) {
@@ -134,6 +136,17 @@ void WaveParticleManager::loadShaders(const QGLContext *context)
         exit(1);
     }
     m_shaderprograms["plot-heightmap"] = shader;
+
+    shader = new QGLShaderProgram(context);
+    if(!shader->addShaderFromSourceFile(QGLShader::Vertex, ":/plot-ambient.vert")) {
+        cerr << "Vertex Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    if (!shader->addShaderFromSourceFile(QGLShader::Fragment, ":/plot-ambient.frag")) {
+        cerr << "Fragment Shader:\n" << shader->log().data() << endl;
+        exit(1);
+    }
+    m_shaderprograms["plot-ambient"] = shader;
 }
 
 void WaveParticleManager::createFbos()
@@ -172,23 +185,23 @@ void WaveParticleManager::computeWeights()
         float piDistOverR = M_PI * dist / WAVE_PARTICLE_RADIUS;
         float boxFactor = dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f;
 
-        _heightWeightsX[3 * i + 0] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
-        _heightWeightsX[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
-        _heightWeightsX[3 * i + 2] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+        m_heightWeightsX[3 * i + 0] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+        m_heightWeightsX[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
+        m_heightWeightsX[3 * i + 2] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
 
-        _velocityWeightsX[2 * i + 0] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR));// * piVOverR;
-        _velocityWeightsX[2 * i + 1] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
+        m_velocityWeightsX[2 * i + 0] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR));// * piVOverR;
+        m_velocityWeightsX[2 * i + 1] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
 
         dist = (float)i * WAVE_HEIGHTMAP_HEIGHT / WAVE_HEIGHTMAP_RESOLUTION;
         piDistOverR = M_PI * dist / WAVE_PARTICLE_RADIUS;
         boxFactor = dist > WAVE_PARTICLE_RADIUS ? 0.f : 1.f;
 
-        _heightWeightsZ[3 * i + 0] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
-        _heightWeightsZ[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
-        _heightWeightsZ[3 * i + 2] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
+        m_heightWeightsZ[3 * i + 0] = .25f * (1.f * cos(piDistOverR)) * (1.f * cos(piDistOverR)) * boxFactor;
+        m_heightWeightsZ[3 * i + 1] = .5f * (cos(piDistOverR) + 1) * boxFactor;
+        m_heightWeightsZ[3 * i + 2] = -.5f * sin(piDistOverR) * (1.f + cos(piDistOverR)) * boxFactor;
 
-        _velocityWeightsZ[2 * i + 0] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
-        _velocityWeightsZ[2 * i + 1] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR));// * piVOverR;
+        m_velocityWeightsZ[2 * i + 0] = .25f * (cos(piDistOverR) + 1) * (cos(piDistOverR) + 1);
+        m_velocityWeightsZ[2 * i + 1] = -.5f * (cos(2 * piDistOverR) + cos(piDistOverR));// * piVOverR;
     }
 }
 
@@ -197,6 +210,7 @@ void WaveParticleManager::load(const QGLContext *context)
     loadShaders(context);
     createFbos();
     computeWeights();
+
 }
 
 void WaveParticleManager::unload()
@@ -264,7 +278,6 @@ void WaveParticleManager::renderHeightmap(float t)
         w = WAVE_HEIGHTMAP_WIDTH,
         h = WAVE_HEIGHTMAP_HEIGHT;
 
-    // Plot the particles (heightConvolve later)
     glBindFramebuffer(GL_FRAMEBUFFER, m_heightVelocityFBO);
     GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, buffers);
@@ -285,8 +298,34 @@ void WaveParticleManager::renderHeightmap(float t)
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable(GL_TEXTURE_2D);
 
-//    glEnable(GL_MULTISAMPLE);
+    if (settings.ambient_waves)
+    {
+        // Ambient waves
+        m_shaderprograms["plot-ambient"]->bind();
 
+        m_shaderprograms["plot-ambient"]->setUniformValue("heightmap_center", QVector2D(m_heightmapX, m_heightmapZ));
+        m_shaderprograms["plot-ambient"]->setUniformValue("heightmap_size", QVector2D(w, h));
+        m_shaderprograms["plot-ambient"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
+        m_shaderprograms["plot-ambient"]->setUniformValue("max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
+        m_shaderprograms["plot-ambient"]->setUniformValue("flow_direction", QVector2D(1.f, 0.f));
+        m_shaderprograms["plot-ambient"]->setUniformValue("velocity", (GLfloat)WAVE_SPEED * .1f);
+        m_shaderprograms["plot-ambient"]->setUniformValue("time", (GLfloat)t);
+
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(0.f, 0.f);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(  r, 0.f);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(  r,   r);
+        glTexCoord2f(0.0f,  0.0f);
+        glVertex2f(0.f,   r);
+        glEnd();
+
+        m_shaderprograms["plot-ambient"]->release();
+    }
+
+    // Wave particle-waves
     float plotwidth = 2.f / WAVE_HEIGHTMAP_RESOLUTION;
 
     m_shaderprograms["plot-heightmap"]->bind();
@@ -344,8 +383,8 @@ void WaveParticleManager::blurHeightmap()
     glColor3f(1.f, 1.f, 1.f);
 
     m_shaderprograms["hblur-heightmap"]->bind();
-    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("heightWeights", (GLfloat*)_heightWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
-    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("velocityWeights", (GLfloat*)_velocityWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 2);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("heightWeights", (GLfloat*)m_heightWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
+    m_shaderprograms["hblur-heightmap"]->setUniformValueArray("velocityWeights", (GLfloat*)m_velocityWeightsX, WAVE_CONVOLUTION_KERNEL_WIDTH, 2);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["hblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
     glActiveTexture(GL_TEXTURE0);
@@ -380,8 +419,8 @@ void WaveParticleManager::blurHeightmap()
     glBindFramebuffer(GL_FRAMEBUFFER, m_heightVelocityFBO);
     glClear(GL_COLOR_BUFFER_BIT);
     m_shaderprograms["vblur-heightmap"]->bind();
-    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("heightWeights", (GLfloat*)_heightWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
-    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("velocityWeights", (GLfloat*)_velocityWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 2);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("heightWeights", (GLfloat*)m_heightWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 3);
+    m_shaderprograms["vblur-heightmap"]->setUniformValueArray("velocityWeights", (GLfloat*)m_velocityWeightsZ, WAVE_CONVOLUTION_KERNEL_WIDTH, 2);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("wp_max_amplitude", (GLfloat)WAVE_MAX_AMPLITUDE);
     m_shaderprograms["vblur-heightmap"]->setUniformValue("heightmap_resolution", (GLfloat)WAVE_HEIGHTMAP_RESOLUTION);
     glActiveTexture(GL_TEXTURE0);

@@ -101,6 +101,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
         ignore = false;
         break;
 
+    case Qt::Key_A:
+        settings.ambient_waves = !settings.ambient_waves;
+        break;
+
     default:
         break;
     }

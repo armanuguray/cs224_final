@@ -66,10 +66,10 @@ private:
 
     float m_heightmapX, m_heightmapZ;
 
-    float _heightWeightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _heightWeightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _velocityWeightsX[2 * WAVE_CONVOLUTION_KERNEL_WIDTH];
-    float _velocityWeightsZ[2 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float m_heightWeightsX[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float m_heightWeightsZ[3 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float m_velocityWeightsX[2 * WAVE_CONVOLUTION_KERNEL_WIDTH];
+    float m_velocityWeightsZ[2 * WAVE_CONVOLUTION_KERNEL_WIDTH];
 };
 
 #endif // WAVEPARTICLEMANAGER_H
