@@ -9,6 +9,7 @@
 struct Settings
 {
     Settings();
+    unsigned default_grid_resolution;
     unsigned grid_resolution;
     bool line_mode;
 

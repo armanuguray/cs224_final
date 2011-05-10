@@ -773,10 +773,8 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
             }
 
             if (fabs(direct) > EPS) {
-                float amp = indirect / (M_PI / 2.f * (unit / 2) * (unit / 2)) * amp_scale_constant * 10;
-                amp = max(0.00001f, min(amp, 0.06f));
-
-                if ((rand() % 100) < 60) {
+                float amp = direct / (M_PI / 2.f * (unit / 2) * (unit / 2)) * amp_scale_constant;
+                if (amp > 0.00625f * 2.f && (rand() % 100) < 35) {
                     float dangle = 1.2f;
                     manager.generateWaveParticle(loc + direction * dangle, direction, dangle, amp, now);
                     //manager.generateUniformWave(3, loc, amp, now);

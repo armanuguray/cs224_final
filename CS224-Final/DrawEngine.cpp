@@ -9,6 +9,7 @@
 #include "WaveConstants.h"
 #include "RigidBody.h"
 #include "RigidBodyConstants.h"
+#include "Settings.h"
 
 //#define SHOW_ORIGIN
 //#define PARTICLE_TEST
@@ -102,12 +103,21 @@ void DrawEngine::drawFrame(float time_elapsed)
     m_rigidbodysim->renderAll();
 
     // render water
-//#undef DRAW_WATER
+    //#undef DRAW_WATER
 #ifdef DRAW_WATER
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    m_waveparticles.renderWaves(m_projectorcamera, m_skyrenderer);
-    glDisable(GL_BLEND);
+    if (settings.line_mode)  {
+        glColor3f(0.0, 0.0, 0.0);
+        settings.grid_resolution = 30;
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        m_projectorcamera->renderProjectedGrid();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    } else {
+        settings.grid_resolution = settings.default_grid_resolution;
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        m_waveparticles.renderWaves(m_projectorcamera, m_skyrenderer);
+        glDisable(GL_BLEND);
+    }
 #endif
 
     // generate waves
@@ -116,21 +126,21 @@ void DrawEngine::drawFrame(float time_elapsed)
 #ifdef SHOW_ORIGIN
 
     // mark the origin as a point of reference
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//    glDisable(GL_CULL_FACE);
-//    glBegin(GL_QUAD_STRIP);
-//    {
-//        glColor3f(1.0,0.0,0.0);
-//        glVertex3f(-0.5, -0.5, 0.0);
-//        glColor3f(0.0,1.0,0.0);
-//        glVertex3f(-0.5, 0.5, 0.0);
-//        glColor3f(0.0,0.0,1.0);
-//        glVertex3f(0.5, -0.5, 0.0);
-//        glColor3f(1.0,1.0,0.0);
-//        glVertex3f(0.5, 0.5, 0.0);
-//    }
-//    glEnd();
-//    glEnable(GL_CULL_FACE);
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //    glDisable(GL_CULL_FACE);
+    //    glBegin(GL_QUAD_STRIP);
+    //    {
+    //        glColor3f(1.0,0.0,0.0);
+    //        glVertex3f(-0.5, -0.5, 0.0);
+    //        glColor3f(0.0,1.0,0.0);
+    //        glVertex3f(-0.5, 0.5, 0.0);
+    //        glColor3f(0.0,0.0,1.0);
+    //        glVertex3f(0.5, -0.5, 0.0);
+    //        glColor3f(1.0,1.0,0.0);
+    //        glVertex3f(0.5, 0.5, 0.0);
+    //    }
+    //    glEnd();
+    //    glEnable(GL_CULL_FACE);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDisable(GL_CULL_FACE);

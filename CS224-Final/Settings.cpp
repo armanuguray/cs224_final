@@ -4,6 +4,7 @@ Settings settings;
 
 Settings::Settings()
 {
+    default_grid_resolution = 600;
     grid_resolution = 600;
     line_mode = false;
     dv_scale = 1.4;

@@ -107,7 +107,9 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_D:
         settings.ow_waves = !settings.ow_waves;
         break;
-
+    case Qt::Key_W:
+        settings.line_mode = !settings.line_mode;
+        break;
     default:
         break;
     }
