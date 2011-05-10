@@ -415,6 +415,8 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     static int ct = 0;
     ct++;
 
+    glDisable(GL_CULL_FACE);
+
     QGLShaderProgram *wavegen_shader = shaders["wavegen"];
     QGLFramebufferObject *lowres_fb = buffers["low-res"];
     QGLShaderProgram *waveeffect_shader = shaders["waveeffect"];
@@ -714,10 +716,10 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
             int y = j / BUOYANCY_IMAGE_RESOLUTION;
 
             Vector2 loc(left + x * unit, bottom - y * unit);
-            Vector2 vel = Vector2(dir_x, dir_y);
-            int mag = vel.getMagnitude();
+            Vector2 direction = Vector2(dir_x, dir_y);
+            int mag = direction.getMagnitude();
             if (mag > EPS) {
-                vel /= mag;
+                direction /= mag;
             } else {
                 continue;
             }
@@ -727,7 +729,7 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
                 // HIS PAPER SAYS TO COMPUTE THIS VALUE WTF
                 //static const float rad = WAVE_PARTICLE_RADIUS / 10;
                 float amp = indirect / (M_PI / 2.f * (unit / 2) * (unit / 2)) * amp_scale_constant;
-                amp = max(0.00001f, min(amp, 0.06f));
+
 //                // compute the dispersion angle, yo
 //                float dispersionAngle = 0.f;
 //                int ct = 0;
@@ -762,34 +764,30 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
 //                    ct++;
 //                }
 
-                if ((rand() % 100) < 52) {
-             //   logln(amp);
-
-//                                    logln("here " << amp);
-                                    manager.generateWaveParticle(loc + vel * 1.5, vel, 1.2, .025, now);
-                //manager.generateUniformWave(3, loc, amp, now);
+                if (amp > 0.00625f * 2.f && (rand() % 100) < 35) {
+                    float dangle = 1.2f;
+                    manager.generateWaveParticle(loc + direction * dangle + direction, direction, dangle, min(amp, 0.05f), now);
+                    //manager.generateWaveParticle(loc + direction, direction, 1.2, .005, now);
+                    //manager.generateUniformWave(3, loc, amp, now);
+                }
             }
-           }
 
             if (fabs(direct) > EPS) {
-//                float amp = direct / (M_PI / 2.f * WAVE_PARTICLE_RADIUS * WAVE_PARTICLE_RADIUS) * amp_scale_constant / 5;
                 float amp = indirect / (M_PI / 2.f * (unit / 2) * (unit / 2)) * amp_scale_constant * 10;
                 amp = max(0.00001f, min(amp, 0.06f));
 
-//                logln("here " << amp);
-//                manager.generateUniformWave(3, loc + vel * 1.5, amp, now);
                 if ((rand() % 100) < 60) {
-             //   logln(amp);
-
-                                    manager.generateWaveParticle(loc + vel * 2, vel, 1.2, amp, now);
-                //manager.generateUniformWave(3, loc, amp, now);
+                    float dangle = 1.2f;
+                    manager.generateWaveParticle(loc + direction * dangle, direction, dangle, amp, now);
+                    //manager.generateUniformWave(3, loc, amp, now);
+                }
             }
-            }
-       }
-   }
+        }
+    }
 
    // restore the viewport
     glViewport(0, 0, screen_width, screen_height);
+    glEnable(GL_CULL_FACE);
 
     if (settings.tvs)
     {

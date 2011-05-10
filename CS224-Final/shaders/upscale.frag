@@ -21,7 +21,7 @@ void main(void)
 
     float indirect = 0.0;
     if (isBoundary(downscale)) {
-        indirect = (prev.y + downscale.y) / downscale.x;
+        indirect = (prev.y + downscale.y) / downscale_prev.x;
     }
 
     gl_FragColor = vec4(downscale.x, indirect,
