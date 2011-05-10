@@ -60,6 +60,7 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui
 
+QMAKE_CFLAGS += -O3
 QMAKE_CXXFLAGS += -O3 -ffast-math -msse
 
 QMAKE_CXXFLAGS_DEBUG += -pg
