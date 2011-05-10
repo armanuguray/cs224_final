@@ -8,8 +8,7 @@
 #include "ProjectorCamera.h"
 #include "WaveParticleManager.h"
 #include "WaveConstants.h"
-
-#define TV_MODE
+#include "Settings.h"
 
 RigidBody::RigidBody(ProjectorCamera *camera, WaveParticleManager *waveparticlemanager)
 {
@@ -686,6 +685,7 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     glPopMatrix();
 
     // generate the wave particles
+    if (settings.ow_waves)
    {
         static const int buffer_size = 4 * BUOYANCY_IMAGE_RESOLUTION * BUOYANCY_IMAGE_RESOLUTION;
         static GLfloat buffer[buffer_size];
@@ -762,11 +762,11 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
 //                    ct++;
 //                }
 
-                if ((rand() % 100) < 60) {
+                if ((rand() % 100) < 52) {
              //   logln(amp);
 
 //                                    logln("here " << amp);
-                                    manager.generateWaveParticle(loc + vel * 1.5, vel, 1.2, amp, now);
+                                    manager.generateWaveParticle(loc + vel * 1.5, vel, 1.2, .025, now);
                 //manager.generateUniformWave(3, loc, amp, now);
             }
            }
@@ -784,14 +784,14 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
                                     manager.generateWaveParticle(loc + vel * 2, vel, 1.2, amp, now);
                 //manager.generateUniformWave(3, loc, amp, now);
             }
-             }
-        }
-    }
+            }
+       }
+   }
 
-    // restore the viewport
+   // restore the viewport
     glViewport(0, 0, screen_width, screen_height);
 
-#ifdef TV_MODE
+    if (settings.tvs)
     {
         // THIS IS FOR TESTING
         const static float w = 2.0f;
@@ -908,5 +908,4 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         glDisable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_CUBE_MAP);
     }
-#endif
 }

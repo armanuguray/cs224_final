@@ -33,6 +33,9 @@ struct Settings
     bool render_overlay;
 
     bool ambient_waves;
+
+    bool tvs;
+    bool ow_waves;
 };
 
 extern Settings settings;

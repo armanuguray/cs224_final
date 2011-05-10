@@ -96,13 +96,16 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     bool ignore = true;
 
     switch (event->key()) {
-    case Qt::Key_S:
-        settings.render_overlay = !settings.render_overlay;
-        ignore = false;
-        break;
-
     case Qt::Key_A:
         settings.ambient_waves = !settings.ambient_waves;
+        break;
+
+    case Qt::Key_S:
+        settings.tvs = !settings.tvs;
+        break;
+
+    case Qt::Key_D:
+        settings.ow_waves = !settings.ow_waves;
         break;
 
     default:

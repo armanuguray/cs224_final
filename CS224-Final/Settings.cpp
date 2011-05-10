@@ -9,6 +9,9 @@ Settings::Settings()
     dv_scale = 1.4;
     ambient_waves = false;
 
+    tvs = false;
+    ow_waves = false;
+
     render_overlay = false;
     overlay_text_offset = QPoint(10, 10);
     overlay_text_max_border = 10;
