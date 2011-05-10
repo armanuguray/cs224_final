@@ -47,6 +47,14 @@ void WaveParticleManager::generateUniformWave(int numParticles, const Vector2 &o
     }
 }
 
+void WaveParticleManager::generateWaveParticle(const Vector2 &origin, const Vector2 &vel, float dispersionAngle, float amplitude, float time) {
+    //logln("center " << origin << ", vel " << vel);
+    WaveParticle *p = (WaveParticle *) m_particleStore.alloc();
+    if (p == NULL) return;
+    p->spawn(vel, amplitude, time, origin, dispersionAngle);
+    m_liveParticles.insert(p);
+}
+
 void WaveParticleManager::drawParticlesAsSpheres(GLUquadric *quadric)
 {
     QSetIterator<WaveParticle*> it(m_liveParticles);

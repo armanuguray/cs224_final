@@ -37,7 +37,7 @@ public:
     void stepSimulation(float time_elapsed);
 
     // generates waves
-    void generateWaves(WaveParticleManager &manager);
+    void generateWaves(WaveParticleManager &manager, float now);
 
     // renders all rigid bodies that are currently alive
     void renderAll();

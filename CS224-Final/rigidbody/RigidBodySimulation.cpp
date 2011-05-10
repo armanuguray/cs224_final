@@ -218,8 +218,8 @@ void RigidBodySimulation::renderAll()
     }
 }
 
-void RigidBodySimulation::generateWaves(WaveParticleManager &manager) {
+void RigidBodySimulation::generateWaves(WaveParticleManager &manager, float now) {
     foreach (RigidBody *rb, m_rigidbodies) {
-        rb->generateWaves(manager, m_shaders, m_buffers, m_lowres, m_camera->getWidth(), m_camera->getHeight());
+        rb->generateWaves(manager, m_shaders, m_buffers, m_lowres, m_camera->getWidth(), m_camera->getHeight(), now);
     }
 }

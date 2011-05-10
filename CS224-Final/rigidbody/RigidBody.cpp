@@ -9,6 +9,8 @@
 #include "WaveParticleManager.h"
 #include "WaveConstants.h"
 
+#define TV_MODE
+
 RigidBody::RigidBody(ProjectorCamera *camera, WaveParticleManager *waveparticlemanager)
 {
     m_camera = camera;
@@ -409,8 +411,11 @@ btScalar RigidBody::computeSubmergedVolume(GLuint heightmap, QGLFramebufferObjec
 void RigidBody::generateWaves(WaveParticleManager &manager,
                               QMap<QString, QGLShaderProgram *> &shaders,
                               QMap<QString, QGLFramebufferObject *> &buffers,
-                              GLfloat *lowres_buffer, int screen_width, int screen_height)
+                              GLfloat *lowres_buffer, int screen_width, int screen_height, float now)
 {
+    static int ct = 0;
+    ct++;
+
     QGLShaderProgram *wavegen_shader = shaders["wavegen"];
     QGLFramebufferObject *lowres_fb = buffers["low-res"];
     QGLShaderProgram *waveeffect_shader = shaders["waveeffect"];
@@ -637,9 +642,12 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
                 glBindTexture(GL_TEXTURE_2D, upscale_map[new_size / 2]->texture());
                 glActiveTexture(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_2D, downscale_map[new_size]->texture());
+                glActiveTexture(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, downscale_map[new_size / 2]->texture());
 
                 upscale->setUniformValue("prev_texture", 0);
                 upscale->setUniformValue("downscale_texture", 1);
+                upscale->setUniformValue("downscale_prev_texture", 2);
                 upscale->setUniformValue("new_size", (GLfloat) new_size);
 
                 glClear(GL_COLOR_BUFFER_BIT);
@@ -650,6 +658,8 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
                 glTexCoord2f(0.0, 1.0); glVertex3f(halfextent, 0.0, -halfextent);
                 glEnd();
 
+                glActiveTexture(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, 0);
                 glActiveTexture(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_2D, 0);
                 glActiveTexture(GL_TEXTURE0);
@@ -675,9 +685,113 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
+    // generate the wave particles
+   {
+        static const int buffer_size = 4 * BUOYANCY_IMAGE_RESOLUTION * BUOYANCY_IMAGE_RESOLUTION;
+        static GLfloat buffer[buffer_size];
+
+        lowres_fb2->bind();
+        glReadPixels(0, 0, BUOYANCY_IMAGE_RESOLUTION, BUOYANCY_IMAGE_RESOLUTION, GL_RGBA, GL_FLOAT, buffer);
+        lowres_fb2->release();
+
+        float left = center.x() - halfextent;
+        float bottom = center.z() + halfextent;
+        float unit = OBJ_EXTENT / BUOYANCY_IMAGE_RESOLUTION;
+
+        for (int idx = 0, j = 0; idx < buffer_size; idx += 4 * 2, j++) {
+            GLfloat &direct = buffer[idx];
+            GLfloat &indirect = buffer[idx + 1];
+            GLfloat &dir_x = buffer[idx + 2];
+            GLfloat &dir_y = buffer[idx + 3];
+
+            // TODO refactor this into a header somewhere
+            static const float EPS = 0.00001;
+
+            // This is the BS constant
+            static float amp_scale_constant = .008f;
+
+            int x = j % BUOYANCY_IMAGE_RESOLUTION;
+            int y = j / BUOYANCY_IMAGE_RESOLUTION;
+
+            Vector2 loc(left + x * unit, bottom - y * unit);
+            Vector2 vel = Vector2(dir_x, dir_y);
+            int mag = vel.getMagnitude();
+            if (mag > EPS) {
+                vel /= mag;
+            } else {
+                continue;
+            }
+
+            // generate indirect effect particles
+            if (fabs(indirect) > EPS) {
+                // HIS PAPER SAYS TO COMPUTE THIS VALUE WTF
+                //static const float rad = WAVE_PARTICLE_RADIUS / 10;
+                float amp = indirect / (M_PI / 2.f * (unit / 2) * (unit / 2)) * amp_scale_constant;
+                amp = max(0.00001f, min(amp, 0.06f));
+//                // compute the dispersion angle, yo
+//                float dispersionAngle = 0.f;
+//                int ct = 0;
+
+//                int right = idx + 4;
+//                if (x < BUOYANCY_IMAGE_RESOLUTION - 1 && fabs(buffer[right + 1]) > EPS) {
+//                    float d = Vector2(buffer[right + 2], buffer[right + 3]).getNormalized().dot(vel);
+
+//                    dispersionAngle += acos(d);
+//                    ct++;
+//                }
+
+//                int left = idx - 4;
+//                if (x >= 1 && fabs(buffer[left + 1]) > EPS) {
+//                    float d = Vector2(buffer[left + 2], buffer[left + 3]).getNormalized().dot(vel);
+
+//                    dispersionAngle += acos(d);
+//                    ct++;
+//                }
+
+//              int top = idx + 4 * BUOYANCY_IMAGE_RESOLUTION;
+//                if (y < BUOYANCY_IMAGE_RESOLUTION - 1 && fabs(buffer[top + 1]) > EPS) {
+//                    float d = Vector2(buffer[top + 2], buffer[top + 3]).getNormalized().dot(vel);
+//                    dispersionAngle += acos(d);
+//                    ct++;
+//                }
+
+//                int bottom = idx - 4 * BUOYANCY_IMAGE_RESOLUTION;
+//                if (y >= 1 && fabs(buffer[bottom + 1]) > EPS) {
+//                    float d = Vector2(buffer[bottom + 2], buffer[bottom + 3]).getNormalized().dot(vel);
+//                    dispersionAngle += acos(d);
+//                    ct++;
+//                }
+
+                if ((rand() % 100) < 60) {
+             //   logln(amp);
+
+//                                    logln("here " << amp);
+                                    manager.generateWaveParticle(loc + vel * 1.5, vel, 1.2, amp, now);
+                //manager.generateUniformWave(3, loc, amp, now);
+            }
+           }
+
+            if (fabs(direct) > EPS) {
+//                float amp = direct / (M_PI / 2.f * WAVE_PARTICLE_RADIUS * WAVE_PARTICLE_RADIUS) * amp_scale_constant / 5;
+                float amp = indirect / (M_PI / 2.f * (unit / 2) * (unit / 2)) * amp_scale_constant * 10;
+                amp = max(0.00001f, min(amp, 0.06f));
+
+//                logln("here " << amp);
+//                manager.generateUniformWave(3, loc + vel * 1.5, amp, now);
+                if ((rand() % 100) < 60) {
+             //   logln(amp);
+
+                                    manager.generateWaveParticle(loc + vel * 2, vel, 1.2, amp, now);
+                //manager.generateUniformWave(3, loc, amp, now);
+            }
+             }
+        }
+    }
+
     // restore the viewport
     glViewport(0, 0, screen_width, screen_height);
 
+#ifdef TV_MODE
     {
         // THIS IS FOR TESTING
         const static float w = 2.0f;
@@ -794,4 +908,5 @@ void RigidBody::generateWaves(WaveParticleManager &manager,
         glDisable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_CUBE_MAP);
     }
+#endif
 }

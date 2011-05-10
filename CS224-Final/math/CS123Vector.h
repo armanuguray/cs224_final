@@ -92,6 +92,7 @@ separately.
 ///@name Additional Operations
 //@{-----------------------------------------------------------------
 
+    inline T dot(const vec2 &other) const { return x * other.x + y * other.y; }
     inline vec2 getNormalized() const { T m = getMagnitude(); return vec2(x/m, y/m); }
 
     inline T getMagnitude() const {

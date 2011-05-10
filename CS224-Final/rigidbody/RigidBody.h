@@ -52,7 +52,7 @@ public:
     void generateWaves(WaveParticleManager &manager,
                        QMap<QString, QGLShaderProgram *> &shaders,
                        QMap<QString, QGLFramebufferObject *> &buffers,
-                       GLfloat *lowres, int screen_width, int screen_height);
+                       GLfloat *lowres, int screen_width, int screen_height, float now);
 
     /* force computations */
     void applyBuoyancy(btScalar submerged_volume, const btVector3 &volume_centroid);

@@ -111,7 +111,7 @@ void DrawEngine::drawFrame(float time_elapsed)
 #endif
 
     // generate waves
-    m_rigidbodysim->generateWaves(m_waveparticles);
+    m_rigidbodysim->generateWaves(m_waveparticles, m_time);
 
 #ifdef SHOW_ORIGIN
 
